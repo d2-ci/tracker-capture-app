@@ -22351,7 +22351,7 @@
 	
 	var trackerCapture = angular.module('trackerCapture');
 	
-	trackerCapture.controller('HomeController', ["$rootScope", "$scope", "$modal", "$location", "$filter", "$timeout", "$q", "Paginator", "MetaDataFactory", "DateUtils", "OrgUnitFactory", "ProgramFactory", "AttributesFactory", "EntityQueryFactory", "CurrentSelection", "TEIGridService", "TEIService", "GridColumnService", "ProgramWorkingListService", "TCStorageService", "orderByFilter", "TEService", "AccessUtils", "TeiAccessApiService", function ($rootScope, $scope, $modal, $location, $filter, $timeout, $q, Paginator, MetaDataFactory, DateUtils, OrgUnitFactory, ProgramFactory, AttributesFactory, EntityQueryFactory, CurrentSelection, TEIGridService, TEIService, GridColumnService, ProgramWorkingListService, TCStorageService, orderByFilter, TEService, AccessUtils, TeiAccessApiService) {
+	trackerCapture.controller('HomeController', ["$rootScope", "$scope", "$modal", "$location", "$filter", "$timeout", "$translate", "$q", "Paginator", "MetaDataFactory", "DateUtils", "OrgUnitFactory", "ProgramFactory", "AttributesFactory", "EntityQueryFactory", "CurrentSelection", "TEIGridService", "TEIService", "GridColumnService", "ProgramWorkingListService", "TCStorageService", "orderByFilter", "TEService", "AccessUtils", "TeiAccessApiService", function ($rootScope, $scope, $modal, $location, $filter, $timeout, $translate, $q, Paginator, MetaDataFactory, DateUtils, OrgUnitFactory, ProgramFactory, AttributesFactory, EntityQueryFactory, CurrentSelection, TEIGridService, TEIService, GridColumnService, ProgramWorkingListService, TCStorageService, orderByFilter, TEService, AccessUtils, TeiAccessApiService) {
 	    TeiAccessApiService.setAuditCancelledSettings(null);
 	    $scope.trackedEntityTypesById = {};
 	    var previousProgram = null;
@@ -22360,7 +22360,7 @@
 	
 	    var viewsByType = {
 	        registration: {
-	            name: "Register",
+	            name: $translate.instant('register'),
 	            template: "components/registration/registration.html",
 	            class: "col-lg-10 col-md-12",
 	            shouldReset: false,
@@ -22370,14 +22370,14 @@
 	            }
 	        },
 	        lists: {
-	            name: "Lists",
+	            name: $translate.instant('lists'),
 	            template: "components/home/lists/lists.html",
 	            class: "col-xs-12",
 	            shouldReset: true,
 	            disabled: false
 	        },
 	        search: {
-	            name: "Search",
+	            name: $translate.instant('search'),
 	            template: "components/home/search/search.html",
 	            class: "",
 	            shouldReset: true,
@@ -39779,4 +39779,4 @@
 
 /***/ }
 /******/ ]);
-//# sourceMappingURL=app-3d77cb773a52c7b658f3.js.map
+//# sourceMappingURL=app-9eb59cf9840a4d5acb09.js.map
