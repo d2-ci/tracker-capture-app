@@ -971,7 +971,7 @@
 	                    }
 	                }
 	            }
-	            if((val || val === 0) && obj.optionSetValue && obj.optionSet && obj.optionSet.id && optionSets[obj.optionSet.id] && optionSets[obj.optionSet.id].options  ){
+	            if((val || val === 0) && obj.optionSetValue && obj.optionSet && obj.optionSet.id && optionSets && optionSets[obj.optionSet.id] && optionSets[obj.optionSet.id].options  ){
 	                if(destination === 'USER'){
 	                    val = OptionSetService.getName(optionSets[obj.optionSet.id].options, String(val));
 	                }
@@ -2409,7 +2409,7 @@
 	})
 	
 	/* service for executing tracker rules and broadcasting results */
-	.service('TrackerRulesExecutionService', function($translate, VariableService, DateUtils, NotificationService, DHIS2EventFactory, OrgUnitFactory, RulesFactory, CalendarService, OptionSetService, $rootScope, $q, $log, $filter, orderByFilter, MetaDataFactory){
+	.service('TrackerRulesExecutionService', function($translate, SessionStorageService, VariableService, DateUtils, NotificationService, DHIS2EventFactory, OrgUnitFactory, RulesFactory, CalendarService, OptionSetService, $rootScope, $q, $log, $filter, orderByFilter, MetaDataFactory){
 	    var NUMBER_OF_EVENTS_IN_SCOPE = 10;
 	
 	    //Variables for storing scope and rules in memory from rules execution to rules execution:
@@ -3201,6 +3201,7 @@
 	                {name:"d2:zScoreHFA",parameters:3},
 	                {name:"d2:length",parameters:1},
 	                {name:"d2:inOrgUnitGroup",parameters:1},
+	                {name:"d2:hasUserRole",parameters:1},
 	                {name:"d2:condition",parameters:3}];
 	            var continueLooping = true;
 	            //Safety harness on 10 loops, in case of unanticipated syntax causing unintencontinued looping
@@ -3637,6 +3638,20 @@
 	                            }
 	
 	                            expression = expression.replace(callToThisFunction, isInGroup);
+	                            expressionUpdated = true;
+	                        }
+	                        else if(dhisFunction.name === "d2:hasUserRole") {
+	                            var userRole = parameters[0];
+	                            var user = SessionStorageService.get('USER_PROFILE');
+	                            var valueFound = false;
+	                            angular.forEach(user.userCredentials.userRoles, function(role){
+	                                if(role.id === userRole) {
+	                                    valueFound = true;
+	                                }
+	                            });
+	
+	                            //Replace the end evaluation of the dhis function:
+	                            expression = expression.replace(callToThisFunction, valueFound);
 	                            expressionUpdated = true;
 	                        }
 	                    });
@@ -39897,4 +39912,4 @@
 
 /***/ }
 /******/ ]);
-//# sourceMappingURL=app-20103e1ae32f66c57ab6.js.map
+//# sourceMappingURL=app-41d34e8b55a399d82442.js.map
