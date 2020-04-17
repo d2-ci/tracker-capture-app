@@ -11428,8 +11428,11 @@
 	        if (workingList.enrollmentStatus) {
 	            searchParams.programUrl += "&programStatus=" + workingList.enrollmentStatus;
 	        }
+	        if (workingList.followup) {
+	            searchParams.programUrl += "&followUp=true";
+	        }
 	        if (sortColumn) {
-	            searchParams.sortUrl = "order=" + sortColumn.id + ':' + sortColumn.direction;
+	            searchParams.sortUrl = "&order=" + sortColumn.id + ':' + sortColumn.direction;
 	        }
 	        if (workingList.enrollmentCreatedPeriod) {
 	            var enrollmentStartDate = moment().add(workingList.enrollmentCreatedPeriod.periodFrom, 'days').format("YYYY-MM-DD");
@@ -39912,4 +39915,4 @@
 
 /***/ }
 /******/ ]);
-//# sourceMappingURL=app-41d34e8b55a399d82442.js.map
+//# sourceMappingURL=app-b311b16a504024c8a171.js.map
