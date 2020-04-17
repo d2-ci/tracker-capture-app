@@ -20321,36 +20321,46 @@
 	                angular.forEach(data.eventRows, function (ev) {
 	                    if (ev.trackedEntityInstance) {
 	                        var stage = $scope.stagesById[ev.programStage];
-	                        ev.name = stage.displayName;
-	                        ev.programName = $scope.model.selectedProgram.displayName;
-	                        ev.statusColor = EventUtils.getEventStatusColor(ev);
-	                        ev.eventDate = DateUtils.formatFromApiToUser(ev.eventDate);
+	                        if (stage) {
+	                            ev.name = stage.displayName;
+	                            ev.programName = $scope.model.selectedProgram.displayName;
+	                            ev.statusColor = EventUtils.getEventStatusColor(ev);
+	                            ev.eventDate = DateUtils.formatFromApiToUser(ev.eventDate);
 	
-	                        angular.forEach(ev.dataValues, function (dv) {
-	                            var de = stage.dataElementsById[dv.dataElement];
-	                            if (de.optionSetValue) {
-	                                var optionSet = $scope.optionSets[de.optionSet.id];
-	                                ev[dv.dataElement] = optionSet.optionsByCode[dv.value].displayName;
-	                            } else {
-	                                ev[dv.dataElement] = dv.value;
+	                            angular.forEach(ev.dataValues, function (dv) {
+	                                var de = stage.dataElementsById[dv.dataElement];
+	                                if (de && de.optionSetValue) {
+	                                    var optionSet = $scope.optionSets[de.optionSet.id];
+	                                    if (optionSet.optionsByCode[dv.value]) {
+	                                        ev[dv.dataElement] = optionSet.optionsByCode[dv.value].displayName;
+	                                    } else {
+	                                        ev[dv.dataElement] = dv.value;
+	                                    }
+	                                } else {
+	                                    ev[dv.dataElement] = dv.value;
+	                                }
+	                                $scope.stagesById[ev.programStage].hasData = true;
+	                            });
+	
+	                            angular.forEach(ev.attributes, function (att) {
+	                                var attr = $scope.model.selectedProgram.attributesById[att.attribute];
+	                                if (attr && attr.optionSetValue) {
+	                                    var optionSet = $scope.optionSets[attr.optionSet.id];
+	                                    if (optionSet.optionsByCode[att.value].displayName) {
+	                                        ev[att.attribute] = optionSet.optionsByCode[att.value].displayName;
+	                                    } else {
+	                                        ev[att.attribute] = att.value;
+	                                    }
+	                                } else {
+	                                    ev[att.attribute] = att.value;
+	                                }
+	                            });
+	
+	                            if ($scope.teiList.indexOf(ev.trackedEntityInstance) === -1) {
+	                                $scope.teiList.push(ev.trackedEntityInstance);
 	                            }
-	                            $scope.stagesById[ev.programStage].hasData = true;
-	                        });
-	
-	                        angular.forEach(ev.attributes, function (att) {
-	                            var attr = $scope.model.selectedProgram.attributesById[att.attribute];
-	                            if (attr.optionSetValue) {
-	                                var optionSet = $scope.optionSets[attr.optionSet.id];
-	                                ev[att.attribute] = optionSet.optionsByCode[att.value].displayName;
-	                            } else {
-	                                ev[att.attribute] = att.value;
-	                            }
-	                        });
-	
-	                        if ($scope.teiList.indexOf(ev.trackedEntityInstance) === -1) {
-	                            $scope.teiList.push(ev.trackedEntityInstance);
+	                            $scope.dhis2Events.push(ev);
 	                        }
-	                        $scope.dhis2Events.push(ev);
 	                    }
 	                });
 	            }
@@ -40137,4 +40147,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-2546835e7d7d2fc9aeb2.js.map
+//# sourceMappingURL=app-14091bc7bd5e00570874.js.map
