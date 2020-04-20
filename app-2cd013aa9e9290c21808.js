@@ -21413,18 +21413,13 @@
 	    $scope.base = {};
 	    $scope.selectedConstraints = { currentTei: null, related: null };
 	    $scope.tempSelectedConstraints = { currentTei: null, related: null };
-	    $scope.attributesById = CurrentSelection.getAttributesById();
-	    $scope.base.attributesById = $scope.attributesById;
-	    if (!$scope.attributesById) {
-	        $scope.attributesById = [];
-	        AttributesFactory.getAll().then(function (atts) {
-	            angular.forEach(atts, function (att) {
-	                $scope.attributesById[att.id] = att;
-	            });
 	
-	            CurrentSelection.setAttributesById($scope.attributesById);
+	    $scope.attributesById = [];
+	    AttributesFactory.getAll().then(function (atts) {
+	        angular.forEach(atts, function (att) {
+	            $scope.attributesById[att.id] = att;
 	        });
-	    }
+	    });
 	
 	    $scope.optionSets = CurrentSelection.getOptionSets();
 	    if (!$scope.optionSets) {
@@ -21536,7 +21531,6 @@
 	    $scope.selectedProgram = selectedProgram;
 	    $scope.relatedProgramRelationship = relatedProgramRelationship;
 	    $scope.mainTei = selectedTei;
-	    $scope.attributesById = CurrentSelection.getAttributesById();
 	    $scope.addingTeiAssociate = false;
 	
 	    $scope.searchOuTree = false;
@@ -22002,7 +21996,6 @@
 	}]).controller('TEIRegistrationController', ["$rootScope", "$scope", "$timeout", "$translate", "AttributesFactory", "MetaDataFactory", "TrackerRulesFactory", "CustomFormService", "TEService", "EnrollmentService", "NotificationService", "CurrentSelection", "DateUtils", "EventUtils", "DHIS2EventFactory", "RegistrationService", "SessionStorageService", "TrackerRulesExecutionService", "TEIGridService", "AttributeUtils", function ($rootScope, $scope, $timeout, $translate, AttributesFactory, MetaDataFactory, TrackerRulesFactory, CustomFormService, TEService, EnrollmentService, NotificationService, CurrentSelection, DateUtils, EventUtils, DHIS2EventFactory, RegistrationService, SessionStorageService, TrackerRulesExecutionService, TEIGridService, AttributeUtils) {
 	    $scope.selectedOrgUnit = SessionStorageService.get('SELECTED_OU');
 	    $scope.enrollment = { enrollmentDate: '', incidentDate: '' };
-	    $scope.attributesById = CurrentSelection.getAttributesById();
 	    $scope.today = DateUtils.getToday();
 	    $scope.trackedEntityForm = null;
 	    $scope.customRegistrationForm = null;
@@ -22017,17 +22010,12 @@
 	    var selections = CurrentSelection.get();
 	    $scope.selectedOrgUnit = selections.orgUnit;
 	
-	    $scope.attributesById = CurrentSelection.getAttributesById();
-	    if (!$scope.attributesById) {
-	        $scope.attributesById = [];
-	        AttributesFactory.getAll().then(function (atts) {
-	            angular.forEach(atts, function (att) {
-	                $scope.attributesById[att.id] = att;
-	            });
-	
-	            CurrentSelection.setAttributesById($scope.attributesById);
+	    $scope.attributesById = [];
+	    AttributesFactory.getAll().then(function (atts) {
+	        angular.forEach(atts, function (att) {
+	            $scope.attributesById[att.id] = att;
 	        });
-	    }
+	    });
 	
 	    $scope.getTrackerAssociate = function (selectedAttribute, existingAssociateUid) {
 	        return $scope.getTrackerAssociateInternal(selectedAttribute, existingAssociateUid, $scope.selectedTei).then(function (res) {
@@ -22162,6 +22150,7 @@
 	        //registration form comes empty, in this case enforce at least one value
 	        $scope.selectedTei.trackedEntityType = $scope.tei.trackedEntityType = selectedTrackedEntity;
 	        $scope.selectedTei.orgUnit = $scope.tei.orgUnit = $scope.selectedOrgUnit.id;
+	        $scope.tei.geometry = $scope.selectedTei.geometry;
 	        $scope.selectedTei.attributes = $scope.tei.attributes = [];
 	
 	        var result = RegistrationService.processForm($scope.tei, $scope.selectedTei, $scope.teiOriginal, $scope.attributesById);
@@ -40147,4 +40136,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-14091bc7bd5e00570874.js.map
+//# sourceMappingURL=app-2cd013aa9e9290c21808.js.map
