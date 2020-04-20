@@ -22163,6 +22163,8 @@
 	            return false;
 	        }
 	
+	        $rootScope.showAddRelationshipDiv = false;
+	
 	        RegistrationService.registerOrUpdate($scope.tei, $scope.optionSets, $scope.attributesById).then(function (registrationResponse) {
 	            var reg = registrationResponse.response.responseType === 'ImportSummaries' ? registrationResponse.response.importSummaries[0] : registrationResponse.response.responseType === 'ImportSummary' ? registrationResponse.response : {};
 	            if (reg.status === 'SUCCESS') {
@@ -40137,4 +40139,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-3c05a8b7fdc0cf52d9e9.js.map
+//# sourceMappingURL=app-ff8b138a12a7ef03c348.js.map
