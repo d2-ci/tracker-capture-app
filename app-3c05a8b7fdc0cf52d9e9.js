@@ -21419,6 +21419,7 @@
 	        angular.forEach(atts, function (att) {
 	            $scope.attributesById[att.id] = att;
 	        });
+	        $scope.base.attributesById = $scope.attributesById;
 	    });
 	
 	    $scope.optionSets = CurrentSelection.getOptionSets();
@@ -40136,4 +40137,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-2cd013aa9e9290c21808.js.map
+//# sourceMappingURL=app-3c05a8b7fdc0cf52d9e9.js.map
