@@ -16705,6 +16705,8 @@
 	                program: eventToSave.program,
 	                programStage: eventToSave.programStage,
 	                status: eventToSave.status,
+	                geometry: eventToSave.geometry,
+	                assignedUser: eventToSave.assignedUser,
 	                trackedEntityInstance: eventToSave.trackedEntityInstance,
 	                dataValues: [{
 	                    dataElement: prStDe.dataElement.id,
@@ -38937,4 +38939,4 @@
 
 /***/ }
 /******/ ]);
-//# sourceMappingURL=app-ef72ffbd20c98832d285.js.map
+//# sourceMappingURL=app-8f5ed91a8a71bc3d3d4f.js.map
