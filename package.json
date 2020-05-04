@@ -1,0 +1,6 @@
+{
+  "name": "tracker-capture-app",
+  "description": "DHIS2 tracker capture app",
+  "license": "BSD-3-Clause",
+  "version": "v32.0.1"
+}
