@@ -971,7 +971,7 @@
 	                    }
 	                }
 	            }
-	            if((val || val === 0) && obj.optionSetValue && obj.optionSet && obj.optionSet.id && optionSets[obj.optionSet.id] && optionSets[obj.optionSet.id].options  ){
+	            if((val || val === 0) && obj.optionSetValue && obj.optionSet && obj.optionSet.id && optionSets && optionSets[obj.optionSet.id] && optionSets[obj.optionSet.id].options  ){
 	                if(destination === 'USER'){
 	                    val = OptionSetService.getName(optionSets[obj.optionSet.id].options, String(val));
 	                }
@@ -2409,7 +2409,7 @@
 	})
 	
 	/* service for executing tracker rules and broadcasting results */
-	.service('TrackerRulesExecutionService', function($translate, VariableService, DateUtils, NotificationService, DHIS2EventFactory, OrgUnitFactory, RulesFactory, CalendarService, OptionSetService, $rootScope, $q, $log, $filter, orderByFilter, MetaDataFactory){
+	.service('TrackerRulesExecutionService', function($translate, SessionStorageService, VariableService, DateUtils, NotificationService, DHIS2EventFactory, OrgUnitFactory, RulesFactory, CalendarService, OptionSetService, $rootScope, $q, $log, $filter, orderByFilter, MetaDataFactory){
 	    var NUMBER_OF_EVENTS_IN_SCOPE = 10;
 	
 	    //Variables for storing scope and rules in memory from rules execution to rules execution:
@@ -3201,6 +3201,7 @@
 	                {name:"d2:zScoreHFA",parameters:3},
 	                {name:"d2:length",parameters:1},
 	                {name:"d2:inOrgUnitGroup",parameters:1},
+	                {name:"d2:hasUserRole",parameters:1},
 	                {name:"d2:condition",parameters:3}];
 	            var continueLooping = true;
 	            //Safety harness on 10 loops, in case of unanticipated syntax causing unintencontinued looping
@@ -3637,6 +3638,20 @@
 	                            }
 	
 	                            expression = expression.replace(callToThisFunction, isInGroup);
+	                            expressionUpdated = true;
+	                        }
+	                        else if(dhisFunction.name === "d2:hasUserRole") {
+	                            var userRole = parameters[0];
+	                            var user = SessionStorageService.get('USER_PROFILE');
+	                            var valueFound = false;
+	                            angular.forEach(user.userCredentials.userRoles, function(role){
+	                                if(role.id === userRole) {
+	                                    valueFound = true;
+	                                }
+	                            });
+	
+	                            //Replace the end evaluation of the dhis function:
+	                            expression = expression.replace(callToThisFunction, valueFound);
 	                            expressionUpdated = true;
 	                        }
 	                    });
@@ -11379,8 +11394,11 @@
 	        if (workingList.enrollmentStatus) {
 	            searchParams.programUrl += "&programStatus=" + workingList.enrollmentStatus;
 	        }
+	        if (workingList.followup) {
+	            searchParams.programUrl += "&followUp=true";
+	        }
 	        if (sortColumn) {
-	            searchParams.sortUrl = "order=" + sortColumn.id + ':' + sortColumn.direction;
+	            searchParams.sortUrl = "&order=" + sortColumn.id + ':' + sortColumn.direction;
 	        }
 	        if (workingList.enrollmentCreatedPeriod) {
 	            var enrollmentStartDate = moment().add(workingList.enrollmentCreatedPeriod.periodFrom, 'days').format("YYYY-MM-DD");
@@ -17540,6 +17558,8 @@
 	                program: eventToSave.program,
 	                programStage: eventToSave.programStage,
 	                status: eventToSave.status,
+	                geometry: eventToSave.geometry,
+	                assignedUser: eventToSave.assignedUser,
 	                trackedEntityInstance: eventToSave.trackedEntityInstance,
 	                dataValues: [{
 	                    dataElement: prStDe.dataElement.id,
@@ -22351,7 +22371,7 @@
 	
 	var trackerCapture = angular.module('trackerCapture');
 	
-	trackerCapture.controller('HomeController', ["$rootScope", "$scope", "$modal", "$location", "$filter", "$timeout", "$q", "Paginator", "MetaDataFactory", "DateUtils", "OrgUnitFactory", "ProgramFactory", "AttributesFactory", "EntityQueryFactory", "CurrentSelection", "TEIGridService", "TEIService", "GridColumnService", "ProgramWorkingListService", "TCStorageService", "orderByFilter", "TEService", "AccessUtils", "TeiAccessApiService", function ($rootScope, $scope, $modal, $location, $filter, $timeout, $q, Paginator, MetaDataFactory, DateUtils, OrgUnitFactory, ProgramFactory, AttributesFactory, EntityQueryFactory, CurrentSelection, TEIGridService, TEIService, GridColumnService, ProgramWorkingListService, TCStorageService, orderByFilter, TEService, AccessUtils, TeiAccessApiService) {
+	trackerCapture.controller('HomeController', ["$rootScope", "$scope", "$modal", "$location", "$filter", "$timeout", "$translate", "$q", "Paginator", "MetaDataFactory", "DateUtils", "OrgUnitFactory", "ProgramFactory", "AttributesFactory", "EntityQueryFactory", "CurrentSelection", "TEIGridService", "TEIService", "GridColumnService", "ProgramWorkingListService", "TCStorageService", "orderByFilter", "TEService", "AccessUtils", "TeiAccessApiService", function ($rootScope, $scope, $modal, $location, $filter, $timeout, $translate, $q, Paginator, MetaDataFactory, DateUtils, OrgUnitFactory, ProgramFactory, AttributesFactory, EntityQueryFactory, CurrentSelection, TEIGridService, TEIService, GridColumnService, ProgramWorkingListService, TCStorageService, orderByFilter, TEService, AccessUtils, TeiAccessApiService) {
 	    TeiAccessApiService.setAuditCancelledSettings(null);
 	    $scope.trackedEntityTypesById = {};
 	    var previousProgram = null;
@@ -22360,7 +22380,7 @@
 	
 	    var viewsByType = {
 	        registration: {
-	            name: "Register",
+	            name: $translate.instant('register'),
 	            template: "components/registration/registration.html",
 	            class: "col-lg-10 col-md-12",
 	            shouldReset: false,
@@ -22370,14 +22390,14 @@
 	            }
 	        },
 	        lists: {
-	            name: "Lists",
+	            name: $translate.instant('lists'),
 	            template: "components/home/lists/lists.html",
 	            class: "col-xs-12",
 	            shouldReset: true,
 	            disabled: false
 	        },
 	        search: {
-	            name: "Search",
+	            name: $translate.instant('search'),
 	            template: "components/home/search/search.html",
 	            class: "",
 	            shouldReset: true,
@@ -39779,4 +39799,4 @@
 
 /***/ }
 /******/ ]);
-//# sourceMappingURL=app-3d77cb773a52c7b658f3.js.map
+//# sourceMappingURL=app-40aec8e02d5f17e2fd76.js.map
