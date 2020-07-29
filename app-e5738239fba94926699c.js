@@ -14893,6 +14893,7 @@
 	        $scope.selectedEnrollment = enrollment;
 	        $scope.enrollmentDateState.date = enrollment.enrollmentDate;
 	        $scope.incidentDateState.date = enrollment.incidentDate;
+	        $scope.enrollmentGeometryState.geometry = $scope.selectedEnrollment.geometry;
 	
 	        if ($scope.selectedEnrollment.enrollment && $scope.selectedEnrollment.orgUnit) {
 	            $scope.broadCastSelections('dashboardWidgets');
@@ -38939,4 +38940,4 @@
 
 /***/ }
 /******/ ]);
-//# sourceMappingURL=app-8f5ed91a8a71bc3d3d4f.js.map
+//# sourceMappingURL=app-e5738239fba94926699c.js.map
