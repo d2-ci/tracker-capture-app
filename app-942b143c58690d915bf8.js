@@ -179,7 +179,7 @@
 	});
 	
 	/* App Module */
-	angular.module('trackerCapture').value('DHIS2URL', '../api/30').value('DHIS2COORDINATESIZE', 6).config(["$httpProvider", "$routeProvider", "$translateProvider", "$logProvider", function ($httpProvider, $routeProvider, $translateProvider, $logProvider) {
+	angular.module('trackerCapture').value('DHIS2URL', '../api').value('DHIS2COORDINATESIZE', 6).config(["$httpProvider", "$routeProvider", "$translateProvider", "$logProvider", function ($httpProvider, $routeProvider, $translateProvider, $logProvider) {
 	
 	    $httpProvider.defaults.useXDomain = true;
 	    delete $httpProvider.defaults.headers.common['X-Requested-With'];
@@ -838,7 +838,7 @@
 	            }
 	            return isValid;
 	        },
-	        getAge: function( _dob ){
+	        getAge: function( _dob ) {
 	            var calendarSetting = CalendarService.getSetting();
 	
 	            var tdy = $.calendars.instance(calendarSetting.keyCalendar).newDate();
@@ -867,23 +867,17 @@
 	})
 	
 	.service('UsersService', function( $http, $translate) {
+	
+	    var mapUserLookupResponse = function( userLookup ) {
+	        return {userid: userLookup.id, username: userLookup.username, firstName: userLookup.firstName, lastName: userLookup.surname};
+	    };
+	
 	    return {
-	        getAll: function(){
-	            var promise = $http.get("../api/users?paging=false&fields=*").then(function (response) {
-	                var users = [];
-	                angular.forEach(response.data.users, function (user) {
-	                    var userObj = {userid: user.id, username: user.userCredentials.username, orgUnits: user.organisationUnits};
-	                    users.push(userObj);
-	                });
-	                return users;
-	            });
-	            return promise;
-	        },
 	        getByQuery: function( queryString ){
-	            var promise = $http.get("../api/users?paging=true&page=1&pageSize=10&query=" + queryString + "&fields=firstName,surname,userCredentials[username],id").then(function (response) {
+	            var promise = $http.get("../api/userLookup?paging=true&page=1&pageSize=10&query=" + queryString).then(function (response) {
 	                var users = [];
 	                angular.forEach(response.data.users, function (user) {
-	                    var userObj = {userid: user.id, username: user.userCredentials.username, firstName: user.firstName, lastName: user.surname};
+	                    var userObj = mapUserLookupResponse(user);
 	                    users.push(userObj);
 	                });
 	                return users;
@@ -891,9 +885,9 @@
 	            return promise;
 	        },
 	        getByUid: function( uid ){
-	            var promise = $http.get("../api/users/" + uid + "?fields=firstName,surname,userCredentials[username],id").then(function (response) {
-	                var userObj = {userid: response.data.id, username: response.data.userCredentials.username, firstName: response.data.firstName, lastName: response.data.surname};
-	                return userObj;        
+	            var promise = $http.get("../api/userLookup/" + uid).then(function (response) {
+	                var userObj = mapUserLookupResponse(response.data);
+	                return userObj;
 	            });
 	            return promise;
 	        }
@@ -5610,7 +5604,7 @@
 	        },
 	        controller: function($scope, UsersService, OrgUnitFactory) {
 	            $scope.allUsers = [];        
-	            $scope.temp = UsersService.getAll().then(function(users){
+	            $scope.temp = UsersService.getByQuery('').then(function(users){
 	                $scope.allUsers = users;
 	            });
 	
@@ -40142,4 +40136,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-4df48be67de3c7a14605.js.map
+//# sourceMappingURL=app-942b143c58690d915bf8.js.map
