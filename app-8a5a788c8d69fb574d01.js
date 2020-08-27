@@ -23571,6 +23571,7 @@
 	
 	        return $modal.open({
 	            templateUrl: 'components/home/search/result-modal.html',
+	            windowClass: 'modal-full-window',
 	            controller: ["$scope", "$modalInstance", "TEIGridService", "OrgUnitFactory", "orgUnit", "res", "refetchDataFn", "internalService", "canOpenRegistration", "TEIService", "NotificationService", function controller($scope, $modalInstance, TEIGridService, OrgUnitFactory, orgUnit, res, refetchDataFn, internalService, canOpenRegistration, TEIService, NotificationService) {
 	                $scope.existingDuplicates = res.existingDuplicates;
 	                $scope.gridData = null;
@@ -40140,4 +40141,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-1d079d9d956a0e7dea10.js.map
+//# sourceMappingURL=app-8a5a788c8d69fb574d01.js.map
