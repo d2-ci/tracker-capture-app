@@ -9768,6 +9768,12 @@
 	            });
 	            return promise;
 	        },
+	        saveRelationship: function saveRelationship(relationship) {
+	            var promise = $http.post(DHIS2URL + '/relationships', relationship).then(function (response) {
+	                return response.data;
+	            });
+	            return promise;
+	        },
 	        getPotentialDuplicates: function getPotentialDuplicates(uidList) {
 	            var uidUrl = "";
 	            if (uidList.length > 0) {
@@ -21910,7 +21916,6 @@
 	    $scope.addRelationship = function () {
 	        if ($scope.addingRelationship) {
 	            if ($scope.mainTei && $scope.teiForRelationship && $scope.relationship.selected) {
-	                var tei = angular.copy($scope.mainTei);
 	
 	                var relationship = { from: { trackedEntityInstance: {} }, to: { trackedEntityInstance: {} } };
 	
@@ -21919,38 +21924,31 @@
 	                relationship.from.trackedEntityInstance.trackedEntityInstance = $scope.selectedConstraints.currentTei === 'fromConstraint' ? $scope.mainTei.trackedEntityInstance : $scope.teiForRelationship.id;
 	                relationship.to.trackedEntityInstance.trackedEntityInstance = $scope.selectedConstraints.currentTei === 'toConstraint' ? $scope.mainTei.trackedEntityInstance : $scope.teiForRelationship.id;
 	
-	                tei.relationships.push(relationship);
+	                TEIService.saveRelationship(relationship).then(function (response) {
+	                    if (response && response.response && response.response.importSummaries && response.response.importSummaries.length == 1) {
+	                        var importSummary = response.response.importSummaries[0];
+	                        if (importSummary.status !== 'SUCCESS') {
+	                            //update has failed
+	                            var message = $translate.instant("saving_relationship_failed_conflicts");
+	                            var conflictMessage = importSummary.description;
+	                            NotificationService.showNotifcationDialog($translate.instant("saving_relationship_failed"), message + ": " + conflictMessage);
+	                            return;
+	                        } else {
+	                            relationship.relationshipName = $scope.relationship.selected.displayName;
+	                            relationship.relationship = importSummary.reference;
 	
-	                TEIService.update(tei, $scope.optionSets, $scope.attributesById).then(function (response) {
-	                    var relationshipResponse = response && response.response && response.response.relationships;
-	                    var importSummary = null;
-	                    angular.forEach(relationshipResponse.importSummaries, function (importSummaryCandidate) {
-	                        if (importSummaryCandidate.status === "SUCCESS" && importSummaryCandidate.importCount.imported === 1) {
-	                            importSummary = importSummaryCandidate;
+	                            if ($scope.mainTei.relationships) {
+	                                $scope.mainTei.relationships.push(relationship);
+	                            } else {
+	                                $scope.mainTei.relationships = [relationship];
+	                            }
+	
+	                            $modalInstance.close($scope.mainTei.relationships);
 	                        }
-	                    });
-	                    if (!importSummary) {
+	                    } else {
 	                        NotificationService.showNotifcationDialog($translate.instant("unknown_error"), $translate.instant("unknown_error"));
 	                        return;
 	                    }
-	                    if (importSummary && importSummary.status !== 'SUCCESS') {
-	                        //update has failed
-	                        var message = $translate.instant("saving_relationship_failed_conflicts");
-	                        var conflictMessage = importSummary.description;
-	                        NotificationService.showNotifcationDialog($translate.instant("saving_relationship_failed"), message + ": " + conflictMessage);
-	                        return;
-	                    }
-	
-	                    relationship.relationshipName = $scope.relationship.selected.displayName;
-	                    relationship.relationship = importSummary.reference;
-	
-	                    if ($scope.mainTei.relationships) {
-	                        $scope.mainTei.relationships.push(relationship);
-	                    } else {
-	                        $scope.mainTei.relationships = [relationship];
-	                    }
-	
-	                    $modalInstance.close($scope.mainTei.relationships);
 	                });
 	            } else {
 	                NotificationService.showNotifcationDialog($translate.instant("relationship_error"), $translate.instant("selected_tei_is_invalid"));
@@ -40144,4 +40142,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-14eab95335c14d37aaa8.js.map
+//# sourceMappingURL=app-03988f59d94ed521e96c.js.map
