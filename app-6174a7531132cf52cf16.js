@@ -16160,7 +16160,7 @@
 	/* global angular, trackerCapture */
 	
 	var trackerCapture = angular.module('trackerCapture');
-	trackerCapture.controller('DataEntryController', ["$rootScope", "$scope", "$modal", "$filter", "$log", "$timeout", "$translate", "$window", "$q", "$parse", "$location", "CommonUtils", "DateUtils", "DashboardLayoutService", "EventUtils", "orderByFilter", "SessionStorageService", "EnrollmentService", "DHIS2EventFactory", "ModalService", "NotificationService", "CurrentSelection", "TrackerRulesExecutionService", "CustomFormService", "PeriodService", "OptionSetService", "AttributesFactory", "TrackerRulesFactory", "EventCreationService", "AuthorityService", "AccessUtils", "TCOrgUnitService", function ($rootScope, $scope, $modal, $filter, $log, $timeout, $translate, $window, $q, $parse, $location, CommonUtils, DateUtils, DashboardLayoutService, EventUtils, orderByFilter, SessionStorageService, EnrollmentService, DHIS2EventFactory, ModalService, NotificationService, CurrentSelection, TrackerRulesExecutionService, CustomFormService, PeriodService, OptionSetService, AttributesFactory, TrackerRulesFactory, EventCreationService, AuthorityService, AccessUtils, TCOrgUnitService) {
+	trackerCapture.controller('DataEntryController', ["$rootScope", "$scope", "$modal", "$filter", "$log", "$timeout", "$translate", "$window", "$q", "$parse", "$location", "CommonUtils", "DateUtils", "DashboardLayoutService", "EventUtils", "orderByFilter", "SessionStorageService", "EnrollmentService", "DHIS2EventFactory", "ModalService", "NotificationService", "CurrentSelection", "TrackerRulesExecutionService", "CustomFormService", "PeriodService", "OptionSetService", "AttributesFactory", "TrackerRulesFactory", "EventCreationService", "AuthorityService", "AccessUtils", "TCOrgUnitService", "UsersService", function ($rootScope, $scope, $modal, $filter, $log, $timeout, $translate, $window, $q, $parse, $location, CommonUtils, DateUtils, DashboardLayoutService, EventUtils, orderByFilter, SessionStorageService, EnrollmentService, DHIS2EventFactory, ModalService, NotificationService, CurrentSelection, TrackerRulesExecutionService, CustomFormService, PeriodService, OptionSetService, AttributesFactory, TrackerRulesFactory, EventCreationService, AuthorityService, AccessUtils, TCOrgUnitService, UsersService) {
 	
 	    //Unique instance id for the controller:
 	    $scope.APIURL = DHIS2URL;
@@ -17448,6 +17448,12 @@
 	
 	                        if ($scope.currentEvent.notes) {
 	                            angular.forEach($scope.currentEvent.notes, function (note) {
+	                                UsersService.getByQuery(note.storedBy).then(function (users) {
+	                                    if (users.length === 1) {
+	                                        note.storedBy = users[0].firstName + ' ' + users[0].lastName;
+	                                    }
+	                                });
+	
 	                                note.displayDate = DateUtils.formatFromApiToUser(note.storedDate);
 	                                note.storedDate = DateUtils.formatToHrsMins(note.storedDate);
 	                            });
@@ -17949,12 +17955,19 @@
 	            NotificationService.showNotifcationDialog(headerText, bodyText);
 	            return;
 	        }
-	        var newNote = { value: $scope.note.value };
+	
+	        var newNote = { value: $scope.note.value, storedDate: today, displayDate: today, storedBy: storedBy };
+	
+	        UsersService.getByQuery(storedBy).then(function (users) {
+	            if (users.length === 1) {
+	                newNote.storedBy = users[0].firstName + ' ' + users[0].lastName;
+	            }
+	        });
 	
 	        if (angular.isUndefined($scope.currentEvent.notes)) {
-	            $scope.currentEvent.notes = [{ value: newNote.value, storedDate: today, displayDate: today, storedBy: storedBy }];
+	            $scope.currentEvent.notes = [newNote];
 	        } else {
-	            $scope.currentEvent.notes.splice(0, 0, { value: newNote.value, storedDate: today, displayDate: today, storedBy: storedBy });
+	            $scope.currentEvent.notes.splice(0, 0, newNote);
 	        }
 	
 	        var e = { event: $scope.currentEvent.event,
@@ -17962,7 +17975,7 @@
 	            programStage: $scope.currentEvent.programStage,
 	            orgUnit: $scope.currentEvent.orgUnit,
 	            trackedEntityInstance: $scope.currentEvent.trackedEntityInstance,
-	            notes: [newNote]
+	            notes: [{ value: newNote.value }]
 	        };
 	
 	        DHIS2EventFactory.updateForNote(e).then(function (data) {
@@ -22391,9 +22404,9 @@
 	/* global trackerCapture, angular */
 	
 	var trackerCapture = angular.module('trackerCapture');
-	trackerCapture.controller('NotesController', ["$scope", "$translate", "DateUtils", "EnrollmentService", "CurrentSelection", "NotificationService", "SessionStorageService", "orderByFilter", function ($scope, $translate, DateUtils, EnrollmentService, CurrentSelection, NotificationService, SessionStorageService, orderByFilter) {
+	trackerCapture.controller('NotesController', ["$scope", "$translate", "DateUtils", "EnrollmentService", "CurrentSelection", "NotificationService", "SessionStorageService", "orderByFilter", "UsersService", function ($scope, $translate, DateUtils, EnrollmentService, CurrentSelection, NotificationService, SessionStorageService, orderByFilter, UsersService) {
 	    var userProfile = SessionStorageService.get('USER_PROFILE');
-	    var storedBy = userProfile && userProfile.username ? userProfile.username : '';
+	    var storedBy = userProfile && userProfile.userCredentials && userProfile.userCredentials.username ? userProfile.userCredentials.username : '';
 	
 	    var today = DateUtils.getToday();
 	
@@ -22410,6 +22423,7 @@
 	            if (!angular.isUndefined($scope.selectedEnrollment.notes)) {
 	                $scope.selectedEnrollment.notes = orderByFilter($scope.selectedEnrollment.notes, '-storedDate');
 	                angular.forEach($scope.selectedEnrollment.notes, function (note) {
+	                    $scope.updateNoteWithRealName(note);
 	                    note.displayDate = DateUtils.formatFromApiToUser(note.storedDate);
 	                    note.storedDate = DateUtils.formatToHrsMins(note.storedDate);
 	                });
@@ -22417,18 +22431,28 @@
 	        }
 	    });
 	
+	    $scope.updateNoteWithRealName = function (note) {
+	        UsersService.getByQuery(note.storedBy).then(function (users) {
+	            if (users.length === 1) {
+	                note.storedBy = users[0].firstName + ' ' + users[0].lastName;
+	            }
+	        });
+	    };
+	
 	    $scope.addNote = function () {
 	        if (!$scope.note.value) {
 	            NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("please_add_some_text"));
 	            return;
 	        }
 	
-	        var newNote = { value: $scope.note.value };
+	        var newNote = { value: $scope.note.value, storedDate: DateUtils.formatFromUserToApi(today), displayDate: today, storedBy: storedBy };
+	
+	        $scope.updateNoteWithRealName(newNote);
 	
 	        if (angular.isUndefined($scope.selectedEnrollment.notes)) {
-	            $scope.selectedEnrollment.notes = [{ value: newNote.value, storedDate: DateUtils.formatFromUserToApi(today), displayDate: today, storedBy: storedBy }];
+	            $scope.selectedEnrollment.notes = [newNote];
 	        } else {
-	            $scope.selectedEnrollment.notes.splice(0, 0, { value: newNote.value, storedDate: DateUtils.formatFromUserToApi(today), displayDate: today, storedBy: storedBy });
+	            $scope.selectedEnrollment.notes.splice(0, 0, newNote);
 	        }
 	
 	        var e = angular.copy($scope.selectedEnrollment);
@@ -22436,7 +22460,7 @@
 	        if (e.incidentDate) {
 	            e.incidentDate = DateUtils.formatFromUserToApi(e.incidentDate);
 	        }
-	        e.notes = [newNote];
+	        e.notes = [{ value: newNote.value }];
 	        EnrollmentService.updateForNote(e).then(function () {
 	            $scope.clear();
 	        });
@@ -40135,4 +40159,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-8b972bf0c5767cd4a117.js.map
+//# sourceMappingURL=app-6174a7531132cf52cf16.js.map
