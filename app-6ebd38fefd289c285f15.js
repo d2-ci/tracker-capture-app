@@ -12024,12 +12024,12 @@
 	
 	var externalLookupServices = angular.module('externalLookupServices', ['ngResource']).service('FNrLookupService', ["$http", "DHIS2URL", "$translate", "NotificationService", function ($http, DHIS2URL, $translate, NotificationService) {
 	    return {
-	        lookupFnr: function lookupFnr(fNr) {
+	        lookupFnr: function lookupFnr(fNr, kommuneNr) {
 	            var url = '../' + DHIS2URL + '/person/sok';
 	            var promise = $http({
 	                method: 'POST',
 	                url: url,
-	                data: fNr,
+	                data: { fnr: fNr, kommunenr: kommuneNr },
 	                headers: { 'Content-Type': 'application/json' }
 	            }).then(function (response) {
 	                return response.data;
@@ -12039,8 +12039,12 @@
 	
 	                errorMsgBody = 'Feil ved henting av data om person:' + fNr;
 	
-	                if (error.status = 404) {
+	                if (error.status == 404) {
 	                    errorMsgBody = 'Tjeneste for henting av data om person er ikke tilgjengelig. ' + 'Prøv igjen senere eller fyll inn persondata manuelt.';
+	                }
+	
+	                if (error.status == 403) {
+	                    errorMsgBody = 'Feil ved henting av data, prøv å logge inn på nytt.';
 	                }
 	
 	                NotificationService.showNotifcationDialog(errorMsgHdr, errorMsgBody);
@@ -15465,14 +15469,21 @@
 	    };
 	
 	    $scope.registryLookup = function (attributeId) {
-	        FNrLookupService.lookupFnr($scope.selectedTei.ZSt07qyq6Pt).then(function (response) {
+	        FNrLookupService.lookupFnr($scope.selectedTei.ZSt07qyq6Pt, CurrentSelection.currentSelection.orgUnit.code).then(function (response) {
 	            if (response) {
-	                $scope.selectedTei["sB1IHYu2xQT"] = response.firstName;
-	                $scope.selectedTei["ENRjVGxVL6l"] = response.lastName;
-	                $scope.selectedTei["Xhdn49gUd52"] = "Ulvollsjordet 13, 2670 Otta";
-	                $scope.selectedTei["NI0QRzJvQ0k"] = "1981-08-01";
-	                $scope.selectedTei["Rv8WM2mTuS5"] = "39";
-	                $scope.selectedTei["oindugucx72"] = "Mann";
+	                var fieldMappings = [{ field: "sB1IHYu2xQT", data: response.fornavn }, { field: "ENRjVGxVL6l", data: response.etternavn }, { field: "Xhdn49gUd52", data: response.adresse ? response.adresse + ', ' + response.postnummer + ' ' + response.poststed : null },
+	                //fødselsdatoformat DDMMYYYY
+	                { field: "NI0QRzJvQ0k", data: response.fodselsdato ? DateUtils.formatFromApiToUser(response.fodselsdato.substring(4, 8) + response.fodselsdato.substring(2, 4) + response.fodselsdato.substring(0, 2)) : '' }, { field: "Ym6yIceP4RO", data: response.epost },
+	                //Kjønn: U/K/M
+	                { field: "oindugucx72", data: response.kjonn == 'M' ? 'Mann' : response.kjonn == 'K' ? 'Kvinne' : response.kjonn == 'U' ? 'Ikke kjent' : '' }, { field: "fctSQp5nAYl", data: response.telefonnummer ? parseInt(response.telefonnummer.replace('+47', '')) : null }];
+	
+	                angular.forEach(fieldMappings, function (fieldMapping) {
+	                    if (fieldMapping.data) {
+	                        if (!$scope.selectedTei[fieldMapping.field] || angular.isString($scope.selectedTei[fieldMapping.field]) && !$scope.selectedTei[fieldMapping.field].trim()) {
+	                            $scope.selectedTei[fieldMapping.field] = fieldMapping.data;
+	                        }
+	                    }
+	                });
 	
 	                $scope.executeRules();
 	            }
@@ -40219,4 +40230,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-e1cd17f7e0b5394bdcab.js.map
+//# sourceMappingURL=app-6ebd38fefd289c285f15.js.map
