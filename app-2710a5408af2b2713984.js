@@ -11394,47 +11394,43 @@
 	    };
 	    var getWorkingListDataWithMultipleEventFilters = function getWorkingListDataWithMultipleEventFilters(searchParams, workingList, pager, sortColumn) {
 	        var def = $q.defer();
-	        if (workingList.cachedSorting === searchParams.sortUrl && workingList.cachedOrgUnit === searchParams.orgUnitId) {
-	            var data = getCachedMultipleEventFiltersData(workingList, pager);
+	
+	        var promises = [];
+	        angular.forEach(workingList.eventFilters, function (eventFilter) {
+	            var eventUrl = getEventUrl(eventFilter);
+	            var tempPager = {
+	                pageSize: 1000,
+	                page: 1
+	            };
+	            promises.push(TEIService.search(searchParams.orgUnitId, "SELECTED", searchParams.sortUrl, searchParams.programUrl, eventUrl, tempPager, true));
+	        });
+	        $q.all(promises).then(function (response) {
+	            var data = { height: 0, width: 0, rows: [] };
+	            var existingTeis = {};
+	            var allRows = [];
+	            angular.forEach(response, function (responseData) {
+	                data.headers = data.headers && data.headers.length > responseData.headers.length ? data.headers : responseData.headers;
+	                data.width = data.width > responseData.width ? data.width : responseData.width;
+	                allRows = allRows.concat(responseData.rows);
+	            });
+	            //Getting distinct list
+	            var existing = {};
+	            data.rows = allRows.filter(function (d) {
+	                if (existing[d[0]]) return false;
+	                existing[d[0]] = true;
+	                return true;
+	            });
+	            var sortColumnIndex = data.headers.findIndex(function (h) {
+	                return h.name === sortColumn.id;
+	            });
+	            if (sortColumnIndex) data.rows = orderByKeyFilter(data.rows, sortColumnIndex, sortColumn.direction);
+	            //order list
+	            cachedMultipleEventFiltersData[workingList.name] = data;
+	            workingList.cachedSorting = searchParams.sortUrl;
+	            workingList.cachedOrgUnit = searchParams.orgUnitId;
+	            var data = getCachedMultipleEventFiltersData(workingList, pager, sortColumn);
 	            def.resolve(data);
-	        } else {
-	            var promises = [];
-	            angular.forEach(workingList.eventFilters, function (eventFilter) {
-	                var eventUrl = getEventUrl(eventFilter);
-	                var tempPager = {
-	                    pageSize: 1000,
-	                    page: 1
-	                };
-	                promises.push(TEIService.search(searchParams.orgUnitId, "SELECTED", searchParams.sortUrl, searchParams.programUrl, eventUrl, tempPager, true));
-	            });
-	            $q.all(promises).then(function (response) {
-	                var data = { height: 0, width: 0, rows: [] };
-	                var existingTeis = {};
-	                var allRows = [];
-	                angular.forEach(response, function (responseData) {
-	                    data.headers = data.headers && data.headers.length > responseData.headers.length ? data.headers : responseData.headers;
-	                    data.width = data.width > responseData.width ? data.width : responseData.width;
-	                    allRows = allRows.concat(responseData.rows);
-	                });
-	                //Getting distinct list
-	                var existing = {};
-	                data.rows = allRows.filter(function (d) {
-	                    if (existing[d[0]]) return false;
-	                    existing[d[0]] = true;
-	                    return true;
-	                });
-	                var sortColumnIndex = data.headers.findIndex(function (h) {
-	                    return h.name === sortColumn.id;
-	                });
-	                if (sortColumnIndex) data.rows = orderByKeyFilter(data.rows, sortColumnIndex, sortColumn.direction);
-	                //order list
-	                cachedMultipleEventFiltersData[workingList.name] = data;
-	                workingList.cachedSorting = searchParams.sortUrl;
-	                workingList.cachedOrgUnit = searchParams.orgUnitId;
-	                var data = getCachedMultipleEventFiltersData(workingList, pager, sortColumn);
-	                def.resolve(data);
-	            });
-	        }
+	        });
 	        return def.promise;
 	    };
 	
@@ -23077,7 +23073,7 @@
 	
 	    var loadCachedData = function loadCachedData() {
 	        var frontPageData = CurrentSelection.getFrontPageData();
-	        if (frontPageData && frontPageData.viewData && frontPageData.viewData === 'Lists') {
+	        if (frontPageData && frontPageData.viewData && frontPageData.viewData.name.toLowerCase() === 'lists') {
 	            var viewData = frontPageData.viewData;
 	            $scope.pager = viewData.pager;
 	            $scope.customWorkingListValues = viewData.customWorkingListValues;
@@ -40230,4 +40226,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-43530ab047a781c39de9.js.map
+//# sourceMappingURL=app-2710a5408af2b2713984.js.map
