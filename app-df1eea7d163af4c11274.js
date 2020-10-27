@@ -21993,7 +21993,7 @@
 	                var relationship = { from: { trackedEntityInstance: {} }, to: { trackedEntityInstance: {} } };
 	
 	                relationship.relationshipType = $scope.relationship.selected.id;
-	
+	                relationship.bidirectional = $scope.relationship.selected.bidirectional;
 	                relationship.from.trackedEntityInstance.trackedEntityInstance = $scope.selectedConstraints.currentTei === 'fromConstraint' ? $scope.mainTei.trackedEntityInstance : $scope.teiForRelationship.id;
 	                relationship.to.trackedEntityInstance.trackedEntityInstance = $scope.selectedConstraints.currentTei === 'toConstraint' ? $scope.mainTei.trackedEntityInstance : $scope.teiForRelationship.id;
 	
@@ -40248,4 +40248,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-c73f365a3dae12c37d8e.js.map
+//# sourceMappingURL=app-df1eea7d163af4c11274.js.map
