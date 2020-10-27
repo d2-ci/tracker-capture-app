@@ -15465,6 +15465,7 @@
 	    };
 	
 	    $scope.registryLookup = function (attributeId) {
+	        $scope.showFetchingDataSpinner = true;
 	        FNrLookupService.lookupFnr($scope.selectedTei.ZSt07qyq6Pt, CurrentSelection.currentSelection.orgUnit.code).then(function (response) {
 	            if (response) {
 	                var fieldMappings = [{ field: "sB1IHYu2xQT", data: response.fornavn }, { field: "ENRjVGxVL6l", data: response.etternavn }, { field: "Xhdn49gUd52", data: response.adresse ? response.adresse + ', ' + response.postnummer + ' ' + response.poststed : null },
@@ -15483,6 +15484,7 @@
 	
 	                $scope.executeRules();
 	            }
+	            $scope.showFetchingDataSpinner = false;
 	        });
 	    };
 	
@@ -22360,6 +22362,7 @@
 	    };
 	
 	    $scope.registryLookup = function (attributeId) {
+	        $scope.showFetchingDataSpinner = true;
 	        FNrLookupService.lookupFnr($scope.selectedTei.ZSt07qyq6Pt, CurrentSelection.currentSelection.orgUnit.code).then(function (response) {
 	            if (response) {
 	                var fieldMappings = [{ field: "sB1IHYu2xQT", data: response.fornavn }, { field: "ENRjVGxVL6l", data: response.etternavn }, { field: "Xhdn49gUd52", data: response.adresse ? response.adresse + ', ' + response.postnummer + ' ' + response.poststed : null },
@@ -22378,6 +22381,7 @@
 	
 	                $scope.executeRules();
 	            }
+	            $scope.showFetchingDataSpinner = false;
 	        });
 	    };
 	}]);
@@ -40248,4 +40252,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-df1eea7d163af4c11274.js.map
+//# sourceMappingURL=app-72ffb1d8d5e2361774a7.js.map
