@@ -23124,14 +23124,10 @@
 	            $scope.pager = viewData.pager;
 	            $scope.customWorkingListValues = viewData.customWorkingListValues;
 	            $scope.gridColumns = viewData.gridColumns;
-	            if (viewData.trackedEntityList && viewData.trackedEntityList.refresh) {
-	                if (viewData.trackedEntityList.type == $scope.trackedEntityListTypes.CUSTOM) {
-	                    $scope.setCustomWorkingList();
-	                } else {
-	                    $scope.setWorkingList(viewData.trackedEntityList.config);
-	                }
+	            if (viewData.trackedEntityList.type == $scope.trackedEntityListTypes.CUSTOM) {
+	                $scope.setCustomWorkingList();
 	            } else {
-	                $scope.currentTrackedEntityList = viewData.trackedEntityList;
+	                $scope.setWorkingList(viewData.trackedEntityList.config);
 	            }
 	        } else {
 	            CurrentSelection.setFrontPageData(null);
@@ -40272,4 +40268,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-7b52d6af6d2f51b1147d.js.map
+//# sourceMappingURL=app-913550f0964956c0b08a.js.map
