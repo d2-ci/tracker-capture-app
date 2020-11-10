@@ -9739,6 +9739,42 @@
 	                return def.promise;
 	            });
 	        },
+	        getListWithProgramData: function getListWithProgramData(entityUidList, programUid, dataElementId, programStageId, orgUnitId) {
+	            if (entityUidList && entityUidList.length > 0) {
+	                return TeiAccessApiService.get(null, programUid, DHIS2URL + '/trackedEntityInstances.json?trackedEntityInstance=' + entityUidList.join(';') + '&program=' + programUid + '&ou=' + orgUnitId + '&fields=trackedEntityInstance,enrollments[enrollment,events[dataValues,programStage]]').then(function (response) {
+	                    var teiDictionary = {};
+	                    if (response.data && response.data.trackedEntityInstances && response.data.trackedEntityInstances.length > 0) {
+	                        response.data.trackedEntityInstances.forEach(function (tei) {
+	                            if (tei.enrollments) {
+	                                tei.enrollments.forEach(function (enrollment) {
+	                                    if (enrollment.events && enrollment.events.length > 0) {
+	                                        enrollment.events.forEach(function (event) {
+	                                            if (event.programStage == programStageId && event.dataValues && event.dataValues.length > 0) {
+	                                                event.dataValues.forEach(function (dataValue) {
+	                                                    if (dataValue.dataElement == dataElementId) {
+	                                                        teiDictionary[tei.trackedEntityInstance] = dataValue.value;
+	                                                    }
+	                                                });
+	                                            }
+	                                        });
+	                                    }
+	                                });
+	                            }
+	                        });
+	                    }
+	
+	                    return teiDictionary;
+	                }, function (error) {
+	                    var def = $q.defer();
+	                    def.reject(error);
+	                    return def.promise;
+	                });
+	            } else {
+	                var def = $q.defer();
+	                def.resolve([]);
+	                return def.promise;
+	            }
+	        },
 	        get: function get(entityUid, optionSets, attributesById) {
 	            var promise = $http.get(DHIS2URL + '/trackedEntityInstances/' + entityUid + '.json').then(function (response) {
 	                var tei = response.data;
@@ -10766,6 +10802,10 @@
 	                    entity.inactive = row[6] !== "" ? row[6] : false;
 	                    entity.followUp = isFollowUp;
 	
+	                    if (grid.headers[grid.headers.length - 1].name == 'lastdate') {
+	                        entity.lastdate = row[row.length - 1];
+	                    }
+	
 	                    for (var i = 7; i < row.length; i++) {
 	                        if (row[i] && row[i] !== '') {
 	                            var val = row[i];
@@ -10844,7 +10884,7 @@
 	            });
 	            return { columns: columns, filterTypes: filterTypes, filterText: filterText };
 	        },
-	        makeGridColumns: function makeGridColumns(attributes, config, savedGridColumnsKeyMap) {
+	        makeGridColumns: function makeGridColumns(attributes, config, savedGridColumnsKeyMap, lastDateName) {
 	            var gridColumns = [{ id: 'orgUnitName', displayName: $translate.instant('registering_unit'), show: false, valueType: 'TEXT' }, { id: 'created', displayName: $translate.instant('registration_date'), show: true, valueType: 'DATE' }, { id: 'inactive', displayName: $translate.instant('inactive'), show: false, valueType: 'BOOLEAN' }];
 	            setShowGridColumn(gridColumns[0], 0, config, savedGridColumnsKeyMap);
 	            setShowGridColumn(gridColumns[1], 1, config, savedGridColumnsKeyMap);
@@ -10860,6 +10900,11 @@
 	                    gridColumns.push(gridColumn);
 	                }
 	            });
+	
+	            if (lastDateName) {
+	                gridColumns.push({ id: 'last_date', displayName: $translate.instant(lastDateName), show: true, valueType: 'DATE' });
+	            }
+	
 	            return gridColumns;
 	        },
 	        generateGridColumnsForSearch: function generateGridColumnsForSearch(existedColumns, attributes, ouMode, nonConfidential) {
@@ -23085,7 +23130,9 @@
 	        if ($scope.base.selectedProgram) {
 	            return UserDataStoreService.get(gridColumnsContainer, $scope.base.selectedProgram.id).then(function (savedGridColumns) {
 	                var gridColumnConfig = { defaultRange: { start: 3, end: 7 } };
-	                $scope.gridColumns = TEIGridService.makeGridColumns($scope.programAttributes, gridColumnConfig, savedGridColumns);
+	                var lastDateName = $scope.base.selectedProgram.id == 'uYjxkTbwRNf' ? 'last_date_in_isolation' : $scope.base.selectedProgram.id == 'DM9n1bUw8W8' ? 'last_date_in_quarantine' : '';
+	
+	                $scope.gridColumns = TEIGridService.makeGridColumns($scope.programAttributes, gridColumnConfig, savedGridColumns, lastDateName);
 	                /*
 	                $scope.gridColumns = [];
 	                angular.forEach($scope.programAttributes, function(attr){
@@ -23193,9 +23240,39 @@
 	    };
 	
 	    var setCurrentTrackedEntityListData = function setCurrentTrackedEntityListData(serverResponse) {
+	        if (serverResponse.rows && serverResponse.rows.length > 0 && ($scope.base.selectedProgram.id == 'uYjxkTbwRNf' || $scope.base.selectedProgram.id == 'DM9n1bUw8W8')) {
+	            var allTeis = [];
+	            serverResponse.rows.forEach(function (row) {
+	                allTeis.push(row[0]);
+	            });
+	
+	            var dataElement = 'BoUcoEx9sVl';
+	            var programStage = 'LpWNjNGvCO5';
+	
+	            if ($scope.base.selectedProgram.id == 'DM9n1bUw8W8') {
+	                dataElement = 'JNF44zBaNqn';
+	                programStage = 'sAV9jAajr8x';
+	            }
+	            TEIService.getListWithProgramData(allTeis, $scope.base.selectedProgram.id, dataElement, programStage, $scope.selectedOrgUnit.id).then(function (dateDictionary) {
+	                serverResponse.rows.forEach(function (row) {
+	                    if (dateDictionary[row[0]]) {
+	                        row.push(dateDictionary[row[0]]);
+	                    } else {
+	                        row.push('');
+	                    }
+	                });
+	
+	                serverResponse.headers.push({ column: "LastDate", hidden: false, meta: false, name: "last_date", type: "java.lang.String" });
+	                $scope.setServerResponse(serverResponse);
+	            });
+	        } else {
+	            $scope.setServerResponse(serverResponse);
+	        }
+	    };
+	
+	    $scope.setServerResponse = function (serverResponse) {
 	        $scope.currentTrackedEntityList.data = TEIGridService.format($scope.selectedOrgUnit.id, serverResponse, false, $scope.base.optionSets, null);
 	        $scope.currentTrackedEntityList.loading = false;
-	        //updateCurrentSelection();
 	    };
 	
 	    $scope.fetchTeis = function (pager, sortColumn) {
@@ -40268,4 +40345,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-913550f0964956c0b08a.js.map
+//# sourceMappingURL=app-4de713fc470097833124.js.map
