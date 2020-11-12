@@ -12064,6 +12064,7 @@
 	/* Services */
 	
 	var externalLookupServices = angular.module('externalLookupServices', ['ngResource']).service('FNrLookupService', ["$http", "DHIS2URL", "$translate", "NotificationService", function ($http, DHIS2URL, $translate, NotificationService) {
+	    var not_supported_message_shown_previously = false;
 	    return {
 	        lookupFnr: function lookupFnr(fNr, kommuneNr) {
 	            var url = '../' + DHIS2URL + '/person/sok';
@@ -12076,9 +12077,10 @@
 	                var errorMsgHdr, errorMsgBody;
 	                errorMsgHdr = $translate.instant('error');
 	
-	                if (response.data.statusFolkeregister == 'NOT_SUPPORTED') {
+	                if (response.data.statusFolkeregister == 'NOT_SUPPORTED' && !not_supported_message_shown_previously) {
 	                    errorMsgHdr = "Folkeregisteroppslag må aktiveres for din kommune";
-	                    errorMsgBody = 'For å hente data fra folkeregisteret må din kommune delegere rettigheter til KS. Se mer informasjon i endringslogg, eller kontakt oss på smittesporing@ks.no for å komme videre.';
+	                    errorMsgBody = '<p>For \xE5 hente data fra folkeregisteret m\xE5 kommunen inng\xE5 avtale med KS om bruk av Fiks folkeregister. Dette m\xE5 dere gj\xF8re:<br>\n                                <ol>\n                                    <li>Dere m\xE5 fylle ut skjemaet RF \u2013 1514 \xABS\xF8knad om tilgang til Folkeregisteret\xBB i Altinn.</li>\n                                    <li>Dere m\xE5 deretter tildele KS rettighet til \xE5 bruke folkeregisteropplysninger p\xE5 deres vegne.</li>\n                                    <li>Dere m\xE5 inng\xE5 avtale med KS om bruk av Fiks folkeregister.<br>\n                                    Avtalen og veiledning til skjemaene i Altinn finner dere her: <a target="_blank" href="https://svarut.wordpress.com/fiks/avtalen/">https://svarut.wordpress.com/fiks/avtalen/</a></li>\n                                </ol>\n                            </p>\n                            \n                            <p>N\xE5r dere har signert og sendt inn avtalen, kan dere sette opp tjenesten p\xE5 <a target="_blank" href="https://forvaltning.fiks.ks.no/">forvaltningsiden til Fiks-plattformen</a>. Dere m\xE5 deretter aktivere bruk av folkeregisteret i konfigurasjonen for Fiks smittesporing.</p>\n                            \n                            <p>Ta gjerne kontakt med KS p\xE5 <a target="_blank" href="mailto:smittesporing@ks.no">smittesporing@ks.no</a> hvis du har sp\xF8rsm\xE5l.</p>\n                            \n                            <p>N\xE5r folkeregisteret ikke er aktivert, vil kun e-post og telefonnummer hentes fra kontakt- og reservasjonsregisteret.</p>';
+	                    not_supported_message_shown_previously = true;
 	                }
 	
 	                if (response.data.statusFolkeregister == 'NONE') {
@@ -40345,4 +40347,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-4de713fc470097833124.js.map
+//# sourceMappingURL=app-728b4c00b62be275d267.js.map
