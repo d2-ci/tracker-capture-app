@@ -23853,9 +23853,13 @@
 	                            $modalInstance.close({ action: "OPENTEI", tei: tei, fromAudit: true });
 	                        }, function (error) {
 	                            if (error && !error.auditDismissed && error.data && error.data.message) {
-	                                var headerText = $translate.instant('open_tei_error');
-	                                var bodyText = $translate.instant(error.data.message);
-	                                NotificationService.showNotifcationDialog(headerText, bodyText);
+	                                if (error.data.message == 'PROGRAM_ACCESS_CLOSED') {
+	                                    $modalInstance.close({ action: "OPENTEI", tei: tei, fromAudit: true, programClosed: true });
+	                                } else {
+	                                    var headerText = $translate.instant('open_tei_error');
+	                                    var bodyText = $translate.instant(error.data.message);
+	                                    NotificationService.showNotifcationDialog(headerText, bodyText);
+	                                }
 	                            }
 	                        });
 	                    } else {
@@ -40347,4 +40351,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-728b4c00b62be275d267.js.map
+//# sourceMappingURL=app-bdedb86912ba9bd22ab3.js.map
