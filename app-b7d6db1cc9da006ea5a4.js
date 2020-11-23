@@ -11257,7 +11257,7 @@
 	            return { partial: partial, all: allColumns };
 	        },
 	        getEditingStatus: function getEditingStatus(dhis2Event, stage, orgUnit, tei, enrollment, program, searchOrgUnits) {
-	            return dhis2Event.orgUnit !== orgUnit.id || stage.blockEntryForm && dhis2Event.status === 'COMPLETED' || tei.inactive || enrollment.status !== 'ACTIVE';
+	            return stage.blockEntryForm && dhis2Event.status === 'COMPLETED' || tei.inactive || enrollment.status !== 'ACTIVE';
 	        },
 	        isExpired: function isExpired(program, event) {
 	            var expired = !DateUtils.verifyExpiryDate(event.eventDate, program.expiryPeriodType, program.expiryDays, false);
@@ -40410,4 +40410,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-dd2388827d437cbfb67d.js.map
+//# sourceMappingURL=app-b7d6db1cc9da006ea5a4.js.map
