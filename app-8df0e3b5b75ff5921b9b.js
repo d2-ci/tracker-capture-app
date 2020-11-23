@@ -15399,8 +15399,6 @@
 	        if (!$scope.currentStage || !$scope.currentStage.access.data.write) return false;
 	        //Check if organisation unit is closed
 	        if ($scope.selectedOrgUnit.closedStatus) return false;
-	        //Check if event is the selected org unit or event is scheduled and org unit exists in users search org units
-	        if ($scope.currentEvent.orgUnit !== $scope.selectedOrgUnit.id && !($scope.currentEvent.status === 'SCHEDULE' && isInSearchOrgUnits($scope.currentEvent.orgUnitPath, userSearchOrgUnits))) return false;
 	        // Check if currentProgramStage blocks entry form when status is completed
 	        if ($scope.currentStage && $scope.currentStage.blockEntryForm && $scope.currentEvent.status === 'COMPLETED') return false;
 	        //Check if tei is inactive
@@ -16317,7 +16315,7 @@
 	        var eventToReturn = null;
 	        if ($scope.selectedEnrollment && $scope.selectedEnrollment.events) {
 	            angular.forEach($scope.selectedEnrollment.events, function (event) {
-	                if (event.event == $scope.referralConfig[$scope.selectedProgram.id].eventId && event.status != 'COMPLETED') eventToReturn = event;
+	                if (event.programStage == $scope.referralConfig[$scope.selectedProgram.id].stageId && event.status != 'COMPLETED') eventToReturn = event;
 	            });
 	        }
 	        return eventToReturn;
@@ -16516,6 +16514,7 @@
 	
 	    $scope.$on('confirmReferralEvent', function (event, args) {
 	        args.event.status = 'COMPLETED';
+	        args.event.eventDate = DateUtils.getToday();
 	        $scope.saveEventDateForEvent(args.event, true);
 	    });
 	
@@ -18063,6 +18062,9 @@
 	            $scope.currentEventOriginal = angular.copy($scope.currentEvent);
 	            $scope.currentStageEventsOriginal = angular.copy($scope.currentStageEvents);
 	            $scope.executeRules();
+	
+	            //Needed by enrollment controller to keep referral button updated
+	            broadcastDataEntryControllerData();
 	        });
 	    };
 	
@@ -18596,8 +18598,6 @@
 	        if (!$scope.currentStage || !$scope.currentStage.access.data.write) return false;
 	        //Check if organisation unit is closed
 	        if ($scope.selectedOrgUnit.closedStatus) return false;
-	        //Check if event is the selected org unit or event is scheduled and org unit exists in users search org units
-	        if ($scope.currentEvent.orgUnit !== $scope.selectedOrgUnit.id && !($scope.currentEvent.status === 'SCHEDULE' && isInSearchOrgUnits($scope.currentEvent.orgUnitPath, userSearchOrgUnits))) return false;
 	        // Check if currentProgramStage blocks entry form when status is completed
 	        if ($scope.currentStage && $scope.currentStage.blockEntryForm && $scope.currentEvent.status === 'COMPLETED') return false;
 	        //Check if tei is inactive
@@ -40410,4 +40410,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-b7d6db1cc9da006ea5a4.js.map
+//# sourceMappingURL=app-8df0e3b5b75ff5921b9b.js.map
