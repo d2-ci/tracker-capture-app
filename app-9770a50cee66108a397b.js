@@ -16285,6 +16285,13 @@
 	            $scope.enrollmentLngSaved = true;
 	        });
 	    };
+	
+	    $scope.makeReferral = function (stageId, permanent) {
+	        $rootScope.$broadcast('referralTriggered', {
+	            stageId: stageId,
+	            permanent: permanent
+	        });
+	    };
 	}]);
 
 /***/ }),
@@ -16461,6 +16468,21 @@
 	            }
 	        }
 	    };
+	
+	    $rootScope.referralInProgress = false;
+	    $scope.$on('referralTriggered', function (event, args) {
+	        if (!$rootScope.referralInProgress) {
+	            $rootScope.referralInProgress = true;
+	            var stageToUseForReferral = null;
+	            angular.forEach($scope.programStages, function (stage) {
+	                if (stage.id === args.stageId) {
+	                    stageToUseForReferral = stage;
+	                }
+	            });
+	            //TODO: Add args.permanent as param
+	            $scope.showCreateEvent(stageToUseForReferral, $scope.eventCreationActions.referral);
+	        }
+	    });
 	
 	    //listen for new events created
 	    $scope.$on('eventcreated', function (event, args) {
@@ -17504,6 +17526,7 @@
 	
 	        var autoCreate = stage && stage.displayEventsInTable ? stage.displayEventsInTable : false;
 	        EventCreationService.showModal($scope.eventsByStage, stage, availableStages, writableStages, $scope.programStages, $scope.selectedEntity, $scope.selectedProgram, $scope.selectedOrgUnit, $scope.selectedEnrollment, autoCreate, eventCreationAction, allApplicableEvents, $scope.selectedCategories).then(function (eventContainer) {
+	            $rootScope.referralInProgress = false;
 	            if (angular.isDefined(eventContainer)) {
 	                var ev = eventContainer.ev;
 	                var dummyEvent = eventContainer.dummyEvent;
@@ -40351,4 +40374,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-bdedb86912ba9bd22ab3.js.map
+//# sourceMappingURL=app-9770a50cee66108a397b.js.map
