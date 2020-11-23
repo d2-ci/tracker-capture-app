@@ -11273,7 +11273,7 @@
 	    };
 	}]).service('EventCreationService', ["$modal", function ($modal) {
 	
-	    this.showModal = function (_eventsByStage, _stage, availableStages, _writableStages, programStages, selectedEntity, selectedProgram, selectedOrgUnit, selectedEnrollment, _autoCreate, _eventCreationAction, allEventsSorted, _selectedCategories) {
+	    this.showModal = function (_eventsByStage, _stage, availableStages, _writableStages, programStages, selectedEntity, selectedProgram, selectedOrgUnit, selectedEnrollment, _autoCreate, _eventCreationAction, allEventsSorted, _selectedCategories, _referralMode) {
 	        var modalInstance = $modal.open({
 	            templateUrl: 'components/dataentry/new-event.html',
 	            controller: 'EventCreationController',
@@ -11317,6 +11317,9 @@
 	                },
 	                selectedCategories: function selectedCategories() {
 	                    return _selectedCategories;
+	                },
+	                referralMode: function referralMode() {
+	                    return _referralMode;
 	                }
 	            }
 	        }).result;
@@ -16286,11 +16289,38 @@
 	        });
 	    };
 	
-	    $scope.makeReferral = function (stageId, permanent) {
+	    //TODO: referral config hard coded. Could be made configurable.
+	    $scope.referralConfig = { DM9n1bUw8W8: { stageId: 'xK50EzZwHkn', referralMode: 'PERMANENT_ONLY' },
+	        uYjxkTbwRNf: { stageId: 'zAstsy3slf9', referralMode: 'PERMANENT_ONLY' } };
+	
+	    $scope.makeReferral = function (stageId, referralMode) {
 	        $rootScope.$broadcast('referralTriggered', {
 	            stageId: stageId,
-	            permanent: permanent
+	            referralMode: referralMode
 	        });
+	    };
+	
+	    $scope.confirmTransferNeeded = function () {
+	        return getTransferEvent() != null;
+	    };
+	
+	    $scope.confirmTransfer = function () {
+	        var event = getTransferEvent();
+	        if (event) {
+	            $rootScope.$broadcast('confirmReferralEvent', {
+	                event: event
+	            });
+	        }
+	    };
+	
+	    var getTransferEvent = function getTransferEvent() {
+	        var eventToReturn = null;
+	        if ($scope.selectedEnrollment && $scope.selectedEnrollment.events) {
+	            angular.forEach($scope.selectedEnrollment.events, function (event) {
+	                if (event.event == $scope.referralConfig[$scope.selectedProgram.id].eventId && event.status != 'COMPLETED') eventToReturn = event;
+	            });
+	        }
+	        return eventToReturn;
 	    };
 	}]);
 
@@ -16479,9 +16509,14 @@
 	                    stageToUseForReferral = stage;
 	                }
 	            });
-	            //TODO: Add args.permanent as param
-	            $scope.showCreateEvent(stageToUseForReferral, $scope.eventCreationActions.referral);
+	
+	            $scope.showCreateEvent(stageToUseForReferral, $scope.eventCreationActions.referral, args.referralMode);
 	        }
+	    });
+	
+	    $scope.$on('confirmReferralEvent', function (event, args) {
+	        args.event.status = 'COMPLETED';
+	        $scope.saveEventDateForEvent(args.event, true);
 	    });
 	
 	    //listen for new events created
@@ -17475,7 +17510,7 @@
 	        }
 	    };
 	
-	    $scope.showCreateEvent = function (stage, eventCreationAction, suggestedStage) {
+	    $scope.showCreateEvent = function (stage, eventCreationAction, referralMode) {
 	        var availableStages = [];
 	        if (stage) {
 	            if (!stage.access.data.write) {
@@ -17525,7 +17560,7 @@
 	        }
 	
 	        var autoCreate = stage && stage.displayEventsInTable ? stage.displayEventsInTable : false;
-	        EventCreationService.showModal($scope.eventsByStage, stage, availableStages, writableStages, $scope.programStages, $scope.selectedEntity, $scope.selectedProgram, $scope.selectedOrgUnit, $scope.selectedEnrollment, autoCreate, eventCreationAction, allApplicableEvents, $scope.selectedCategories).then(function (eventContainer) {
+	        EventCreationService.showModal($scope.eventsByStage, stage, availableStages, writableStages, $scope.programStages, $scope.selectedEntity, $scope.selectedProgram, $scope.selectedOrgUnit, $scope.selectedEnrollment, autoCreate, eventCreationAction, allApplicableEvents, $scope.selectedCategories, referralMode).then(function (eventContainer) {
 	            $rootScope.referralInProgress = false;
 	            if (angular.isDefined(eventContainer)) {
 	                var ev = eventContainer.ev;
@@ -19823,7 +19858,7 @@
 	/* global trackerCapture, angular */
 	
 	var trackerCapture = angular.module('trackerCapture');
-	trackerCapture.controller('EventCreationController', ["$scope", "$rootScope", "$modalInstance", "$timeout", "$translate", "$filter", "removeFuturePeriodFilter", "DateUtils", "DHIS2EventFactory", "OrgUnitFactory", "NotificationService", "EventCreationService", "eventsByStage", "stage", "stages", "writableStages", "allStages", "tei", "program", "orgUnit", "enrollment", "eventCreationAction", "autoCreate", "EventUtils", "events", "selectedCategories", "PeriodService", "ModalService", "CurrentSelection", "TEIService", "TCOrgUnitService", function ($scope, $rootScope, $modalInstance, $timeout, $translate, $filter, removeFuturePeriodFilter, DateUtils, DHIS2EventFactory, OrgUnitFactory, NotificationService, EventCreationService, eventsByStage, stage, stages, writableStages, allStages, tei, program, orgUnit, enrollment, eventCreationAction, autoCreate, EventUtils, events, selectedCategories, PeriodService, ModalService, CurrentSelection, TEIService, TCOrgUnitService) {
+	trackerCapture.controller('EventCreationController', ["$scope", "$rootScope", "$modalInstance", "$timeout", "$translate", "$filter", "removeFuturePeriodFilter", "DateUtils", "DHIS2EventFactory", "OrgUnitFactory", "NotificationService", "EventCreationService", "eventsByStage", "stage", "stages", "writableStages", "allStages", "tei", "program", "orgUnit", "enrollment", "eventCreationAction", "autoCreate", "EventUtils", "events", "selectedCategories", "referralMode", "PeriodService", "ModalService", "CurrentSelection", "TEIService", "TCOrgUnitService", function ($scope, $rootScope, $modalInstance, $timeout, $translate, $filter, removeFuturePeriodFilter, DateUtils, DHIS2EventFactory, OrgUnitFactory, NotificationService, EventCreationService, eventsByStage, stage, stages, writableStages, allStages, tei, program, orgUnit, enrollment, eventCreationAction, autoCreate, EventUtils, events, selectedCategories, referralMode, PeriodService, ModalService, CurrentSelection, TEIService, TCOrgUnitService) {
 	    $scope.selectedOrgUnit = orgUnit;
 	    $scope.selectedEnrollment = enrollment;
 	    $scope.stages = stages;
@@ -19835,6 +19870,7 @@
 	    $scope.isNewEvent = eventCreationAction === $scope.eventCreationActions.add;
 	    $scope.isScheduleEvent = eventCreationAction === $scope.eventCreationActions.schedule || eventCreationAction === $scope.eventCreationActions.referral;
 	    $scope.isReferralEvent = eventCreationAction === $scope.eventCreationActions.referral;
+	    $scope.referralMode = referralMode;
 	    $scope.model = { selectedStage: stage, dueDateInvalid: false, eventDateInvalid: false };
 	    $scope.stageSpecifiedOnModalOpen = angular.isObject(stage) ? true : false;
 	    $scope.suggestedStage = stage;
@@ -40374,4 +40410,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-9770a50cee66108a397b.js.map
+//# sourceMappingURL=app-dd2388827d437cbfb67d.js.map
