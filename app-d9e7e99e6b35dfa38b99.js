@@ -22548,6 +22548,8 @@
 	
 	                serverResponse.headers.push({ column: "LastDate", hidden: false, meta: false, name: "last_date", type: "java.lang.String" });
 	                $scope.setServerResponse(serverResponse);
+	            }, function (error) {
+	                $scope.setServerResponse(serverResponse);
 	            });
 	        } else {
 	            $scope.setServerResponse(serverResponse);
@@ -39634,4 +39636,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-0aca7b6b7105bc0940ec.js.map
+//# sourceMappingURL=app-d9e7e99e6b35dfa38b99.js.map
