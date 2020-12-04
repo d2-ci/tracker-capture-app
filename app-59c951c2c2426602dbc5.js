@@ -14768,7 +14768,51 @@
 	        return attributeMandatory || $scope.mandatoryFields[attributeId];
 	    };
 	
-	    $scope.registryLookup = function (attributeId) {
+	    $scope.labTestLookup = function () {
+	        return FNrLookupService.lookupLabSvar($scope.selectedTei.ZSt07qyq6Pt, CurrentSelection.currentSelection.orgUnit.code);
+	    };
+	
+	    $scope.showLabTest = function () {
+	        $scope.showFetchingDataSpinner = true;
+	        $scope.labTestLookup().then(function (response) {
+	            $scope.showFetchingDataSpinner = false;
+	            var _modalData3 = response.provesvarliste;
+	
+	            return $modal.open({
+	                templateUrl: 'components/registration/lab-test-modal.html',
+	                controller: ["$scope", "$modalInstance", "modalData", "orderByFilter", function controller($scope, $modalInstance, modalData, orderByFilter) {
+	                    $scope.gridData = orderByFilter(modalData, '-provedato');
+	
+	                    $scope.dateFromItem = function (item) {
+	                        var date = '';
+	                        date = item.provedato[2] + '-' + item.provedato[1] + '-' + item.provedato[0];
+	                        return date;
+	                    };
+	
+	                    $scope.cancel = function () {
+	                        $modalInstance.close({ action: "OK" });
+	                    };
+	                }],
+	                resolve: {
+	                    modalData: function modalData() {
+	                        return _modalData3;
+	                    }
+	                }
+	            }).result.then(function (res) {
+	                var def = $q.defer();
+	                if (res.action === "OPENTEI") {
+	                    def.resolve();
+	                    openTei(res.tei);
+	                    return def.promise;
+	                } else {
+	                    def.reject();
+	                    return def.promise;
+	                }
+	            });
+	        });
+	    };
+	
+	    $scope.registryLookup = function () {
 	        $scope.showFetchingDataSpinner = true;
 	        FNrLookupService.lookupFnr($scope.selectedTei.ZSt07qyq6Pt, CurrentSelection.currentSelection.orgUnit.code).then(function (response) {
 	            if (response) {
@@ -14789,10 +14833,6 @@
 	                $scope.executeRules();
 	            }
 	            $scope.showFetchingDataSpinner = false;
-	        });
-	
-	        FNrLookupService.lookupLabSvar($scope.selectedTei.ZSt07qyq6Pt, CurrentSelection.currentSelection.orgUnit.code).then(function (response) {
-	            var responseCheck = response;
 	        });
 	    };
 	
@@ -39669,4 +39709,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-6d647c6e4f9c29d327ad.js.map
+//# sourceMappingURL=app-59c951c2c2426602dbc5.js.map
