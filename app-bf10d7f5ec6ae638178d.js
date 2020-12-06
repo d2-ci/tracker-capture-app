@@ -14776,39 +14776,41 @@
 	        $scope.showFetchingDataSpinner = true;
 	        $scope.labTestLookup().then(function (response) {
 	            $scope.showFetchingDataSpinner = false;
-	            var _modalData3 = response.provesvarliste;
+	            if (reponse) {
+	                var _modalData3 = response.provesvarliste;
 	
-	            return $modal.open({
-	                templateUrl: 'components/registration/lab-test-modal.html',
-	                controller: ["$scope", "$modalInstance", "modalData", "orderByFilter", function controller($scope, $modalInstance, modalData, orderByFilter) {
-	                    $scope.gridData = orderByFilter(modalData, '-provedato');
+	                return $modal.open({
+	                    templateUrl: 'components/registration/lab-test-modal.html',
+	                    controller: ["$scope", "$modalInstance", "modalData", "orderByFilter", function controller($scope, $modalInstance, modalData, orderByFilter) {
+	                        $scope.gridData = orderByFilter(modalData, '-provedato');
 	
-	                    $scope.dateFromItem = function (item) {
-	                        var date = '';
-	                        date = item.provedato[2] + '-' + item.provedato[1] + '-' + item.provedato[0];
-	                        return date;
-	                    };
+	                        $scope.dateFromItem = function (item) {
+	                            var date = '';
+	                            date = item.provedato[2] + '-' + item.provedato[1] + '-' + item.provedato[0];
+	                            return date;
+	                        };
 	
-	                    $scope.cancel = function () {
-	                        $modalInstance.close({ action: "OK" });
-	                    };
-	                }],
-	                resolve: {
-	                    modalData: function modalData() {
-	                        return _modalData3;
+	                        $scope.cancel = function () {
+	                            $modalInstance.close({ action: "OK" });
+	                        };
+	                    }],
+	                    resolve: {
+	                        modalData: function modalData() {
+	                            return _modalData3;
+	                        }
 	                    }
-	                }
-	            }).result.then(function (res) {
-	                var def = $q.defer();
-	                if (res.action === "OPENTEI") {
-	                    def.resolve();
-	                    openTei(res.tei);
-	                    return def.promise;
-	                } else {
-	                    def.reject();
-	                    return def.promise;
-	                }
-	            });
+	                }).result.then(function (res) {
+	                    var def = $q.defer();
+	                    if (res.action === "OPENTEI") {
+	                        def.resolve();
+	                        openTei(res.tei);
+	                        return def.promise;
+	                    } else {
+	                        def.reject();
+	                        return def.promise;
+	                    }
+	                });
+	            }
 	        });
 	    };
 	
@@ -19153,7 +19155,7 @@
 	/* global trackerCapture, angular */
 	
 	var trackerCapture = angular.module('trackerCapture');
-	trackerCapture.controller('EventCreationController', ["$scope", "$rootScope", "$modalInstance", "$timeout", "$translate", "$filter", "removeFuturePeriodFilter", "$location", "DateUtils", "DHIS2EventFactory", "OrgUnitFactory", "NotificationService", "EventCreationService", "eventsByStage", "stage", "stages", "writableStages", "allStages", "tei", "program", "orgUnit", "enrollment", "eventCreationAction", "autoCreate", "EventUtils", "events", "selectedCategories", "referralMode", "PeriodService", "ModalService", "CurrentSelection", "TEIService", "TCOrgUnitService", function ($scope, $rootScope, $modalInstance, $timeout, $translate, $filter, removeFuturePeriodFilter, $location, DateUtils, DHIS2EventFactory, OrgUnitFactory, NotificationService, EventCreationService, eventsByStage, stage, stages, writableStages, allStages, tei, program, orgUnit, enrollment, eventCreationAction, autoCreate, EventUtils, events, selectedCategories, referralMode, PeriodService, ModalService, CurrentSelection, TEIService, TCOrgUnitService) {
+	trackerCapture.controller('EventCreationController', ["$scope", "$rootScope", "$modalInstance", "$timeout", "$translate", "$filter", "removeFuturePeriodFilter", "$location", "DateUtils", "DHIS2EventFactory", "EnrollmentService", "OrgUnitFactory", "NotificationService", "EventCreationService", "eventsByStage", "stage", "stages", "writableStages", "allStages", "tei", "program", "orgUnit", "enrollment", "eventCreationAction", "autoCreate", "EventUtils", "events", "selectedCategories", "referralMode", "PeriodService", "ModalService", "CurrentSelection", "TEIService", "TCOrgUnitService", function ($scope, $rootScope, $modalInstance, $timeout, $translate, $filter, removeFuturePeriodFilter, $location, DateUtils, DHIS2EventFactory, EnrollmentService, OrgUnitFactory, NotificationService, EventCreationService, eventsByStage, stage, stages, writableStages, allStages, tei, program, orgUnit, enrollment, eventCreationAction, autoCreate, EventUtils, events, selectedCategories, referralMode, PeriodService, ModalService, CurrentSelection, TEIService, TCOrgUnitService) {
 	    $scope.selectedOrgUnit = orgUnit;
 	    $scope.selectedEnrollment = enrollment;
 	    $scope.stages = stages;
@@ -19452,9 +19454,51 @@
 	            $scope.tei = currSelections.tei;
 	
 	            TEIService.changeTeiProgramOwner($scope.tei.trackedEntityInstance, $scope.selectedProgram.id, dummyEvent.orgUnit).then(function (response) {
-	                $scope.save();
-	                $rootScope.$broadcast('ownerUpdated', { programExists: true });
-	                $location.path('/').search({ program: $scope.selectedProgram.id });
+	
+	                //enroll TEI in transfer program
+	                var enrollment = {};
+	                enrollment.trackedEntityInstance = $scope.tei.trackedEntityInstance;
+	                enrollment.program = "WcCmRtfQjAu";
+	                enrollment.status = 'ACTIVE';
+	                enrollment.orgUnit = $scope.selectedEnrollment.orgUnit;
+	                enrollment.enrollmentDate = DateUtils.getToday();
+	
+	                if ($scope.selectedEnrollment.geometry) {
+	                    enrollment.geometry = $scope.selectedEnrollment.geometry;
+	                }
+	
+	                EnrollmentService.enroll(enrollment).then(function (enrollmentResponse) {
+	                    if (enrollmentResponse) {
+	                        var event = {
+	                            "program": "WcCmRtfQjAu",
+	                            "programStage": "w41mE4kmqnK",
+	                            "orgUnit": $scope.selectedEnrollment.orgUnit,
+	                            "enrollment": enrollmentResponse.response.importSummaries[0].reference,
+	                            "status": "ACTIVE",
+	                            "trackedEntityInstance": $scope.tei.trackedEntityInstance,
+	                            "eventDate": DateUtils.getToday(),
+	                            "dataValues": [{
+	                                "dataElement": "ipPJ37f57Wx",
+	                                "value": dummyEvent.orgUnit
+	                            }, {
+	                                "dataElement": "Jq2plkf1cFr",
+	                                "value": $scope.selectedEnrollment.orgUnit
+	                            }]
+	                        };
+	
+	                        DHIS2EventFactory.create(event).then(function () {
+	                            $scope.save();
+	                            $rootScope.$broadcast('ownerUpdated', { programExists: true });
+	
+	                            $location.path('/').search({ program: $scope.selectedProgram.id });
+	                        });
+	                    } else {
+	                        $scope.save();
+	                        $rootScope.$broadcast('ownerUpdated', { programExists: true });
+	
+	                        $location.path('/').search({ program: $scope.selectedProgram.id });
+	                    }
+	                });
 	            });
 	        });
 	    };
@@ -39709,4 +39753,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-59c951c2c2426602dbc5.js.map
+//# sourceMappingURL=app-bf10d7f5ec6ae638178d.js.map
