@@ -14776,7 +14776,7 @@
 	        $scope.showFetchingDataSpinner = true;
 	        $scope.labTestLookup().then(function (response) {
 	            $scope.showFetchingDataSpinner = false;
-	            if (reponse) {
+	            if (response) {
 	                var _modalData3 = response.provesvarliste;
 	
 	                return $modal.open({
@@ -39753,4 +39753,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-bf10d7f5ec6ae638178d.js.map
+//# sourceMappingURL=app-7014b9dba80e56805def.js.map
