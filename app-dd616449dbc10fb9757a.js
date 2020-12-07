@@ -11349,7 +11349,7 @@
 	
 	                errorMsgBody = 'Feil ved henting av prøvesvar:' + fNr;
 	
-	                //NotificationService.showNotifcationDialog(errorMsgHdr, errorMsgBody);
+	                NotificationService.showNotifcationDialog(errorMsgHdr, errorMsgBody);
 	                return null;
 	            });
 	            return promise;
@@ -39753,4 +39753,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-7014b9dba80e56805def.js.map
+//# sourceMappingURL=app-dd616449dbc10fb9757a.js.map
