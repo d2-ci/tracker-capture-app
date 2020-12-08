@@ -19476,7 +19476,7 @@
 	                            "enrollment": enrollmentResponse.response.importSummaries[0].reference,
 	                            "status": "ACTIVE",
 	                            "trackedEntityInstance": $scope.tei.trackedEntityInstance,
-	                            "eventDate": DateUtils.formatFromApiToUser(DateUtils.getToday()),
+	                            "eventDate": DateUtils.formatFromUserToApi(DateUtils.getToday()),
 	                            "dataValues": [{
 	                                "dataElement": "ipPJ37f57Wx",
 	                                "value": dummyEvent.orgUnit
@@ -39753,4 +39753,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-cecd3be3e6c73be8002e.js.map
+//# sourceMappingURL=app-2c2bfe4dd689b631cd56.js.map
