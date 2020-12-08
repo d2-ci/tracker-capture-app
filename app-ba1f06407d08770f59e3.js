@@ -8946,22 +8946,31 @@
 	                return def.promise;
 	            });
 	        },
-	        getListWithProgramData: function getListWithProgramData(entityUidList, programUid, dataElementId, programStageId, orgUnitId) {
+	        getListWithProgramData: function getListWithProgramData(entityUidList, programUid, dataElementId, programStageId, orgUnitId, transferStageId) {
 	            if (entityUidList && entityUidList.length > 0) {
-	                return TeiAccessApiService.get(null, programUid, DHIS2URL + '/trackedEntityInstances.json?trackedEntityInstance=' + entityUidList.join(';') + '&program=' + programUid + '&ou=' + orgUnitId + '&fields=trackedEntityInstance,enrollments[enrollment,events[dataValues,programStage]]').then(function (response) {
+	                return TeiAccessApiService.get(null, programUid, DHIS2URL + '/trackedEntityInstances.json?trackedEntityInstance=' + entityUidList.join(';') + '&program=' + programUid + '&ou=' + orgUnitId + '&fields=trackedEntityInstance,orgUnit,enrollments[enrollment,program,enrollmentDate,events[dataValues,programStage]]').then(function (response) {
 	                    var teiDictionary = {};
 	                    if (response.data && response.data.trackedEntityInstances && response.data.trackedEntityInstances.length > 0) {
 	                        response.data.trackedEntityInstances.forEach(function (tei) {
+	                            teiDictionary[tei.trackedEntityInstance] = { orgUnit: tei.orgUnit };
 	                            if (tei.enrollments) {
 	                                tei.enrollments.forEach(function (enrollment) {
+	
+	                                    if (enrollment.program == programUid) {
+	                                        teiDictionary[tei.trackedEntityInstance].enrollmentDate = enrollment.enrollmentDate;
+	                                    }
+	
 	                                    if (enrollment.events && enrollment.events.length > 0) {
 	                                        enrollment.events.forEach(function (event) {
 	                                            if (event.programStage == programStageId && event.dataValues && event.dataValues.length > 0) {
 	                                                event.dataValues.forEach(function (dataValue) {
 	                                                    if (dataValue.dataElement == dataElementId) {
-	                                                        teiDictionary[tei.trackedEntityInstance] = dataValue.value;
+	                                                        teiDictionary[tei.trackedEntityInstance].dataValue = dataValue.value;
 	                                                    }
 	                                                });
+	                                            }
+	                                            if (event.programStage == transferStageId) {
+	                                                teiDictionary[tei.trackedEntityInstance].transferStatus = event.status;
 	                                            }
 	                                        });
 	                                    }
@@ -10009,8 +10018,12 @@
 	                    entity.inactive = row[6] !== "" ? row[6] : false;
 	                    entity.followUp = isFollowUp;
 	
-	                    if (grid.headers[grid.headers.length - 1].name == 'lastdate') {
-	                        entity.lastdate = row[row.length - 1];
+	                    if (grid.headers[grid.headers.length - 2].name == 'lastdate') {
+	                        entity.lastdate = row[row.length - 2];
+	                    }
+	
+	                    if (grid.headers[grid.headers.length - 1].name == 'TransferStatus') {
+	                        entity.followUp = followUp || row[row.length - 1] == "ACTIVE";
 	                    }
 	
 	                    for (var i = 7; i < row.length; i++) {
@@ -22477,6 +22490,8 @@
 	
 	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 	
+	function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
+	
 	var trackerCapture = angular.module('trackerCapture');
 	
 	trackerCapture.controller('ListsController', ["$rootScope", "$scope", "$modal", "$location", "$filter", "$timeout", "$q", "Paginator", "MetaDataFactory", "DateUtils", "OrgUnitFactory", "ProgramFactory", "AttributesFactory", "EntityQueryFactory", "CurrentSelection", "TEIGridService", "TEIService", "UserDataStoreService", "ProgramWorkingListService", "OperatorFactory", function ($rootScope, $scope, $modal, $location, $filter, $timeout, $q, Paginator, MetaDataFactory, DateUtils, OrgUnitFactory, ProgramFactory, AttributesFactory, EntityQueryFactory, CurrentSelection, TEIGridService, TEIService, UserDataStoreService, ProgramWorkingListService, OperatorFactory) {
@@ -22649,21 +22664,63 @@
 	
 	            var dataElement = 'BoUcoEx9sVl';
 	            var programStage = 'LpWNjNGvCO5';
+	            var transferStage = 'zAstsy3slf9';
 	
 	            if ($scope.base.selectedProgram.id == 'DM9n1bUw8W8') {
 	                dataElement = 'JNF44zBaNqn';
 	                programStage = 'sAV9jAajr8x';
+	                transferStage = 'xK50EzZwHkn';
 	            }
-	            TEIService.getListWithProgramData(allTeis, $scope.base.selectedProgram.id, dataElement, programStage, $scope.selectedOrgUnit.id).then(function (dateDictionary) {
-	                serverResponse.rows.forEach(function (row) {
-	                    if (dateDictionary[row[0]]) {
-	                        row.push(dateDictionary[row[0]]);
-	                    } else {
-	                        row.push('');
-	                    }
-	                });
+	            TEIService.getListWithProgramData(allTeis, $scope.base.selectedProgram.id, dataElement, programStage, $scope.selectedOrgUnit.id, transferStage).then(function (dateDictionary) {
+	                serverResponse.rows.forEach(function () {
+	                    var _ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(row) {
+	                        return regeneratorRuntime.wrap(function _callee$(_context) {
+	                            while (1) {
+	                                switch (_context.prev = _context.next) {
+	                                    case 0:
+	                                        if (dateDictionary[row[0]] && dateDictionary[row[0]].enrollmentDate) {
+	                                            //Set enrollment date instead of created date:
+	                                            row[1] = dateDictionary[row[0]].enrollmentDate;
+	                                        }
+	
+	                                        if (dateDictionary[row[0]] && dateDictionary[row[0]].dataValue) {
+	                                            row.push(dateDictionary[row[0]].dataValue);
+	                                        } else {
+	                                            row.push('');
+	                                        }
+	
+	                                        if (dateDictionary[row[0]] && dateDictionary[row[0]].transferStatus) {
+	                                            row.push(dateDictionary[row[0]].transferStatus);
+	                                        } else {
+	                                            row.push('');
+	                                        }
+	
+	                                        if (dateDictionary[row[0]] && dateDictionary[row[0]].orgUnit && dateDictionary[row[0]].orgUnit != $scope.selectedOrgUnit.id) {
+	                                            //var orgUnitPromise = OrgUnitFactory.getOrgUnit(dateDictionary[row[0]].orgUnit);
+	                                            //let orgUnit = await orgUnitPromise;
+	                                            //if (orgUnit) {
+	                                            //    row[3] = orgUnit.id;
+	                                            //    row[4] = orgUnit.name;
+	                                            //}
+	                                            row[4] = "Overført";
+	                                        }
+	
+	                                    case 4:
+	                                    case 'end':
+	                                        return _context.stop();
+	                                }
+	                            }
+	                        }, _callee, this);
+	                    }));
+	
+	                    return function (_x) {
+	                        return _ref.apply(this, arguments);
+	                    };
+	                }());
 	
 	                serverResponse.headers.push({ column: "LastDate", hidden: false, meta: false, name: "last_date", type: "java.lang.String" });
+	                serverResponse.headers.push({ column: "TransferStatus", hidden: true, meta: false, name: "Overføringsstatus", type: "java.lang.String" });
+	
 	                $scope.setServerResponse(serverResponse);
 	            }, function (error) {
 	                $scope.setServerResponse(serverResponse);
@@ -39753,4 +39810,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-2c2bfe4dd689b631cd56.js.map
+//# sourceMappingURL=app-ba1f06407d08770f59e3.js.map
