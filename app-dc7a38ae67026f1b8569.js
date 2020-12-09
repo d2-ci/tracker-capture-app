@@ -11289,12 +11289,12 @@
 	var externalLookupServices = angular.module('externalLookupServices', ['ngResource']).service('FNrLookupService', ["$http", "DHIS2URL", "$translate", "NotificationService", function ($http, DHIS2URL, $translate, NotificationService) {
 	    var not_supported_message_shown_previously = false;
 	    return {
-	        lookupFnr: function lookupFnr(fNr, kommuneNr) {
+	        lookupFnr: function lookupFnr(fNr, kommuneNr, userId) {
 	            var url = '../' + DHIS2URL + '/person/sok';
 	            var promise = $http({
 	                method: 'POST',
 	                url: url,
-	                data: { fnr: fNr, kommunenr: kommuneNr },
+	                data: { fnr: fNr, kommunenr: kommuneNr, userid: userId },
 	                headers: { 'Content-Type': 'application/json' }
 	            }).then(function (response) {
 	                var errorMsgHdr, errorMsgBody;
@@ -11338,29 +11338,26 @@
 	            });
 	            return promise;
 	        },
-	        lookupLabSvar: function lookupLabSvar(fNr, kommuneNr) {
+	        lookupLabSvar: function lookupLabSvar(fNr, kommuneNr, userId) {
 	            var url = '../' + DHIS2URL + '/provesvar/sok';
 	            var promise = $http({
 	                method: 'POST',
 	                url: url,
-	                data: { fnr: fNr, kommunenr: kommuneNr },
+	                data: { fnr: fNr, kommunenr: kommuneNr, userid: userId },
 	                headers: { 'Content-Type': 'application/json' }
 	            }).then(function (response) {
-	                var errorMsgHdr, errorMsgBody;
-	                errorMsgHdr = $translate.instant('error');
-	
-	                //TODO: Error handling
-	
-	                if (errorMsgBody) {
-	                    NotificationService.showNotifcationDialog(errorMsgHdr, errorMsgBody);
-	                }
-	
 	                return response.data;
 	            }, function (error) {
 	                var errorMsgHdr, errorMsgBody;
 	                errorMsgHdr = $translate.instant('error');
 	
 	                errorMsgBody = 'Feil ved henting av prøvesvar:' + fNr;
+	
+	                if (error.status == 403) {
+	                    errorMsgBody = 'Tjenesten for Fiks pr\xF8vesvar er ikke aktivert i din kommune, les mer om hvordan komme i gang her:\n                        <a target="_blank" href="https://portal.fiks.ks.no/fiks/fiks-provesvar/">https://portal.fiks.ks.no/fiks/fiks-provesvar/</a>';
+	                } else if (error.status == 401) {
+	                    errorMsgBody = "Kunne ikke nå tjeneste for prøvesvar, prøv å logge inn på nytt.";
+	                }
 	
 	                NotificationService.showNotifcationDialog(errorMsgHdr, errorMsgBody);
 	                return null;
@@ -14782,7 +14779,11 @@
 	    };
 	
 	    $scope.labTestLookup = function () {
-	        return FNrLookupService.lookupLabSvar($scope.selectedTei.ZSt07qyq6Pt, CurrentSelection.currentSelection.orgUnit.code);
+	        var userId;
+	        try {
+	            userId = JSON.parse(sessionStorage.USER_PROFILE).id;
+	        } finally {}
+	        return FNrLookupService.lookupLabSvar($scope.selectedTei.ZSt07qyq6Pt, CurrentSelection.currentSelection.orgUnit.code, userId);
 	    };
 	
 	    $scope.showLabTest = function () {
@@ -14829,7 +14830,12 @@
 	
 	    $scope.registryLookup = function () {
 	        $scope.showFetchingDataSpinner = true;
-	        FNrLookupService.lookupFnr($scope.selectedTei.ZSt07qyq6Pt, CurrentSelection.currentSelection.orgUnit.code).then(function (response) {
+	        var userId;
+	        try {
+	            userId = JSON.parse(sessionStorage.USER_PROFILE).id;
+	        } finally {}
+	
+	        FNrLookupService.lookupFnr($scope.selectedTei.ZSt07qyq6Pt, CurrentSelection.currentSelection.orgUnit.code, userId).then(function (response) {
 	            if (response) {
 	                var fieldMappings = [{ field: "sB1IHYu2xQT", data: response.fornavn }, { field: "ENRjVGxVL6l", data: response.etternavn }, { field: "Xhdn49gUd52", data: response.adresse ? response.adresse + ', ' + response.postnummer + ' ' + response.poststed : null },
 	                //fødselsdatoformat DDMMYYYY
@@ -21842,7 +21848,12 @@
 	
 	    $scope.registryLookup = function (attributeId) {
 	        $scope.showFetchingDataSpinner = true;
-	        FNrLookupService.lookupFnr($scope.selectedTei.ZSt07qyq6Pt, CurrentSelection.currentSelection.orgUnit.code).then(function (response) {
+	        var userId;
+	        try {
+	            userId = JSON.parse(sessionStorage.USER_PROFILE).id;
+	        } finally {}
+	
+	        FNrLookupService.lookupFnr($scope.selectedTei.ZSt07qyq6Pt, CurrentSelection.currentSelection.orgUnit.code, userId).then(function (response) {
 	            if (response) {
 	                var fieldMappings = [{ field: "sB1IHYu2xQT", data: response.fornavn }, { field: "ENRjVGxVL6l", data: response.etternavn }, { field: "Xhdn49gUd52", data: response.adresse ? response.adresse + ', ' + response.postnummer + ' ' + response.poststed : null },
 	                //fødselsdatoformat DDMMYYYY
@@ -39810,4 +39821,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-ba1f06407d08770f59e3.js.map
+//# sourceMappingURL=app-dc7a38ae67026f1b8569.js.map
