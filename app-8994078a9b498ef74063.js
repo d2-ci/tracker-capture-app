@@ -10105,7 +10105,7 @@
 	            return { columns: columns, filterTypes: filterTypes, filterText: filterText };
 	        },
 	        makeGridColumns: function makeGridColumns(attributes, config, savedGridColumnsKeyMap, lastDateName) {
-	            var gridColumns = [{ id: 'orgUnitName', displayName: $translate.instant('registering_unit'), show: false, valueType: 'TEXT' }, { id: 'created', displayName: $translate.instant('registration_date'), show: true, valueType: 'DATE' }, { id: 'inactive', displayName: $translate.instant('inactive'), show: false, valueType: 'BOOLEAN' }];
+	            var gridColumns = [{ id: 'orgUnitName', displayName: $translate.instant('registering_unit'), show: true, valueType: 'TEXT' }, { id: 'created', displayName: $translate.instant('registration_date'), show: true, valueType: 'DATE' }, { id: 'inactive', displayName: $translate.instant('inactive'), show: false, valueType: 'BOOLEAN' }];
 	            setShowGridColumn(gridColumns[0], 0, config, savedGridColumnsKeyMap);
 	            setShowGridColumn(gridColumns[1], 1, config, savedGridColumnsKeyMap);
 	            setShowGridColumn(gridColumns[2], 2, config, savedGridColumnsKeyMap);
@@ -39821,4 +39821,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-dc7a38ae67026f1b8569.js.map
+//# sourceMappingURL=app-8994078a9b498ef74063.js.map
