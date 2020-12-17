@@ -14846,7 +14846,7 @@
 	                var errorMessage = "";
 	                angular.forEach(fieldMappings, function (fieldMapping) {
 	                    if (fieldMapping.data) {
-	                        if (angular.isString($scope.selectedTei[fieldMapping.field]) && $scope.selectedTei[fieldMapping.field].trim() && $scope.selectedTei[fieldMapping.field] != fieldMapping.data) {
+	                        if ($scope.selectedTei[fieldMapping.field] && $scope.selectedTei[fieldMapping.field] != fieldMapping.data) {
 	                            errorMessage += $scope.selectedTei[fieldMapping.field] + " erstattes med " + fieldMapping.data + ". ";
 	                        }
 	                    }
@@ -14873,7 +14873,7 @@
 	    var updateValues = function updateValues(fieldMappings, replaceValues) {
 	        angular.forEach(fieldMappings, function (fieldMapping) {
 	            if (fieldMapping.data) {
-	                if (replaceValues || !$scope.selectedTei[fieldMapping.field] || angular.isString($scope.selectedTei[fieldMapping.field]) && !$scope.selectedTei[fieldMapping.field].trim()) {
+	                if (replaceValues || !$scope.selectedTei[fieldMapping.field]) {
 	                    $scope.selectedTei[fieldMapping.field] = fieldMapping.data;
 	                }
 	            }
@@ -21889,7 +21889,7 @@
 	                var errorMessage = "";
 	                angular.forEach(fieldMappings, function (fieldMapping) {
 	                    if (fieldMapping.data) {
-	                        if (angular.isString($scope.selectedTei[fieldMapping.field]) && $scope.selectedTei[fieldMapping.field].trim() && $scope.selectedTei[fieldMapping.field] != fieldMapping.data) {
+	                        if ($scope.selectedTei[fieldMapping.field] && $scope.selectedTei[fieldMapping.field] != fieldMapping.data) {
 	                            errorMessage += $scope.selectedTei[fieldMapping.field] + " erstattes med " + fieldMapping.data + ". ";
 	                        }
 	                    }
@@ -21916,7 +21916,7 @@
 	    var updateValues = function updateValues(fieldMappings, replaceValues) {
 	        angular.forEach(fieldMappings, function (fieldMapping) {
 	            if (fieldMapping.data) {
-	                if (replaceValues || !$scope.selectedTei[fieldMapping.field] || angular.isString($scope.selectedTei[fieldMapping.field]) && !$scope.selectedTei[fieldMapping.field].trim()) {
+	                if (replaceValues || !$scope.selectedTei[fieldMapping.field]) {
 	                    $scope.selectedTei[fieldMapping.field] = fieldMapping.data;
 	                }
 	            }
@@ -39871,4 +39871,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-d6cd58f4116ffa7127cb.js.map
+//# sourceMappingURL=app-d392c92a1a5cec96e978.js.map
