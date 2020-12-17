@@ -11353,7 +11353,7 @@
 	
 	                errorMsgBody = 'Feil ved henting av prøvesvar:' + fNr;
 	
-	                if (error.status != 403) {
+	                if (error.status == 403) {
 	                    errorMsgBody = 'Tjenesten Fiks pr\xF8vesvar er ikke tilgjengelig for deg.\n                        Det kan v\xE6re to \xE5rsaker til dette\n                        <ol>\n                        <li>Din kommune har ikke aktivert tjenesten Fiks pr\xF8vesvar. Les mer om aktivering av Fiks pr\xF8vesvar her: <a target="_blank" href="https://portal.fiks.ks.no/fiks/fiks-provesvar/">https://portal.fiks.ks.no/fiks/fiks-provesvar/</a></li>\n                        <li>Tjenesten er aktivert, men du har ikke f\xE5tt rettigheter til \xE5 gj\xF8re oppslag. Ta kontakt med Fiks administrator i din kommune.</li>\n                        </ol>';
 	                } else if (error.status == 401) {
 	                    errorMsgBody = "Kunne ikke nå tjeneste for prøvesvar, prøv å logge inn på nytt.";
@@ -39871,4 +39871,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-b3e535bd1c54ff972bb1.js.map
+//# sourceMappingURL=app-d6cd58f4116ffa7127cb.js.map
