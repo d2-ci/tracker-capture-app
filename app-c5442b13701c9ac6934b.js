@@ -9435,7 +9435,7 @@
 	            return promise;
 	        },
 	        getByStartAndEndDate: function getByStartAndEndDate(program, orgUnit, ouMode, startDate, endDate) {
-	            var promise = $http.get(DHIS2URL + '/enrollments.json?ouMode=ACCESSIBLE&program=' + program + '&orgUnit=' + orgUnit + '&ouMode=' + ouMode + '&startDate=' + startDate + '&endDate=' + endDate + '&fields=:all&paging=false').then(function (response) {
+	            var promise = $http.get(DHIS2URL + '/enrollments.json?program=' + program + '&orgUnit=' + orgUnit + '&ouMode=' + ouMode + '&programStartDate=' + startDate + '&programEndDate=' + endDate + '&fields=:all&paging=false').then(function (response) {
 	                return convertFromApiToUser(response.data);
 	            }, function (response) {
 	                var errorBody = $translate.instant('failed_to_fetch_enrollment');
@@ -40143,4 +40143,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-b468813815120169bde7.js.map
+//# sourceMappingURL=app-c5442b13701c9ac6934b.js.map
