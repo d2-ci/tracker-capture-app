@@ -11500,9 +11500,9 @@
 	
 	    var constructNotificationMessage = function constructNotificationMessage(tei, events, kommuneNr) {
 	
-	        var bakgrunnsUndersokelse = null;
-	        var sisteHelseStatus = null;
-	        var sistePositiveTest = null;
+	        var bakgrunnsUndersokelse = {};
+	        var sisteHelseStatus = {};
+	        var sistePositiveTest = {};
 	        events.forEach(function (event) {
 	            if (event.programStage == 'LpWNjNGvCO5') {
 	                bakgrunnsUndersokelse = event;
@@ -11621,7 +11621,9 @@
 	            diagnoseforhold: diagnoseforhold,
 	            antattSmittemate: {
 	                //smittemåte hardkodes for Covid
-	                smittemate: { "id": 3873, "verdi": "70", "beskrivelse": "Luft/Dråpesmitte", "oId": 80018 }
+	                smittemate: { "id": 3873, "verdi": "70", "beskrivelse": "Luft/Dråpesmitte", "oId": 80018 },
+	                //smittesituasjon: string    <- MAPPING IKKE DISKUTERT
+	                rekvirent: {}
 	            },
 	            smitteforhold: smitteforhold
 	        };
@@ -40252,4 +40254,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-143920ca55b7834c399c.js.map
+//# sourceMappingURL=app-3927313435f5c524984b.js.map
