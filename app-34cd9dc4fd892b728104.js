@@ -11453,10 +11453,10 @@
 	            sykdommer.push(codeLookup(underliggendeSykdommer, 'beskrivelse', 'Diabetes'));
 	        };
 	        if (bakgrunn.geeY6wHrzA0) {
-	            sykdommer.push(codeLookup(underliggendeSykdommer, 'beskrivelse', 'Fedme'));
+	            sykdommer.push(codeLookup(underliggendeSykdommer, 'beskrivelse', 'Fedme (KMI>30)'));
 	        };
 	        if (bakgrunn.AaBuania9Ot) {
-	            sykdommer.push(codeLookup(underliggendeSykdommer, 'beskrivelse', 'Forhøyet blodtrykk'));
+	            sykdommer.push(codeLookup(underliggendeSykdommer, 'beskrivelse', 'Forhøyet blodtrykk (hypertensjon)'));
 	        };
 	        if (bakgrunn.K7uUiBkrkYB) {
 	            sykdommer.push(codeLookup(underliggendeSykdommer, 'beskrivelse', 'Hjertesykdom'));
@@ -11474,13 +11474,13 @@
 	            sykdommer.push(codeLookup(underliggendeSykdommer, 'beskrivelse', 'Nedsatt immunforsvar'));
 	        };
 	        if (bakgrunn.j6LrBVzW3k4) {
-	            sykdommer.push(codeLookup(underliggendeSykdommer, 'beskrivelse', 'Nevrologisk/nevromuskulær sykdom'));
+	            sykdommer.push(codeLookup(underliggendeSykdommer, 'beskrivelse', 'Nevrologisk/nevromuskulær'));
 	        };
 	        if (bakgrunn.rMRNPKj8FBS) {
 	            sykdommer.push(codeLookup(underliggendeSykdommer, 'beskrivelse', 'Nyresykdom'));
 	        };
 	        if (bakgrunn.rtxSNjWcnxC) {
-	            sykdommer.push(codeLookup(underliggendeSykdommer, 'beskrivelse', 'Røyker?'));
+	            sykdommer.push(codeLookup(underliggendeSykdommer, 'beskrivelse', 'Røyker'));
 	        };
 	        if (bakgrunn.NrUvDud9C5g) {
 	            sykdommer.push(codeLookup(underliggendeSykdommer, 'beskrivelse', 'Kronisk lungesykdom'));
@@ -11492,7 +11492,7 @@
 	            sykdommer.push(codeLookup(underliggendeSykdommer, 'beskrivelse', 'Annet'));
 	        };
 	        if (bakgrunn.RUHPJ5GVvjb) {
-	            sykdommer.push(codeLookup(underliggendeSykdommer, 'beskrivelse', 'ukjent'));
+	            sykdommer.push(codeLookup(underliggendeSykdommer, 'beskrivelse', 'Ukjent'));
 	        };
 	
 	        return sykdommer;
@@ -11593,8 +11593,7 @@
 	        var diagnoseforhold = {
 	            //hardkodes ved Covid19
 	            diagnose: { "id": 4734, "verdi": "713", "beskrivelse": "Koronavirus med utbruddspotensial", "oid": 80012 },
-	            smittestoff: { "id": 4735, "verdi": "713000", "beskrivelse": "SARS-COV-2", "oid": 80000 },
-	            rekvirent: {}
+	            smittestoff: { "id": 4735, "verdi": "713000", "beskrivelse": "SARS-COV-2", "oid": 80000 }
 	            //annenIndikasjon: string,  <-- DENNE FINNES IKKE I FIKS
 	            //annenKlinikk: string,    <-- DENNE ER IKKE DISKUTERT, FINNES IKKE I FIKS OG SER DEN IKKE I MSIS WEB
 	            //utfallAvSykdommen: {      <-- DENNE ER IKKE DISKUTERT, FINNES IKKE I FIKS OG SER DEN IKKE I MSIS WEB
@@ -11657,7 +11656,9 @@
 	            diagnoseforhold: diagnoseforhold,
 	            antattSmittemate: {
 	                //smittemåte hardkodes for Covid
-	                smittemate: { "id": 3873, "verdi": "70", "beskrivelse": "Luft/Dråpesmitte", "oid": 80018 }
+	                smittemate: { "id": 3873, "verdi": "70", "beskrivelse": "Luft/Dråpesmitte", "oid": 80018 },
+	                //smittesituasjon: string    <- MAPPING IKKE DISKUTERT
+	                rekvirent: {}
 	            },
 	            smitteforhold: smitteforhold
 	        };
@@ -40299,4 +40300,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-1c99f418cd9289efbde0.js.map
+//# sourceMappingURL=app-34cd9dc4fd892b728104.js.map
