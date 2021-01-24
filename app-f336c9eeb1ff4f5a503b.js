@@ -11656,11 +11656,10 @@
 	            diagnoseforhold: diagnoseforhold,
 	            antattSmittemate: {
 	                //smittemåte hardkodes for Covid
-	                smittemate: { "id": 3873, "verdi": "70", "beskrivelse": "Luft/Dråpesmitte", "oid": 80018 },
-	                //smittesituasjon: string    <- MAPPING IKKE DISKUTERT
-	                rekvirent: {}
+	                smittemate: { "id": 3873, "verdi": "70", "beskrivelse": "Luft/Dråpesmitte", "oid": 80018 }
 	            },
-	            smitteforhold: smitteforhold
+	            smitteforhold: smitteforhold,
+	            rekvirent: {}
 	        };
 	        return melding;
 	    };
@@ -11751,6 +11750,9 @@
 	                headers: { 'Content-Type': 'application/json' }
 	            }).then(function (response) {
 	                response.data.melding = melding;
+	                if (response.data.status == 'ok') {
+	                    NotificationService.showNotifcationDialog("Klinikermelding sendt", "Klinikermelding er sendt inn i MSIS.");
+	                }
 	                return response.data;
 	            }, function (error) {
 	                var errorMsgHdr, errorMsgBody;
@@ -40300,4 +40302,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-34cd9dc4fd892b728104.js.map
+//# sourceMappingURL=app-f336c9eeb1ff4f5a503b.js.map
