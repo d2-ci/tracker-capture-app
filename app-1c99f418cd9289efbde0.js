@@ -11593,7 +11593,8 @@
 	        var diagnoseforhold = {
 	            //hardkodes ved Covid19
 	            diagnose: { "id": 4734, "verdi": "713", "beskrivelse": "Koronavirus med utbruddspotensial", "oid": 80012 },
-	            smittestoff: { "id": 4735, "verdi": "713000", "beskrivelse": "SARS-COV-2", "oid": 80000 }
+	            smittestoff: { "id": 4735, "verdi": "713000", "beskrivelse": "SARS-COV-2", "oid": 80000 },
+	            rekvirent: {}
 	            //annenIndikasjon: string,  <-- DENNE FINNES IKKE I FIKS
 	            //annenKlinikk: string,    <-- DENNE ER IKKE DISKUTERT, FINNES IKKE I FIKS OG SER DEN IKKE I MSIS WEB
 	            //utfallAvSykdommen: {      <-- DENNE ER IKKE DISKUTERT, FINNES IKKE I FIKS OG SER DEN IKKE I MSIS WEB
@@ -11656,9 +11657,7 @@
 	            diagnoseforhold: diagnoseforhold,
 	            antattSmittemate: {
 	                //smittemåte hardkodes for Covid
-	                smittemate: { "id": 3873, "verdi": "70", "beskrivelse": "Luft/Dråpesmitte", "oid": 80018 },
-	                //smittesituasjon: string    <- MAPPING IKKE DISKUTERT
-	                rekvirent: {}
+	                smittemate: { "id": 3873, "verdi": "70", "beskrivelse": "Luft/Dråpesmitte", "oid": 80018 }
 	            },
 	            smitteforhold: smitteforhold
 	        };
@@ -40300,4 +40299,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-a47df6ea0edf61b0b43a.js.map
+//# sourceMappingURL=app-1c99f418cd9289efbde0.js.map
