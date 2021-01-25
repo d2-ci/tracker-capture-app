@@ -11498,7 +11498,9 @@
 	        return sykdommer;
 	    };
 	
-	    var constructNotificationMessage = function constructNotificationMessage(tei, events, kommuneNr) {
+	    var constructNotificationMessage = function constructNotificationMessage(tei, events, kommuneNr, getTextMessage) {
+	
+	        var textMessages = [];
 	
 	        var bakgrunnsUndersokelse = {};
 	        var sisteHelseStatus = {};
@@ -11518,42 +11520,51 @@
 	        var pasient = {};
 	
 	        if (tei.ZSt07qyq6Pt) {
+	            textMessages.push("Fødselsnummer: " + tei.ZSt07qyq6Pt);
 	            pasient.fodselsnummer = tei.ZSt07qyq6Pt;
 	        }
 	
 	        if (tei.NI0QRzJvQ0k) {
+	            textMessages.push("Fødselsdato: " + tei.NI0QRzJvQ0k);
 	            pasient.fodselsdato = DateUtils.formatFromUserToApi(tei.NI0QRzJvQ0k);
 	        }
 	
 	        if (tei.sB1IHYu2xQT) {
+	            textMessages.push("Fornavn: " + tei.sB1IHYu2xQT);
 	            pasient.fornavn = tei.sB1IHYu2xQT;
 	        }
 	
 	        if (tei.ENRjVGxVL6l) {
+	            textMessages.push("Etternavn: " + tei.ENRjVGxVL6l);
 	            pasient.etternavn = tei.ENRjVGxVL6l;
 	        }
 	
 	        var bosted = getBosted(kommuneNr);
 	        if (bosted) {
+	            textMessages.push("Bosted: " + bosted.beskrivelse);
 	            pasient.bosted = bosted;
 	        }
 	
 	        if (tei.ooK7aSiAaGq) {
+	            textMessages.push("Arbeidsplass: " + tei.ooK7aSiAaGq);
 	            pasient.arbeidsplass = tei.ooK7aSiAaGq;
 	        }
 	
 	        var kjonn = getKjonn(tei.oindugucx72);
 	        if (kjonn) {
+	            textMessages.push("Kjønn: " + kjonn.beskrivelse);
 	            pasient.kjonn = kjonn;
 	        }
 	
 	        var fodeland = getFodeland(tei.hBcoBCZBWFb);
 	        if (fodeland) {
+	            textMessages.push("Fodeland: " + tei.hBcoBCZBWFb);
 	            pasient.fodeland = fodeland;
 	        }
 	
 	        var yrkesgruppe = getYrke(tei.l5y5P4d1vbM);
 	        if (yrkesgruppe) {
+	            textMessages.push("Yrkesgruppe: " + yrkesgruppe.beskrivelse);
 	            pasient.yrkesgruppe = yrkesgruppe;
 	        }
 	
@@ -11562,30 +11573,36 @@
 	        var smitteforhold = {};
 	
 	        if (bakgrunnsUndersokelse.VyaD2KGfpUA) {
+	            textMessages.push("Annet smittested: " + bakgrunnsUndersokelse.VyaD2KGfpUA);
 	            smitteforhold.annetSmittested = bakgrunnsUndersokelse.VyaD2KGfpUA;
 	        }
 	
 	        if (bakgrunnsUndersokelse.brUNizYRJ6i) {
+	            textMessages.push("Dato for hjemkomst: " + bakgrunnsUndersokelse.brUNizYRJ6i);
 	            smitteforhold.datoForHjemkomst = DateUtils.formatFromUserToApi(bakgrunnsUndersokelse.brUNizYRJ6i);
 	        }
 	
 	        var smittested = getSmittested(bakgrunnsUndersokelse, kommuneNr);
 	        if (smittested) {
+	            textMessages.push("Smittested: " + smittested.beskrivelse);
 	            smitteforhold.smittested = smittested;
 	        }
 	
 	        var arsakTilUtenlandsopphold = getArsakTilUtenlandsopphold(bakgrunnsUndersokelse.LwjOWAWb4Jm);
 	        if (arsakTilUtenlandsopphold) {
+	            textMessages.push("Årsak til utenlandsopphold: " + arsakTilUtenlandsopphold.beskrivelse);
 	            smitteforhold.arsakTilUtenlandsopphold = arsakTilUtenlandsopphold;
 	        }
 	
 	        var harBekreftetNarkontakt = getJaNeiUkjent(bakgrunnsUndersokelse.WkjX7MGyi8z);
 	        if (harBekreftetNarkontakt) {
+	            textMessages.push("Har bekreftet nærkontakt: " + harBekreftetNarkontakt.beskrivelse);
 	            smitteforhold.harBekreftetNarkontakt = harBekreftetNarkontakt;
 	        }
 	
 	        var eksponeringssted = getEksponeringssted(bakgrunnsUndersokelse.XA2Pk3U89ty);
 	        if (eksponeringssted) {
+	            textMessages.push("Eksponeringssted: " + eksponeringssted.beskrivelse);
 	            smitteforhold.eksponeringssted = eksponeringssted;
 	        }
 	
@@ -11605,49 +11622,66 @@
 	            //folgetilstander: string,     <-- DENNE ER IKKE DISKUTERT, FINNES IKKE I FIKS OG SER DEN IKKE I MSIS WEB
 	        };
 	
+	        textMessages.push("Diagnose: Koronavirus med utbruddspotensial");
+	        textMessages.push("Smittestoff: SARS-COV-2");
+	
 	        if (sisteHelseStatus.SFaxZRvgnsg) {
+	            textMessages.push("Sykehjemsnavn: " + sisteHelseStatus.SFaxZRvgnsg);
 	            diagnoseforhold.sykehjemNavn = sisteHelseStatus.SFaxZRvgnsg;
 	        }
 	
 	        if (sisteHelseStatus.s3eoonJ8OJb) {
+	            textMessages.push("Innsykningsdato: " + sisteHelseStatus.s3eoonJ8OJb);
 	            diagnoseforhold.innsykningsdato = DateUtils.formatFromUserToApi(sisteHelseStatus.s3eoonJ8OJb);
 	        }
 	
 	        if (sistePositiveTest.ylnZBwlN80w) {
+	            textMessages.push("Prøvedato: " + sisteHelseStatus.ylnZBwlN80w);
 	            diagnoseforhold.provedato = DateUtils.formatFromUserToApi(sistePositiveTest.ylnZBwlN80w);
 	        }
 	
 	        if (sisteHelseStatus.dDEdmn8q3P1) {
+	            textMessages.push("Dødsdato: " + sisteHelseStatus.dDEdmn8q3P1);
 	            diagnoseforhold.dodsdato = DateUtils.formatFromUserToApi(sisteHelseStatus.dDEdmn8q3P1);
 	        }
 	
 	        var erInnlagtPaaSykehjem = getInnlagtSykehjem(sisteHelseStatus);
 	        if (erInnlagtPaaSykehjem) {
+	            textMessages.push("Er innlagt på sykehjem: " + erInnlagtPaaSykehjem.beskrivelse);
 	            diagnoseforhold.erInnlagtPaaSykehjem = erInnlagtPaaSykehjem;
 	        }
 	
 	        var erInnlagtPaaSykehus = getInnlagtSykehus(sisteHelseStatus);
-	        if (erInnlagtPaaSykehjem) {
+	        if (erInnlagtPaaSykehus) {
+	            textMessages.push("Er innlagt på sykehys: " + erInnlagtPaaSykehus.beskrivelse);
 	            diagnoseforhold.erInnlagtPaaSykehus = erInnlagtPaaSykehus;
 	        }
 	
 	        var sykehus = getSykehus(sisteHelseStatus.yBUxbX079to);
 	        if (sykehus) {
+	            textMessages.push("Sykehus: " + erInnlagtPaaSykehus.beskrivelse);
 	            diagnoseforhold.sykehus = sykehus;
 	        }
 	
 	        var indikasjon = getIndikasjon(bakgrunnsUndersokelse.vrrQP9OrjOB);
 	        if (indikasjon) {
+	            textMessages.push("Indikasjon: " + indikasjon.beskrivelse);
 	            diagnoseforhold.indikasjon = indikasjon;
 	        }
 	
 	        var sykdomsbilde = getSykdomsBilde(sisteHelseStatus);
 	        if (sykdomsbilde) {
+	            textMessages.push("Indikasjon: " + sykdomsbilde.beskrivelse);
 	            diagnoseforhold.sykdomsbilde = sykdomsbilde;
 	        }
 	
 	        var underliggendeSykdom = getUnderliggendeSykdomListe(bakgrunnsUndersokelse);
-	        diagnoseforhold.underliggendeSykdom = underliggendeSykdom;
+	        if (underliggendeSykdom && underliggendeSykdom.length > 0) {
+	            underliggendeSykdom.forEach(function (sykdom) {
+	                textMessages.push("Underliggende sykdom: " + sykdom.beskrivelse);
+	            });
+	            diagnoseforhold.underliggendeSykdom = underliggendeSykdom;
+	        }
 	
 	        //-------MELDING
 	
@@ -11661,7 +11695,14 @@
 	            smitteforhold: smitteforhold,
 	            rekvirent: {}
 	        };
-	        return melding;
+	
+	        textMessages.push("Smittemåte: Luft/Dråpesmitte");
+	
+	        if (getTextMessage) {
+	            return textMessages;
+	        } else {
+	            return melding;
+	        }
 	    };
 	
 	    return {
@@ -11740,6 +11781,9 @@
 	            });
 	            return promise;
 	        },
+	        getNotificationMessageTextSummary: function getNotificationMessageTextSummary(kommuneNr, tei, allEvents) {
+	            return constructNotificationMessage(tei, allEvents, kommuneNr, true);
+	        },
 	        sendNotificationMessage: function sendNotificationMessage(kommuneNr, userId, tei, allEvents) {
 	            var url = '../' + DHIS2URL + '/klinikermelding';
 	            var melding = constructNotificationMessage(tei, allEvents, kommuneNr);
@@ -11749,7 +11793,6 @@
 	                data: { melding: melding, kommunenr: kommuneNr, userid: userId },
 	                headers: { 'Content-Type': 'application/json' }
 	            }).then(function (response) {
-	                response.data.melding = melding;
 	                if (response.data.status == 'ok') {
 	                    NotificationService.showNotifcationDialog("Klinikermelding sendt", "Klinikermelding er sendt inn i MSIS.");
 	                }
@@ -15241,21 +15284,34 @@
 	    });
 	
 	    $scope.sendNotification = function () {
-	        var userId;
-	        try {
-	            userId = JSON.parse(sessionStorage.USER_PROFILE).id;
-	        } finally {}
 	
-	        FNrLookupService.sendNotificationMessage(CurrentSelection.currentSelection.orgUnit.code, userId, $scope.selectedTei, $scope.allEventsSorted).then(function (result) {
+	        var messageText = FNrLookupService.getNotificationMessageTextSummary(CurrentSelection.currentSelection.orgUnit.code, $scope.selectedTei, $scope.allEventsSorted);
 	
-	            //TODO inspect response and only perform the following when successful:
+	        var modalOptions = {
+	            closeButtonText: 'Avbryt',
+	            actionButtonText: 'Send klinikermelding til MSIS',
+	            headerText: 'Klinikermelding',
+	            bodyText: 'Følgende verdier er klare for innsending.',
+	            bodyList: messageText
+	        };
 	
-	            //Store value indicating that notification is sent.
-	            $scope.selectedTei.C225m3EOPRo = 'true';
-	            $scope.registerEntity(null);
+	        ModalService.showModal({}, modalOptions).then(function (result) {
+	            var userId;
+	            try {
+	                userId = JSON.parse(sessionStorage.USER_PROFILE).id;
+	            } finally {}
 	
-	            //TODO: Log result to note
-	            //$rootScope.$broadcast('notificationSuccessful', result.message); 
+	            FNrLookupService.sendNotificationMessage(CurrentSelection.currentSelection.orgUnit.code, userId, $scope.selectedTei, $scope.allEventsSorted).then(function (result) {
+	
+	                if (result) {
+	                    //Store value indicating that notification is sent.
+	                    $scope.selectedTei.C225m3EOPRo = 'true';
+	                    $scope.registerEntity(null);
+	
+	                    //TODO: Log result to note
+	                    $rootScope.$broadcast('notificationSuccessful', messageText);
+	                }
+	            });
 	        });
 	    };
 	
@@ -40302,4 +40358,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-f336c9eeb1ff4f5a503b.js.map
+//# sourceMappingURL=app-9b03a2ae2a11b2891775.js.map
