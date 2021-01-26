@@ -15308,8 +15308,8 @@
 	                    $scope.selectedTei.C225m3EOPRo = 'true';
 	                    $scope.registerEntity(null);
 	
-	                    //TODO: Log result to note
-	                    $rootScope.$broadcast('notificationSuccessful', messageText);
+	                    var note = "Klinikermelding innsendt til MSIS med følgende verdier: " + messageText.join(', ');
+	                    $rootScope.$broadcast('notificationSuccessful', note);
 	                }
 	            });
 	        });
@@ -22559,13 +22559,21 @@
 	        });
 	    };
 	
-	    $scope.addNote = function () {
-	        if (!$scope.note.value) {
+	    $scope.$on('notificationSuccessful', function (event, messageText) {
+	        $scope.addNote(messageText);
+	    });
+	
+	    $scope.addNote = function (noteText) {
+	        if (!noteText) {
+	            noteText = $scope.note.value;
+	        }
+	
+	        if (!noteText) {
 	            NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("please_add_some_text"));
 	            return;
 	        }
 	
-	        var newNote = { value: $scope.note.value, storedDate: DateUtils.formatFromUserToApi(today), displayDate: today, storedBy: storedBy };
+	        var newNote = { value: noteText, storedDate: DateUtils.formatFromUserToApi(today), displayDate: today, storedBy: storedBy };
 	
 	        $scope.updateNoteWithRealName(newNote);
 	
@@ -40358,4 +40366,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-9b03a2ae2a11b2891775.js.map
+//# sourceMappingURL=app-4173554d6a3b0ad8ff77.js.map
