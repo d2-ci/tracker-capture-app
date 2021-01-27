@@ -14925,8 +14925,8 @@
 	    map['Frisør og lignende'] = 'Annet';
 	    map['Laboratoriearbeider'] = 'Annet';
 	    map['Student'] = 'Student/Elev';
-	    map['Drosjesjåfør'] = 'Annet';
-	    map['Bussjåfør'] = 'Annet';
+	    map['Drosjesjåfør'] = 'Persontransport';
+	    map['Bussjåfør'] = 'Persontransport';
 	    map['Pensjonist'] = 'Annet';
 	    map['Helsepersonell (inkl tannhelse og apotekansatte)'] = 'Helsepersonell';
 	    map['Lærer'] = 'Undervisningspersonell';
@@ -15042,7 +15042,7 @@
 	      sykdommer.push(codeLookup(underliggendeSykdommer, 'beskrivelse', 'Fedme (KMI>30)'));
 	    };
 	    if (bakgrunn.AaBuania9Ot) {
-	      sykdommer.push(codeLookup(underliggendeSykdommer, 'beskrivelse', 'Forhøyet blodtrykk (hypertensjon)'));
+	      sykdommer.push(codeLookup(underliggendeSykdommer, 'beskrivelse', 'Forhøyet blodtrykk'));
 	    };
 	    if (bakgrunn.K7uUiBkrkYB) {
 	      sykdommer.push(codeLookup(underliggendeSykdommer, 'beskrivelse', 'Hjertesykdom'));
@@ -15050,7 +15050,7 @@
 	    if (bakgrunn.VIa8JayRQbA) {
 	      sykdommer.push(codeLookup(underliggendeSykdommer, 'beskrivelse', 'Kols'));
 	    };
-	    if (bakgrunn.rMRNPKj8FBS) {
+	    if (bakgrunn.QQlLI413Wn1) {
 	      sykdommer.push(codeLookup(underliggendeSykdommer, 'beskrivelse', 'Kreft'));
 	    };
 	    if (bakgrunn.j6LrBVzW3k4) {
@@ -15059,7 +15059,7 @@
 	    if (bakgrunn.vWzPVyomNL8) {
 	      sykdommer.push(codeLookup(underliggendeSykdommer, 'beskrivelse', 'Nedsatt immunforsvar'));
 	    };
-	    if (bakgrunn.j6LrBVzW3k4) {
+	    if (bakgrunn.hcHUkwpjcDc) {
 	      sykdommer.push(codeLookup(underliggendeSykdommer, 'beskrivelse', 'Nevrologisk/nevromuskulær'));
 	    };
 	    if (bakgrunn.rMRNPKj8FBS) {
@@ -15079,6 +15079,9 @@
 	    };
 	    if (bakgrunn.RUHPJ5GVvjb) {
 	      sykdommer.push(codeLookup(underliggendeSykdommer, 'beskrivelse', 'Ukjent'));
+	    };
+	    if (bakgrunn.zzlA5JFfLCR) {
+	      sykdommer.push(codeLookup(underliggendeSykdommer, 'beskrivelse', 'Ingen underliggende sykdom'));
 	    };
 	
 	    return sykdommer;
@@ -43954,4 +43957,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-13fe5c7fe2ebed16888d.js.map
+//# sourceMappingURL=app-cfcd9005107826b362cb.js.map
