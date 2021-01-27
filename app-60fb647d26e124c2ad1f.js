@@ -8948,7 +8948,7 @@
 	        },
 	        getListWithProgramData: function getListWithProgramData(entityUidList, programUid, dataElementId, programStageId, orgUnitId, transferStageId) {
 	            if (entityUidList && entityUidList.length > 0) {
-	                return TeiAccessApiService.get(null, programUid, DHIS2URL + '/trackedEntityInstances.json?trackedEntityInstance=' + entityUidList.join(';') + '&program=' + programUid + '&ou=' + orgUnitId + '&fields=trackedEntityInstance,orgUnit,enrollments[enrollment,program,enrollmentDate,events[dataValues,programStage]]').then(function (response) {
+	                return TeiAccessApiService.get(null, programUid, DHIS2URL + '/trackedEntityInstances.json?trackedEntityInstance=' + entityUidList.join(';') + '&program=' + programUid + '&ou=' + orgUnitId + '&fields=trackedEntityInstance,orgUnit,enrollments[enrollment,program,enrollmentDate,events[status,dataValues,programStage]]').then(function (response) {
 	                    var teiDictionary = {};
 	                    if (response.data && response.data.trackedEntityInstances && response.data.trackedEntityInstances.length > 0) {
 	                        response.data.trackedEntityInstances.forEach(function (tei) {
@@ -10022,8 +10022,8 @@
 	                        entity.lastdate = row[row.length - 2];
 	                    }
 	
-	                    if (grid.headers[grid.headers.length - 1].name == 'TransferStatus') {
-	                        entity.followUp = followUp || row[row.length - 1] == "ACTIVE";
+	                    if (grid.headers[grid.headers.length - 1].column == 'TransferStatus') {
+	                        //entity.followUp =  entity.followUp || row[row.length-1] == "ACTIVE";
 	                    }
 	
 	                    for (var i = 7; i < row.length; i++) {
@@ -23335,22 +23335,13 @@
 	                                        }
 	
 	                                        if (dateDictionary[row[0]] && dateDictionary[row[0]].transferStatus) {
+	                                            row[4] = "Overført";
 	                                            row.push(dateDictionary[row[0]].transferStatus);
 	                                        } else {
 	                                            row.push('');
 	                                        }
 	
-	                                        if (dateDictionary[row[0]] && dateDictionary[row[0]].orgUnit && dateDictionary[row[0]].orgUnit != $scope.selectedOrgUnit.id) {
-	                                            //var orgUnitPromise = OrgUnitFactory.getOrgUnit(dateDictionary[row[0]].orgUnit);
-	                                            //let orgUnit = await orgUnitPromise;
-	                                            //if (orgUnit) {
-	                                            //    row[3] = orgUnit.id;
-	                                            //    row[4] = orgUnit.name;
-	                                            //}
-	                                            row[4] = "Overført";
-	                                        }
-	
-	                                    case 4:
+	                                    case 3:
 	                                    case 'end':
 	                                        return _context.stop();
 	                                }
@@ -23364,7 +23355,7 @@
 	                }());
 	
 	                serverResponse.headers.push({ column: "LastDate", hidden: false, meta: false, name: "last_date", type: "java.lang.String" });
-	                serverResponse.headers.push({ column: "TransferStatus", hidden: true, meta: false, name: "Overføringsstatus", type: "java.lang.String" });
+	                serverResponse.headers.push({ column: "TransferStatus", hidden: false, meta: false, name: "Overføringsstatus", type: "java.lang.String" });
 	
 	                if ($scope.currentTrackedEntityList.sortColumn.id == 'created') {
 	                    serverResponse.rows = $filter('orderBy')(serverResponse.rows, function (tei) {
@@ -40466,4 +40457,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-7cf7560f5472c3bfcfcf.js.map
+//# sourceMappingURL=app-60fb647d26e124c2ad1f.js.map
