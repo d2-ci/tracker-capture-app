@@ -23366,6 +23366,17 @@
 	                serverResponse.headers.push({ column: "LastDate", hidden: false, meta: false, name: "last_date", type: "java.lang.String" });
 	                serverResponse.headers.push({ column: "TransferStatus", hidden: true, meta: false, name: "Overføringsstatus", type: "java.lang.String" });
 	
+	                if ($scope.currentTrackedEntityList.sortColumn.id == 'created') {
+	                    serverResponse.rows = $filter('orderBy')(serverResponse.rows, function (tei) {
+	                        return tei[1];
+	                    }, $scope.currentTrackedEntityList.sortColumn.direction != 'desc');
+	                }
+	                if ($scope.currentTrackedEntityList.sortColumn.id == 'last_date') {
+	                    serverResponse.rows = $filter('orderBy')(serverResponse.rows, function (tei) {
+	                        return tei[tei.length - 2];
+	                    }, $scope.currentTrackedEntityList.sortColumn.direction != 'desc');
+	                }
+	
 	                $scope.setServerResponse(serverResponse);
 	            }, function (error) {
 	                $scope.setServerResponse(serverResponse);
@@ -40455,4 +40466,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-2ffd265f22367fdf8453.js.map
+//# sourceMappingURL=app-7cf7560f5472c3bfcfcf.js.map
