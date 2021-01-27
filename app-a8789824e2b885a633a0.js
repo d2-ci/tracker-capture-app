@@ -11893,7 +11893,7 @@
 	                errorMsgBody = 'Feil ved innsending av klinikermelding til MSIS';
 	
 	                if (error.status == 403) {
-	                    errorMsgBody = 'Tjenesten Fiks klinikermelding er ikke tilgjengelig for deg.\n                        Det kan v\xE6re to \xE5rsaker til dette\n                        <ol>\n                        <li>Din kommune har ikke aktivert tjenesten Fiks klinikermelding. Les mer om aktivering av Fiks klinikermelding her: <a target="_blank" href="https://portal.fiks.ks.no/">https://portal.fiks.ks.no/</a></li>\n                        <li>Tjenesten er aktivert, men du har ikke f\xE5tt rettigheter til \xE5 gj\xF8re oppslag. Ta kontakt med Fiks administrator i din kommune.</li>\n                        </ol>';
+	                    errorMsgBody = 'Tjenesten Fiks klinikermelding er ikke tilgjengelig for deg.\n                        Det kan v\xE6re to \xE5rsaker til dette\n                        <ol>\n                        <li>Din kommune har ikke aktivert tjenesten Fiks klinikermelding. Les mer om aktivering av Fiks klinikermelding her: <a target="_blank" href="https://portal.fiks.ks.no/fiks/fiks-klinikermelding/">https://portal.fiks.ks.no/fiks/fiks-klinikermelding</a></li>\n                        <li>Tjenesten er aktivert, men du har ikke f\xE5tt rettigheter til \xE5 gj\xF8re oppslag. Ta kontakt med Fiks administrator i din kommune.</li>\n                        </ol>';
 	                } else if (error.status == 401) {
 	                    errorMsgBody = "Kunne ikke nå tjeneste for klinikermelding, prøv å logge inn på nytt.";
 	                }
@@ -40457,4 +40457,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-1a473bbf03645483c4d1.js.map
+//# sourceMappingURL=app-a8789824e2b885a633a0.js.map
