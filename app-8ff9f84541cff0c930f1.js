@@ -15080,7 +15080,7 @@
 	    if (bakgrunn.RUHPJ5GVvjb) {
 	      sykdommer.push(codeLookup(underliggendeSykdommer, 'beskrivelse', 'Ukjent'));
 	    };
-	    if (bakgrunn.zzlA5JFfLCR) {
+	    if (!bakgrunn.zzlA5JFfLCR) {
 	      sykdommer.push(codeLookup(underliggendeSykdommer, 'beskrivelse', 'Ingen underliggende sykdom'));
 	    };
 	
@@ -26189,6 +26189,13 @@
 	
 	    $scope.showNotes = function () {
 	        $scope.showNotesDiv = !$scope.showNotesDiv;
+	    };
+	
+	    $scope.printNote = function (note) {
+	        var w = window.open();
+	        w.document.write('Dato: ' + note.displayDate + '(' + note.storedBy + ')<br>' + note.value);
+	        w.print();
+	        w.close();
 	    };
 	}]);
 
@@ -43957,4 +43964,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-cfcd9005107826b362cb.js.map
+//# sourceMappingURL=app-8ff9f84541cff0c930f1.js.map
