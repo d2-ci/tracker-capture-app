@@ -15067,7 +15067,7 @@
 	  };
 	
 	  var getArbeidsplassKategori = function getArbeidsplassKategori(kategori) {
-	    return codeLookup(arbeidsplassKategori, "beskrivelse", value);
+	    return codeLookup(arbeidsplassKategori, "beskrivelse", kategori);
 	  };
 	
 	  var constructNotificationMessage = function constructNotificationMessage(tei, events, kommuneNr, getTextMessage) {
@@ -43952,4 +43952,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-aa1ca44b6380f05b79fb.js.map
+//# sourceMappingURL=app-c6a56735b65b9b1bb289.js.map
