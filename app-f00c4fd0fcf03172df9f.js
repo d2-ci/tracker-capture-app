@@ -14893,12 +14893,27 @@
 	    "verdi": "99",
 	    "beskrivelse": "Ukjent",
 	    "oid": 80014
+	  }, {
+	    "id": 5074,
+	    "verdi": "47",
+	    "beskrivelse": "Grenseovergang",
+	    "oid": 80014
+	  }, {
+	    "id": 5082,
+	    "verdi": "81",
+	    "beskrivelse": "Utenlandsk arbeidstaker",
+	    "oid": 80014
+	  }, {
+	    "id": 5100,
+	    "verdi": "21",
+	    "beskrivelse": "Test etter varsel fra Smittestopp-app",
+	    "oid": 80014
 	  }];
 	
 	  var codeLookup = function codeLookup(codes, field, value) {
 	    var codeFound = null;
 	    codes.forEach(function (code) {
-	      if (code[field] == value) {
+	      if (code[field] && value && code[field].toLower() == value.toLower()) {
 	        codeFound = code;
 	      }
 	    });
@@ -14919,41 +14934,22 @@
 	  };
 	
 	  var getYrke = function getYrke(yrke) {
-	    var map = {};
-	    map['Ikke yrkesaktiv'] = 'Annet';
-	    map['Butikkansatt'] = 'Annet';
-	    map['Frisør og lignende'] = 'Annet';
-	    map['Laboratoriearbeider'] = 'Annet';
-	    map['Student'] = 'Student/Elev';
-	    map['Drosjesjåfør'] = 'Persontransport';
-	    map['Bussjåfør'] = 'Persontransport';
-	    map['Pensjonist'] = 'Annet';
-	    map['Helsepersonell (inkl tannhelse og apotekansatte)'] = 'Helsepersonell';
-	    map['Lærer'] = 'Undervisningspersonell';
-	    map['Barnehageansatt'] = 'Barnehagepersonell';
-	    map['Barnehagebarn'] = 'Barnehagebarn';
-	    map['Elev'] = 'Student/Elev';
-	    map['Annet Yrke'] = 'Annet';
-	    map['Au pair'] = 'Au pair';
-	    map['Ukjent'] = 'Ukjent';
-	    map['Jobber med husdyr'] = 'Jobber med husdyr';
-	    map['Matpersonell'] = 'Matpersonell';
-	
-	    return codeLookup(yrkeKategori, "beskrivelse", map[yrke]);
+	    return codeLookup(yrkeKategori, "beskrivelse", yrke);
 	  };
 	
 	  var getSmittested = function getSmittested(bakgrunn, kommuneNr) {
-	    if (bakgrunn.QPBQ6ha3KSU == 'Ukjent') {
+	    var verdi = trim(bakgrunn.QPBQ6ha3KSU);
+	    if (verdi == 'Ukjent') {
 	      return { "id": 3745, "verdi": "1UK", "beskrivelse": "Ukjent", "oid": 80022 };
-	    } else if (bakgrunn.QPBQ6ha3KSU == 'Verdensdel') {
+	    } else if (verdi == 'Verdensdel') {
 	      return codeLookup(verdensdeler, 'beskrivelse', bakgrunn.r9wly8yChCe);
-	    } else if (bakgrunn.QPBQ6ha3KSU == 'Land') {
+	    } else if (verdi == 'Land') {
 	      return codeLookup(land, 'beskrivelse', bakgrunn.G2EbXQPYKUM);
-	    } else if (bakgrunn.QPBQ6ha3KSU == 'Kommune') {
+	    } else if (verdi == 'Kommune') {
 	      return codeLookup(kommunerOgBydeler, 'beskrivelse', bakgrunn.hYwdup3TdCH);
-	    } else if (bakgrunn.QPBQ6ha3KSU == 'Bydel') {
-	      return codeLookup(kommunerOgBydeler, 'beskrivelse', bakgrunn.hYwdupxX6HSBa83pB3TdCH);
-	    } else if (bakgrunn.QPBQ6ha3KSU == 'Registrerende kommune') {
+	    } else if (verdi == 'Bydel') {
+	      return codeLookup(kommunerOgBydeler, 'beskrivelse', bakgrunn.xX6HSBa83pB);
+	    } else if (verdi == 'Registrerende kommune') {
 	      return codeLookup(kommunerOgBydeler, 'verdi', kommuneNr);
 	    }
 	  };
@@ -14967,24 +14963,7 @@
 	  };
 	
 	  var getEksponeringssted = function getEksponeringssted(value) {
-	    var map = {};
-	    map['Privat husstand'] = 'Husstand';
-	    map['Samling i privat hjem'] = 'Samling i privat hjem';
-	    map['Privat arrangement på offentlig sted'] = 'Privat arrangement på offentlig sted';
-	    map['Arrangement'] = 'Arrangement offentlig';
-	    map['Barnehage'] = 'Barnehage/skole - barn/elev';
-	    map['Skole'] = 'Barnehage/skole - barn/elev';
-	    map['Jobb'] = 'Jobb - i arbeidstid';
-	    map['Helseinstitusjon og sykehjem'] = 'Helseinstitusjon - pasient';
-	    map['Organisert fritidsaktivitet'] = 'Organisert fritidsaktivitet';
-	    map['Reise'] = 'Reise';
-	    map['Servering/bar/utested'] = 'Serveringssted/bar/utested - gjest';
-	    map['Universitet'] = 'Universitet/høyskole';
-	    map['Annet'] = 'Annet';
-	    map['Ukjent'] = 'Ukjent';
-	    map['Offentlig transport'] = 'Annet';
-	
-	    return codeLookup(eksponeringssteder, "beskrivelse", map[value]);
+	    return codeLookup(eksponeringssteder, "beskrivelse", value);
 	  };
 	
 	  var getInnlagtSykehus = function getInnlagtSykehus(sisteHelseStatus) {
@@ -15087,6 +15066,10 @@
 	    return sykdommer;
 	  };
 	
+	  var getArbeidsplassKategori = function getArbeidsplassKategori(kategori) {
+	    return codeLookup(arbeidsplassKategori, "beskrivelse", value);
+	  };
+	
 	  var constructNotificationMessage = function constructNotificationMessage(tei, events, kommuneNr, getTextMessage) {
 	
 	    var textMessages = [];
@@ -15137,6 +15120,11 @@
 	    if (tei.ooK7aSiAaGq) {
 	      textMessages.push("Arbeidsplass: " + tei.ooK7aSiAaGq);
 	      pasient.arbeidsplass = tei.ooK7aSiAaGq;
+	    }
+	
+	    if (tei.tOq71gWwiYQ) {
+	      textMessages.push("Arbeidsplasskategori: " + tei.tOq71gWwiYQ);
+	      pasient.arbeidsplasskategori = getArbeidsplassKategori(tei.tOq71gWwiYQ);
 	    }
 	
 	    var kjonn = getKjonn(tei.oindugucx72);
@@ -43964,4 +43952,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-7b38333369108b18b089.js.map
+//# sourceMappingURL=app-f00c4fd0fcf03172df9f.js.map
