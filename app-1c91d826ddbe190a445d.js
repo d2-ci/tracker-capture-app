@@ -14963,6 +14963,10 @@
 	  };
 	
 	  var getEksponeringssted = function getEksponeringssted(value) {
+	    if (value == 'Sykehjem') {
+	      value = 'Helseinstitusjon - pasient';
+	    }
+	
 	    return codeLookup(eksponeringssteder, "beskrivelse", value);
 	  };
 	
@@ -43952,4 +43956,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-c6a56735b65b9b1bb289.js.map
+//# sourceMappingURL=app-1c91d826ddbe190a445d.js.map
