@@ -14913,7 +14913,7 @@
 	  var codeLookup = function codeLookup(codes, field, value) {
 	    var codeFound = null;
 	    codes.forEach(function (code) {
-	      if (code[field] && value && code[field].toLower() == value.toLower()) {
+	      if (code[field] && value && code[field].toLowerCase() == value.toLowerCase()) {
 	        codeFound = code;
 	      }
 	    });
@@ -43952,4 +43952,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-f00c4fd0fcf03172df9f.js.map
+//# sourceMappingURL=app-aa1ca44b6380f05b79fb.js.map
