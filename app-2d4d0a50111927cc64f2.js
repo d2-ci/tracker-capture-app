@@ -15081,10 +15081,15 @@
 	    var bakgrunnsUndersokelse = {};
 	    var sisteHelseStatus = {};
 	    var sistePositiveTest = {};
+	    var symptomStart = '';
 	    events.forEach(function (event) {
 	      if (event.programStage == 'LpWNjNGvCO5') {
 	        bakgrunnsUndersokelse = event;
 	      } else if (event.programStage == 'oqsk2Jv4k3s') {
+	        if (event.s3eoonJ8OJb) {
+	          symptomStart = event.s3eoonJ8OJb;
+	        }
+	
 	        sisteHelseStatus = event;
 	      } else if (event.programStage == 'dDHkBd3X8Ce' && event.ovY6E8BSdto == 'Positiv') {
 	        sistePositiveTest = event;
@@ -15211,9 +15216,9 @@
 	      diagnoseforhold.sykehjemNavn = sisteHelseStatus.SFaxZRvgnsg;
 	    }
 	
-	    if (sisteHelseStatus.s3eoonJ8OJb) {
-	      textMessages.push("Innsykningsdato: " + sisteHelseStatus.s3eoonJ8OJb);
-	      diagnoseforhold.innsykningsdato = DateUtils.formatFromUserToApi(sisteHelseStatus.s3eoonJ8OJb);
+	    if (symptomStart != '') {
+	      textMessages.push("Innsykningsdato: " + symptomStart);
+	      diagnoseforhold.innsykningsdato = DateUtils.formatFromUserToApi(symptomStart);
 	    }
 	
 	    if (sistePositiveTest.ylnZBwlN80w) {
@@ -43956,4 +43961,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-1c91d826ddbe190a445d.js.map
+//# sourceMappingURL=app-2d4d0a50111927cc64f2.js.map
