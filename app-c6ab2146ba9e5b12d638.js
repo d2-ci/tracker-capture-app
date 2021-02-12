@@ -9217,8 +9217,9 @@
 	
 	                    angular.forEach(program.programTrackedEntityAttributes, function (pAttribute) {
 	                        var att = attributes[pAttribute.trackedEntityAttribute.id];
-	                        att.programTrackedEntityAttribute = pAttribute;
+	
 	                        if (att) {
+	                            att.programTrackedEntityAttribute = pAttribute;
 	                            att.mandatory = pAttribute.mandatory;
 	                            att.displayInListNoProgram = pAttribute.displayInList;
 	
@@ -39370,4 +39371,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-97c4cb0e8d96b099982b.js.map
+//# sourceMappingURL=app-c6ab2146ba9e5b12d638.js.map
