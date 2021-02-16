@@ -9229,7 +9229,7 @@
 	                    TCStorageService.currentStore.getAll('programs').done(function (prs) {
 	                        var programs = [];
 	                        angular.forEach(prs, function (pr) {
-	                            if (pr.organisationUnits.hasOwnProperty(ou.id) && accesses.programsById[pr.id] && accesses.programsById[pr.id].data.read) {
+	                            if (loadSelectedProgram && selectedProgram && pr.id == selectedProgram.id || pr.organisationUnits.hasOwnProperty(ou.id) && accesses.programsById[pr.id] && accesses.programsById[pr.id].data.read) {
 	                                if (pr.programTrackedEntityAttributes) {
 	                                    pr.programTrackedEntityAttributes = pr.programTrackedEntityAttributes.filter(function (attr) {
 	                                        return attr.access && attr.access.read;
@@ -13590,7 +13590,7 @@
 	                                            });
 	                                        }
 	
-	                                        ProgramFactory.getProgramsByOu($scope.selectedOrgUnit, false).then(function (response) {
+	                                        ProgramFactory.getProgramsByOu($scope.selectedOrgUnit, selectedEnrollment ? true : false, selectedEnrollment ? { id: selectedEnrollment.program } : null).then(function (response) {
 	                                            $scope.programs = [];
 	                                            $scope.programNames = [];
 	                                            $scope.programStageNames = [];
@@ -40144,4 +40144,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-cb3cdd5350ebbbc7e3d7.js.map
+//# sourceMappingURL=app-e83c5bd6647917cef707.js.map
