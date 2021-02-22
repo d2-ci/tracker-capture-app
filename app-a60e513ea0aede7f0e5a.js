@@ -9413,29 +9413,8 @@
 	                return null;
 	            });
 	        },
-	        getByEntity: function getByEntity(entity) {
-	            var promise = $http.get(DHIS2URL + '/enrollments.json?ouMode=ACCESSIBLE&trackedEntityInstance=' + entity + '&fields=:all&paging=false').then(function (response) {
-	                return convertFromApiToUser(response.data);
-	            }, function (response) {
-	                var errorBody = $translate.instant('failed_to_fetch_enrollment');
-	                NotificationService.showNotifcationDialog(errorHeader, errorBody, response);
-	                return null;
-	            });
-	            return promise;
-	        },
-	        getByEntityAndProgram: function getByEntityAndProgram(entity, program) {
-	            var url = DHIS2URL + '/enrollments.json?ouMode=ACCESSIBLE&trackedEntityInstance=' + entity + '&program=' + program + '&fields=:all&paging=false';
-	            var promise = TeiAccessApiService.get(entity, program, url).then(function (response) {
-	                return convertFromApiToUser(response.data);
-	            }, function (response) {
-	                var errorBody = $translate.instant('failed_to_fetch_enrollment');
-	                NotificationService.showNotifcationDialog(errorHeader, errorBody, response);
-	                return null;
-	            });
-	            return promise;
-	        },
 	        getByStartAndEndDate: function getByStartAndEndDate(program, orgUnit, ouMode, startDate, endDate) {
-	            var promise = $http.get(DHIS2URL + '/enrollments.json?ouMode=ACCESSIBLE&program=' + program + '&orgUnit=' + orgUnit + '&ouMode=' + ouMode + '&startDate=' + startDate + '&endDate=' + endDate + '&fields=:all&paging=false').then(function (response) {
+	            var promise = $http.get(DHIS2URL + '/enrollments.json?program=' + program + '&ou=' + orgUnit + '&ouMode=' + ouMode + '&startDate=' + startDate + '&endDate=' + endDate + '&fields=:all&paging=false').then(function (response) {
 	                return convertFromApiToUser(response.data);
 	            }, function (response) {
 	                var errorBody = $translate.instant('failed_to_fetch_enrollment');
@@ -40166,4 +40145,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-d6518e001825286989c6.js.map
+//# sourceMappingURL=app-a60e513ea0aede7f0e5a.js.map
