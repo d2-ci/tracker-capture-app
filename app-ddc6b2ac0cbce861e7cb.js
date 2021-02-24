@@ -26268,9 +26268,7 @@
 	
 	    //listen for updated rule effects
 	    $scope.$on('ruleeffectsupdated', function (event, args) {
-	        if (args.event !== 'registration') {
-	            $scope.data = RuleBoundFactory.getDisplayEffects($scope.data, args.event, $rootScope.ruleeffects, $scope.widgetTitle);
-	        }
+	        $scope.data = RuleBoundFactory.getDisplayEffects($scope.data, args.event, $rootScope.ruleeffects, $scope.widgetTitle);
 	    });
 	
 	    $scope.$on('dataEntryEventChanged', function (event, args) {
@@ -43984,4 +43982,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-fc36c538862719e55d7a.js.map
+//# sourceMappingURL=app-ddc6b2ac0cbce861e7cb.js.map
