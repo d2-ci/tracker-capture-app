@@ -11160,8 +11160,6 @@
 	            ruleBoundData.textInEffect = false;
 	            ruleBoundData.keyDataInEffect = false;
 	
-	            if (event === 'registration') return;
-	
 	            //In case the 
 	            if (ruleBoundData.lastEventUpdated !== event) {
 	                ruleBoundData.displayTextEffects = {};
@@ -43982,4 +43980,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-ddc6b2ac0cbce861e7cb.js.map
+//# sourceMappingURL=app-4f5df7dc66de89923375.js.map
