@@ -12606,7 +12606,7 @@
 	
 	//Controller for dashboard
 	var trackerCapture = angular.module('trackerCapture');
-	trackerCapture.controller('DashboardController', ["$rootScope", "$scope", "$location", "$modal", "$timeout", "$filter", "$translate", "$q", "$route", "$templateCache", "TCStorageService", "orderByFilter", "SessionStorageService", "TEIService", "TEService", "MetaDataFactory", "EnrollmentService", "ProgramFactory", "DHIS2EventFactory", "DashboardLayoutService", "AttributesFactory", "CurrentSelection", "ModalService", "AuthorityService", "OrgUnitFactory", "NotificationService", "TeiAccessApiService", function ($rootScope, $scope, $location, $modal, $timeout, $filter, $translate, $q, $route, $templateCache, TCStorageService, orderByFilter, SessionStorageService, TEIService, TEService, MetaDataFactory, EnrollmentService, ProgramFactory, DHIS2EventFactory, DashboardLayoutService, AttributesFactory, CurrentSelection, ModalService, AuthorityService, OrgUnitFactory, NotificationService, TeiAccessApiService) {
+	trackerCapture.controller('DashboardController', ["$rootScope", "$scope", "$location", "$window", "DHIS2URL", "$modal", "$timeout", "$filter", "$translate", "$q", "$route", "$templateCache", "TCStorageService", "orderByFilter", "SessionStorageService", "TEIService", "TEService", "MetaDataFactory", "EnrollmentService", "ProgramFactory", "DHIS2EventFactory", "DashboardLayoutService", "AttributesFactory", "CurrentSelection", "ModalService", "AuthorityService", "OrgUnitFactory", "NotificationService", "TeiAccessApiService", function ($rootScope, $scope, $location, $window, DHIS2URL, $modal, $timeout, $filter, $translate, $q, $route, $templateCache, TCStorageService, orderByFilter, SessionStorageService, TEIService, TEService, MetaDataFactory, EnrollmentService, ProgramFactory, DHIS2EventFactory, DashboardLayoutService, AttributesFactory, CurrentSelection, ModalService, AuthorityService, OrgUnitFactory, NotificationService, TeiAccessApiService) {
 	
 	    var preAuditCancelled = function preAuditCancelled() {
 	        var modalOptions = {
@@ -13204,7 +13204,8 @@
 	
 	    $scope.back = function () {
 	        if ($scope.returnUrl) {
-	            $location.url(atob($scope.returnUrl));
+	            var returnUrl = '../' + atob($scope.returnUrl).replace(/^\//, "");
+	            $window.location.href = returnUrl;
 	        } else if (!$scope.dataEntryMainMenuItemSelected) {
 	            //reload OU tree
 	            selection.load();
@@ -39379,4 +39380,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-4542354807e10f7593f5.js.map
+//# sourceMappingURL=app-7f36e3a32febf4f2b971.js.map
