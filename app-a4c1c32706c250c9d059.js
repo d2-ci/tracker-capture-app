@@ -12606,7 +12606,7 @@
 	
 	//Controller for dashboard
 	var trackerCapture = angular.module('trackerCapture');
-	trackerCapture.controller('DashboardController', ["$rootScope", "$scope", "$location", "$modal", "$timeout", "$filter", "$translate", "$q", "$route", "$templateCache", "TCStorageService", "orderByFilter", "SessionStorageService", "TEIService", "TEService", "MetaDataFactory", "EnrollmentService", "ProgramFactory", "DHIS2EventFactory", "DashboardLayoutService", "AttributesFactory", "CurrentSelection", "ModalService", "AuthorityService", "OrgUnitFactory", "NotificationService", "TeiAccessApiService", function ($rootScope, $scope, $location, $modal, $timeout, $filter, $translate, $q, $route, $templateCache, TCStorageService, orderByFilter, SessionStorageService, TEIService, TEService, MetaDataFactory, EnrollmentService, ProgramFactory, DHIS2EventFactory, DashboardLayoutService, AttributesFactory, CurrentSelection, ModalService, AuthorityService, OrgUnitFactory, NotificationService, TeiAccessApiService) {
+	trackerCapture.controller('DashboardController', ["$rootScope", "$scope", "$location", "$window", "$modal", "$timeout", "$filter", "$translate", "$q", "$route", "$templateCache", "TCStorageService", "orderByFilter", "SessionStorageService", "TEIService", "TEService", "MetaDataFactory", "EnrollmentService", "ProgramFactory", "DHIS2EventFactory", "DashboardLayoutService", "AttributesFactory", "CurrentSelection", "ModalService", "AuthorityService", "OrgUnitFactory", "NotificationService", "TeiAccessApiService", function ($rootScope, $scope, $location, $window, $modal, $timeout, $filter, $translate, $q, $route, $templateCache, TCStorageService, orderByFilter, SessionStorageService, TEIService, TEService, MetaDataFactory, EnrollmentService, ProgramFactory, DHIS2EventFactory, DashboardLayoutService, AttributesFactory, CurrentSelection, ModalService, AuthorityService, OrgUnitFactory, NotificationService, TeiAccessApiService) {
 	
 	    var preAuditCancelled = function preAuditCancelled() {
 	        var modalOptions = {
@@ -12642,6 +12642,11 @@
 	        });
 	    } else {
 	        updateDashboard();
+	    }
+	
+	    $scope.returnUrl;
+	    if ($location.search().returnUrl) {
+	        $scope.returnUrl = $location.search().returnUrl;
 	    }
 	
 	    function getOrgUnit() {
@@ -13078,12 +13083,16 @@
 	    });
 	
 	    $scope.applySelectedProgram = function (pr) {
+	        var path = { ou: $scope.selectedOrgUnit.id, tei: $scope.selectedTei.trackedEntityInstance };
 	        if (pr) {
 	            $scope.selectedProgram = pr;
-	        } else {
-	            $location.path('/dashboard').search({ ou: $scope.selectedOrgUnit.id, tei: $scope.selectedTei.trackedEntityInstance });
+	            path.program = pr.id;
 	        }
-	        $location.path('/dashboard').search({ program: pr.id, ou: $scope.selectedOrgUnit.id, tei: $scope.selectedTei.trackedEntityInstance });
+	        if ($scope.returnUrl) {
+	            path.returnUrl = $scope.returnUrl;
+	        }
+	
+	        $location.path('/dashboard').search(path);
 	    };
 	
 	    $scope.broadCastSelections = function (tei) {
@@ -13194,7 +13203,10 @@
 	    };
 	
 	    $scope.back = function () {
-	        if (!$scope.dataEntryMainMenuItemSelected) {
+	        if ($scope.returnUrl) {
+	            var returnUrl = '../' + atob($scope.returnUrl).replace(/^\//, "");
+	            $window.location.href = returnUrl;
+	        } else if (!$scope.dataEntryMainMenuItemSelected) {
 	            //reload OU tree
 	            selection.load();
 	            $location.path('/').search({ program: $scope.selectedProgramId });
@@ -13741,6 +13753,11 @@
 	
 	        $scope.tei.attributes = tempAttributes;
 	
+	        $scope.returnUrl;
+	        if ($location.search().returnUrl) {
+	            $scope.returnUrl = $location.search().returnUrl;
+	        }
+	
 	        RegistrationService.registerOrUpdate($scope.tei, $scope.optionSets, $scope.attributesById, $scope.selectedEnrollment.program).then(function (regResponse) {
 	            var reg = regResponse.response.responseType === 'ImportSummaries' ? regResponse.response.importSummaries[0] : regResponse.response.responseType === 'ImportSummary' ? regResponse.response : {};
 	            if (reg.status === 'SUCCESS') {
@@ -13754,7 +13771,11 @@
 	                        $scope.selectedEnrollment.orgUnit = $scope.tei.orgUnit;
 	                        EnrollmentService.update($scope.selectedEnrollment);
 	                        selection.load();
-	                        $location.path('/').search({ program: $scope.selectedProgram.id });
+	                        if ($scope.returnUrl) {
+	                            $location.path(atob(returnUrl));
+	                        } else {
+	                            $location.path('/').search({ program: $scope.selectedProgram.id });
+	                        }
 	                    }
 	                } else {
 	                    if ($scope.selectedProgram) {
@@ -20454,8 +20475,17 @@
 	        });
 	    };
 	
+	    $scope.returnUrl;
+	    if ($location.search().returnUrl) {
+	        $scope.returnUrl = $location.search().returnUrl;
+	    }
+	
 	    $scope.showDashboard = function (teiId, program) {
-	        $location.path('/dashboard').search({ tei: teiId, program: program, ou: $scope.selectedOrgUnit.id });
+	        var path = { tei: teiId, program: program, ou: $scope.selectedOrgUnit.id };
+	        if ($scope.returnUrl) {
+	            path.returnUrl = $scope.returnUrl;
+	        }
+	        $location.path('/dashboard').search(path);
 	    };
 	
 	    $scope.showEventInCaptureApp = function (eventId) {
@@ -39350,4 +39380,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-d4697a8d8a17125c765c.js.map
+//# sourceMappingURL=app-a4c1c32706c250c9d059.js.map
