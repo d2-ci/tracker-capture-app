@@ -12606,7 +12606,7 @@
 	
 	//Controller for dashboard
 	var trackerCapture = angular.module('trackerCapture');
-	trackerCapture.controller('DashboardController', ["$rootScope", "$scope", "$location", "$window", "DHIS2URL", "$modal", "$timeout", "$filter", "$translate", "$q", "$route", "$templateCache", "TCStorageService", "orderByFilter", "SessionStorageService", "TEIService", "TEService", "MetaDataFactory", "EnrollmentService", "ProgramFactory", "DHIS2EventFactory", "DashboardLayoutService", "AttributesFactory", "CurrentSelection", "ModalService", "AuthorityService", "OrgUnitFactory", "NotificationService", "TeiAccessApiService", function ($rootScope, $scope, $location, $window, DHIS2URL, $modal, $timeout, $filter, $translate, $q, $route, $templateCache, TCStorageService, orderByFilter, SessionStorageService, TEIService, TEService, MetaDataFactory, EnrollmentService, ProgramFactory, DHIS2EventFactory, DashboardLayoutService, AttributesFactory, CurrentSelection, ModalService, AuthorityService, OrgUnitFactory, NotificationService, TeiAccessApiService) {
+	trackerCapture.controller('DashboardController', ["$rootScope", "$scope", "$location", "$window", "$modal", "$timeout", "$filter", "$translate", "$q", "$route", "$templateCache", "TCStorageService", "orderByFilter", "SessionStorageService", "TEIService", "TEService", "MetaDataFactory", "EnrollmentService", "ProgramFactory", "DHIS2EventFactory", "DashboardLayoutService", "AttributesFactory", "CurrentSelection", "ModalService", "AuthorityService", "OrgUnitFactory", "NotificationService", "TeiAccessApiService", function ($rootScope, $scope, $location, $window, $modal, $timeout, $filter, $translate, $q, $route, $templateCache, TCStorageService, orderByFilter, SessionStorageService, TEIService, TEService, MetaDataFactory, EnrollmentService, ProgramFactory, DHIS2EventFactory, DashboardLayoutService, AttributesFactory, CurrentSelection, ModalService, AuthorityService, OrgUnitFactory, NotificationService, TeiAccessApiService) {
 	
 	    var preAuditCancelled = function preAuditCancelled() {
 	        var modalOptions = {
@@ -39380,4 +39380,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-7f36e3a32febf4f2b971.js.map
+//# sourceMappingURL=app-a4c1c32706c250c9d059.js.map
