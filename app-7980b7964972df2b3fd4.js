@@ -926,7 +926,7 @@
 	        formatDataValue: function formatDataValue(event, val, obj, optionSets, destination) {
 	            if (val && (obj.valueType === 'NUMBER' || obj.valueType === 'PERCENTAGE' || obj.valueType === 'INTEGER' || obj.valueType === 'INTEGER_POSITIVE' || obj.valueType === 'INTEGER_NEGATIVE' || obj.valueType === 'INTEGER_ZERO_OR_POSITIVE')) {
 	                if (dhis2.validation.isNumber(val)) {
-	                    if (obj.valueType === 'NUMBER') {
+	                    if (obj.valueType === 'NUMBER' || obj.valueType === 'PERCENTAGE') {
 	                        val = parseFloat(val);
 	                    } else {
 	                        val = parseInt(val);
@@ -39380,4 +39380,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-ad00ba95cc16da19b223.js.map
+//# sourceMappingURL=app-7980b7964972df2b3fd4.js.map
