@@ -15232,6 +15232,12 @@
 	    textMessages.push("Diagnose: Koronavirus med utbruddspotensial");
 	    textMessages.push("Smittestoff: SARS-COV-2");
 	
+	    var antattSmittetDato = bakgrunnsUndersokelse.LS20ZSe0zAC;
+	    {
+	      textMessages.push("Antatt smittet dato: " + antattSmittetDato);
+	      diagnoseforhold.antattSmittetDato = antattSmittetDato;
+	    }
+	
 	    if (helseStatus.SFaxZRvgnsg) {
 	      textMessages.push("Sykehjemsnavn: " + helseStatus.SFaxZRvgnsg);
 	      diagnoseforhold.sykehjemNavn = helseStatus.SFaxZRvgnsg;
@@ -53912,4 +53918,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-a75db4ccaa16ec33f020.js.map
+//# sourceMappingURL=app-0b211c2b70cc5cfb5741.js.map
