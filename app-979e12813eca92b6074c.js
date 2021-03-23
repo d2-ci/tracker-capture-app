@@ -25014,11 +25014,60 @@
 	                    if (enrollment.program == 'uYjxkTbwRNf') {
 	                        var symptomsOnsetMoment = moment(DateUtils.formatFromUserToApi(enrollment.incidentDate));
 	                        if (!endDate || symptomsOnsetMoment.isBefore(endDate)) {
+	                            angular.forEach(enrollment.events, function (event) {
+	                                if (moment(enrollment.events[0].eventDate).isBefore(endDate) && moment(enrollment.events[0].eventDate).isAfter(startDate)) {
+	                                    //Health condition:
+	                                    if (event.programStage == 'oqsk2Jv4k3s') {
+	                                        angular.forEach(event.dataValues, function (dataValue) {
+	                                            if (dataValue.dataElement == 'bOYWVEBaWy6') {
+	                                                relative.status = dataValue.value;
+	                                            }
+	                                        });
+	                                    }
+	
+	                                    //Virus Mutation
+	                                    if (event.programStage == 'dDHkBd3X8Ce') {
+	                                        angular.forEach(event.dataValues, function (dataValue) {
+	                                            if (dataValue.dataElement == 'NupAfWpNXMw') {
+	                                                relative.mutation = dataValue.value;
+	                                            }
+	                                        });
+	                                    }
+	
+	                                    //Serious condition
+	                                    if (event.programStage == 'LpWNjNGvCO5') {
+	                                        angular.forEach(event.dataValues, function (dataValue) {
+	                                            if (dataValue.dataElement == 'bOYWVEBaWy6') {
+	                                                relative.condition = dataValue.value;
+	                                            }
+	                                        });
+	                                    }
+	                                }
+	                            });
 	                            relative.symptomsOnset = enrollment.incidentDate;
 	                            relative.symptomsOnsetMoment = symptomsOnsetMoment;
 	                        }
 	                    }
 	                });
+	
+	                if (relative.status == 'Death') {
+	                    $scope.indicators.death++;
+	                }
+	                if (relative.status == 'HOSPITAL') {
+	                    $scope.indicators.hospital++;
+	                }
+	
+	                if (relative.mutation == 'true') {
+	                    $scope.indicators.mutation++;
+	                }
+	
+	                if (relative.condition == 'true') {
+	                    $scope.indicators.underlyingCondition++;
+	                }
+	
+	                if (relative.symptomsOnsetMoment && relative.symptomsOnsetMoment.isAfter(startDate.add(9, 'days')) && relative.symptomsOnsetMoment.isBefore(endDate)) {
+	                    $scope.indicators.positiveContact10++;
+	                }
 	
 	                //Now indicators.
 	                if (relative.symptomsOnsetMoment && relative.symptomsOnsetMoment.isBefore(endDate)) {
@@ -25076,6 +25125,11 @@
 	        $scope.indicators.contact21 = 0;
 	        $scope.indicators.index30 = 0;
 	        $scope.indicators.contact30 = 0;
+	        $scope.indicators.death = 0;
+	        $scope.indicators.hospital = 0;
+	        $scope.indicators.underlyingCondition = 0;
+	        $scope.indicators.mutation = 0;
+	        $scope.indicators.positiveContact10 = 0;
 	
 	        $scope.relatedTeis = [];
 	        $scope.relatedEvents = [];
@@ -25217,6 +25271,16 @@
 	                if ($scope.indicators.index30 || $scope.indicators.contact30) {
 	                    $rootScope.customConstants.push({ id: '30antalld30', type: 'TEXT', value: 'Ind:' + $scope.indicators.index30 + " Nær:" + $scope.indicators.contact30 });
 	                }
+	
+	                $rootScope.customConstants.push({ id: 'antDodsfall', type: 'TEXT', value: $scope.indicators.death ? $scope.indicators.death : '0' });
+	
+	                $rootScope.customConstants.push({ id: 'antinnsykhu', type: 'TEXT', value: $scope.indicators.hospital ? $scope.indicators.hospital : '0' });
+	
+	                $rootScope.customConstants.push({ id: 'alvorHelset', type: 'TEXT', value: $scope.indicators.underlyingCondition ? $scope.indicators.underlyingCondition : '0' });
+	
+	                $rootScope.customConstants.push({ id: 'mutasjon123', type: 'TEXT', value: $scope.indicators.mutation });
+	
+	                $rootScope.customConstants.push({ id: 'naerPos10dg', type: 'TEXT', value: $scope.indicators.positiveContact10 ? $scope.indicators.positiveContact10 : '0' });
 	
 	                $rootScope.$broadcast('relationshipIndicatorsUpdated', $scope.indicators);
 	            }
@@ -36288,8 +36352,8 @@
 	    $scope.lastEventUpdated = null;
 	    $scope.widgetTitleLabel = $translate.instant($scope.widgetTitle);
 	
-	    $scope.displayTextEffects = {};
-	    $scope.displayKeyDataEffects = {};
+	    $scope.displayTextEffects = [];
+	    $scope.displayKeyDataEffects = [];
 	
 	    var currentEventId = null;
 	
@@ -36315,15 +36379,32 @@
 	
 	    //listen for updated rule effects
 	    $scope.$on('ruleeffectsupdated', function (event, args) {
-	        $scope.data = RuleBoundFactory.getDisplayEffects($scope.data, args.event, $rootScope.ruleeffects, $scope.widgetTitle);
+	        setOrderedData(RuleBoundFactory.getDisplayEffects($scope.data, args.event, $rootScope.ruleeffects, $scope.widgetTitle));
 	    });
 	
 	    $scope.$on('dataEntryEventChanged', function (event, args) {
 	        if (currentEventId !== args.event) {
 	            currentEventId = args.event;
-	            $scope.data = RuleBoundFactory.getDisplayEffects($scope.data, currentEventId, $rootScope.ruleeffects, $scope.widgetTitle);
+	            setOrderedData(RuleBoundFactory.getDisplayEffects($scope.data, currentEventId, $rootScope.ruleeffects, $scope.widgetTitle));
 	        }
 	    });
+	
+	    var setOrderedData = function setOrderedData(data) {
+	        $scope.displayTextEffects = [];
+	        $scope.displayKeyDataEffects = [];
+	
+	        angular.forEach(Object.keys(data.displayKeyDataEffects), function (key) {
+	            if (data.displayKeyDataEffects[key].ineffect) {
+	                $scope.displayKeyDataEffects.push({ title: data.displayKeyDataEffects[key].content, value: data.displayKeyDataEffects[key].data });
+	            }
+	        });
+	
+	        angular.forEach(Object.keys(data.displayTextEffects), function (key) {
+	            if (data.displayTextEffects[key].ineffect) {
+	                $scope.displayTextEffects.push({ title: data.displayTextEffects[key].content, value: data.displayTextEffects[key].data });
+	            }
+	        });
+	    };
 	}]);
 
 /***/ }),
@@ -54029,4 +54110,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-2b6745c1c88c285ccf5b.js.map
+//# sourceMappingURL=app-979e12813eca92b6074c.js.map
