@@ -25015,7 +25015,7 @@
 	                        var symptomsOnsetMoment = moment(DateUtils.formatFromUserToApi(enrollment.incidentDate));
 	                        if (!endDate || symptomsOnsetMoment.isBefore(endDate)) {
 	                            angular.forEach(enrollment.events, function (event) {
-	                                if (moment(enrollment.events[0].eventDate).isBefore(endDate) && moment(enrollment.events[0].eventDate).isAfter(startDate)) {
+	                                if ((!endDate || moment(enrollment.events[0].eventDate).isBefore(endDate)) && moment(enrollment.events[0].eventDate).isAfter(startDate)) {
 	                                    //Health condition:
 	                                    if (event.programStage == 'oqsk2Jv4k3s') {
 	                                        angular.forEach(event.dataValues, function (dataValue) {
@@ -54110,4 +54110,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-979e12813eca92b6074c.js.map
+//# sourceMappingURL=app-1dd292059dc7e79f4198.js.map
