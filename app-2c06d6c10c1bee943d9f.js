@@ -24826,7 +24826,7 @@
 	    program = _require.program;
 	
 	var trackerCapture = angular.module('trackerCapture');
-	trackerCapture.controller('RelationshipController', ["$scope", "$rootScope", "$modal", "$location", "TEIService", "AttributesFactory", "CurrentSelection", "RelationshipFactory", "OrgUnitFactory", "ProgramFactory", "EnrollmentService", "ModalService", "CommonUtils", "TEService", "$timeout", "DHIS2EventFactory", "DateUtils", function ($scope, $rootScope, $modal, $location, TEIService, AttributesFactory, CurrentSelection, RelationshipFactory, OrgUnitFactory, ProgramFactory, EnrollmentService, ModalService, CommonUtils, TEService, $timeout, DHIS2EventFactory, DateUtils) {
+	trackerCapture.controller('RelationshipController', ["$scope", "$rootScope", "$modal", "$location", "TEIService", "AttributesFactory", "CurrentSelection", "RelationshipFactory", "OrgUnitFactory", "ProgramFactory", "EnrollmentService", "ModalService", "CommonUtils", "TEService", "$timeout", "$q", "DHIS2EventFactory", "DateUtils", function ($scope, $rootScope, $modal, $location, TEIService, AttributesFactory, CurrentSelection, RelationshipFactory, OrgUnitFactory, ProgramFactory, EnrollmentService, ModalService, CommonUtils, TEService, $timeout, $q, DHIS2EventFactory, DateUtils) {
 	    $rootScope.showAddRelationshipDiv = false;
 	    $scope.relatedProgramRelationship = false;
 	    var ENTITYNAME = "TRACKED_ENTITY_INSTANCE";
@@ -24972,6 +24972,8 @@
 	
 	    var pushRelative = function pushRelative(relative) {
 	
+	        var promise = $q.defer();
+	
 	        var startDate = moment(DateUtils.formatFromUserToApi($scope.selectedEnrollment.enrollmentDate));
 	        var endDate;
 	        angular.forEach($scope.selectedTei.attributes, function (attribute) {
@@ -24997,6 +24999,7 @@
 	                if (relative.symptomsOnset) {
 	                    $scope.relatedTeis.push(relative);
 	                }
+	                promise.resolve();
 	            });
 	        } else if ($scope.relationshipsWidget.customRelationship == 'contact') {
 	            relative.relationshipProgramConstraint.id = 'DM9n1bUw8W8';
@@ -25107,10 +25110,15 @@
 	                if (!relative.symptomsOnset) {
 	                    $scope.relatedTeis.push(relative);
 	                }
+	
+	                promise.resolve();
 	            });
 	        } else {
 	            $scope.relatedTeis.push(relative);
+	            promise.resolve();
 	        }
+	
+	        return promise.promise;
 	    };
 	
 	    var setRelationships = function setRelationships() {
@@ -25138,12 +25146,14 @@
 	        var relationshipProgram = {};
 	        var relationshipType = {};
 	
-	        TEService.getAll().then(function (teiTypes) {
+	        var teServicePromise = TEService.getAll().then(function (teiTypes) {
 	            //Loop through all relationships.      
+	            var queries = [];
+	
 	            angular.forEach($scope.selectedTei.relationships, function (rel) {
 	                if (rel.to && rel.to.trackedEntityInstance && rel.to.trackedEntityInstance.trackedEntityInstance !== $scope.selectedTei.trackedEntityInstance) {
 	                    var teiId = rel.to.trackedEntityInstance.trackedEntityInstance;
-	                    TEIService.get(teiId, $scope.optionSets, $scope.attributesById).then(function (tei) {
+	                    queries.push(TEIService.get(teiId, $scope.optionSets, $scope.attributesById).then(function (tei) {
 	                        relationshipType = $scope.relationshipTypes.find(function (relType) {
 	                            return relType.id === rel.relationshipType;
 	                        });
@@ -25173,11 +25183,11 @@
 	                        }
 	
 	                        var relative = { trackedEntityInstance: teiId, relName: relName, relId: rel.relationship, attributes: getRelativeAttributes(tei.attributes), relationshipProgramConstraint: relationshipProgram, relationshipType: relationshipType, created: rel.created };
-	                        pushRelative(relative);
-	                    });
+	                        return pushRelative(relative);
+	                    }));
 	                } else if (rel.from && rel.bidirectional && rel.from.trackedEntityInstance && rel.from.trackedEntityInstance.trackedEntityInstance !== $scope.selectedTei.trackedEntityInstance) {
 	                    var teiId = rel.from.trackedEntityInstance.trackedEntityInstance;
-	                    TEIService.get(teiId, $scope.optionSets, $scope.attributesById).then(function (tei) {
+	                    queries.push(TEIService.get(teiId, $scope.optionSets, $scope.attributesById).then(function (tei) {
 	                        relationshipType = $scope.relationshipTypes.find(function (relType) {
 	                            return relType.id === rel.relationshipType;
 	                        });
@@ -25207,8 +25217,8 @@
 	                        }
 	
 	                        var relative = { trackedEntityInstance: teiId, relName: relName, relId: rel.relationship, attributes: getRelativeAttributes(tei.attributes), relationshipProgramConstraint: relationshipProgram, relationshipType: relationshipType, created: rel.created };
-	                        pushRelative(relative);
-	                    });
+	                        return pushRelative(relative);
+	                    }));
 	                } else if (rel.from && rel.bidirectional && rel.from.event && rel.from.event.event) {
 	                    var event = null;
 	                    DHIS2EventFactory.getEventWithoutRegistration(rel.from.event.event).then(function (e) {
@@ -25244,13 +25254,14 @@
 	                    });
 	                }
 	            });
+	            return $q.all(queries);
 	        });
 	
 	        var selections = CurrentSelection.get();
 	        CurrentSelection.set({ tei: $scope.selectedTei, te: $scope.trackedEntityType, prs: selections.prs, pr: $scope.selectedProgram, prNames: selections.prNames, prStNames: selections.prStNames, enrollments: selections.enrollments, selectedEnrollment: $scope.selectedEnrollment, optionSets: selections.optionSets, orgUnit: selections.orgUnit });
 	
 	        //todo, collect promises and broadcase once done.
-	        $timeout(function () {
+	        teServicePromise.then(function () {
 	            if ($scope.relationshipsWidget.customRelationship == 'contact') {
 	                $rootScope.customConstants = [];
 	
@@ -25284,7 +25295,7 @@
 	
 	                $rootScope.$broadcast('relationshipIndicatorsUpdated', $scope.indicators);
 	            }
-	        }, 2000);
+	        });
 	    };
 	
 	    var getRelativeAttributes = function getRelativeAttributes(teiAttributes) {
@@ -25309,6 +25320,9 @@
 	        return programAttributes;
 	    };
 	}]);
+	
+	// WEBPACK FOOTER //
+	// ./components/relationship/relationship-controller.js
 
 /***/ }),
 /* 39 */
@@ -54110,4 +54124,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-fe77ac5758b526cdb0d4.js.map
+//# sourceMappingURL=app-2c06d6c10c1bee943d9f.js.map
