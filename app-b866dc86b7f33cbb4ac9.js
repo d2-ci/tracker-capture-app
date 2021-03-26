@@ -15243,7 +15243,7 @@
 	    var antattSmittetDato = bakgrunnsUndersokelse.LS20ZSe0zAC;
 	    {
 	      textMessages.push("Antatt smittet dato: " + antattSmittetDato);
-	      diagnoseforhold.antattSmittetDato = antattSmittetDato;
+	      diagnoseforhold.antattSmittetDato = DateUtils.formatFromUserToApi(antattSmittetDato);
 	    }
 	
 	    if (helseStatus.SFaxZRvgnsg) {
@@ -54124,4 +54124,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-2c06d6c10c1bee943d9f.js.map
+//# sourceMappingURL=app-b866dc86b7f33cbb4ac9.js.map
