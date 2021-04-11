@@ -13438,6 +13438,11 @@
 	                return t.id === currentTet;
 	            });
 	            $scope.setTrackedEntityType();
+	        } else if ($location.search().tracked_entity_type) {
+	            $scope.trackedEntityTypes.selected = $scope.trackedEntityTypes.writable.find(function (t) {
+	                return t.id === $location.search().tracked_entity_type;
+	            });
+	            $scope.setTrackedEntityType();
 	        }
 	    };
 	
@@ -39380,4 +39385,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-7980b7964972df2b3fd4.js.map
+//# sourceMappingURL=app-248d9448022ff8c9d521.js.map
