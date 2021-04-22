@@ -958,7 +958,7 @@
 	                obj.valueType === 'INTEGER_NEGATIVE' ||
 	                obj.valueType === 'INTEGER_ZERO_OR_POSITIVE')){
 	                if( dhis2.validation.isNumber(val)){
-	                    if(obj.valueType === 'NUMBER'){
+	                    if(obj.valueType === 'NUMBER' || obj.valueType === 'PERCENTAGE'){
 	                        val = parseFloat(val);
 	                    }else{
 	                        val = parseInt(val);
@@ -3700,7 +3700,7 @@
 	        if(value === 'true' || value === 'false') {
 	            valueType = 'BOOLEAN';
 	        }
-	        else if(angular.isNumber(value) || !isNaN(value)) {
+	        else if((angular.isNumber(value) || !isNaN(value)) && (value && value.substring(0,1) != '0')) {
 	            if(value % 1 !== 0) {
 	                valueType = 'NUMBER';
 	            }
@@ -40139,4 +40139,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-9e085362e6d37a94fa7f.js.map
+//# sourceMappingURL=app-c00e4fddfe2c69d338df.js.map
