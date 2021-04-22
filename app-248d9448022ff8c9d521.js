@@ -21723,8 +21723,8 @@
 	    $scope.lastEventUpdated = null;
 	    $scope.widgetTitleLabel = $translate.instant($scope.widgetTitle);
 	
-	    $scope.displayTextEffects = [];
-	    $scope.displayKeyDataEffects = [];
+	    $scope.displayTextEffects = {};
+	    $scope.displayKeyDataEffects = {};
 	
 	    var currentEventId = null;
 	
@@ -21750,32 +21750,17 @@
 	
 	    //listen for updated rule effects
 	    $scope.$on('ruleeffectsupdated', function (event, args) {
-	        setOrderedData(RuleBoundFactory.getDisplayEffects($scope.data, args.event, $rootScope.ruleeffects, $scope.widgetTitle));
+	        if (args.event !== 'registration') {
+	            $scope.data = RuleBoundFactory.getDisplayEffects($scope.data, args.event, $rootScope.ruleeffects, $scope.widgetTitle);
+	        }
 	    });
 	
 	    $scope.$on('dataEntryEventChanged', function (event, args) {
 	        if (currentEventId !== args.event) {
 	            currentEventId = args.event;
-	            setOrderedData(RuleBoundFactory.getDisplayEffects($scope.data, currentEventId, $rootScope.ruleeffects, $scope.widgetTitle));
+	            $scope.data = RuleBoundFactory.getDisplayEffects($scope.data, currentEventId, $rootScope.ruleeffects, $scope.widgetTitle);
 	        }
 	    });
-	
-	    var setOrderedData = function setOrderedData(data) {
-	        $scope.displayTextEffects = [];
-	        $scope.displayKeyDataEffects = [];
-	
-	        angular.forEach(Object.keys(data.displayKeyDataEffects), function (key) {
-	            if (data.displayKeyDataEffects[key].ineffect) {
-	                $scope.displayKeyDataEffects.push({ title: data.displayKeyDataEffects[key].content, value: data.displayKeyDataEffects[key].data });
-	            }
-	        });
-	
-	        angular.forEach(Object.keys(data.displayTextEffects), function (key) {
-	            if (data.displayTextEffects[key].ineffect) {
-	                $scope.displayTextEffects.push({ title: data.displayTextEffects[key].content, value: data.displayTextEffects[key].data });
-	            }
-	        });
-	    };
 	}]);
 
 /***/ }),
@@ -39400,4 +39385,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-479d50a8efd636ab85b4.js.map
+//# sourceMappingURL=app-248d9448022ff8c9d521.js.map
