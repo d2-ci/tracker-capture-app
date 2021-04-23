@@ -3220,7 +3220,7 @@
 	        var valueType = 'TEXT';
 	        if (value === 'true' || value === 'false') {
 	            valueType = 'BOOLEAN';
-	        } else if (angular.isNumber(value) || !isNaN(value)) {
+	        } else if ((angular.isNumber(value) || !isNaN(value)) && value && value.substring(0, 1) != '0') {
 	            if (value % 1 !== 0) {
 	                valueType = 'NUMBER';
 	            } else {
@@ -39385,4 +39385,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-248d9448022ff8c9d521.js.map
+//# sourceMappingURL=app-8fe6dc3928c2c48d5c2e.js.map
