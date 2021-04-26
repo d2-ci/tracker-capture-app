@@ -36962,7 +36962,7 @@
 	        if (!$scope.currentTrackedEntityList.sortColumn) {
 	            $scope.currentTrackedEntityList.sortColumn = {
 	                id: 'created',
-	                direction: 'desc'
+	                direction: 'asc'
 	            };
 	        }
 	    };
@@ -54124,4 +54124,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-b866dc86b7f33cbb4ac9.js.map
+//# sourceMappingURL=app-69193155a9b76d8359a6.js.map
