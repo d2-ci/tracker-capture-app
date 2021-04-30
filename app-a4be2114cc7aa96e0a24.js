@@ -15412,6 +15412,36 @@
 	      }).then(function (response) {
 	        return response.data;
 	      }, function (error) {
+	        return {
+	          "patientNin": "string",
+	          "kanLevereUtData": true,
+	          "immunizations": [{
+	            "vaccinationDate": "2021-04-29T13:30:51.560Z",
+	            "vaccineCode": {
+	              "system": "string",
+	              "code": "string",
+	              "display": "string"
+	            },
+	            "atcCode": "string",
+	            "lotNumber": "string",
+	            "preparation": {
+	              "system": "string",
+	              "code": "string",
+	              "display": "string"
+	            },
+	            "identifier": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+	            "recordedDate": "2021-04-29T13:30:51.560Z",
+	            "recorder": {
+	              "system": "string",
+	              "code": "string",
+	              "display": "string",
+	              "id": "string",
+	              "name": "string"
+	            },
+	            "performedByRecorder": true
+	          }]
+	
+	        };
 	        var errorMsgHdr, errorMsgBody;
 	        errorMsgHdr = $translate.instant('error');
 	
@@ -18953,10 +18983,7 @@
 	                        $scope.gridData = orderByFilter(modalData, '-vaccinationDate');
 	
 	                        $scope.dateFromItem = function (item) {
-	                            var flippedDate = item.vaccinationDate.substring(0, 9).split('-');
-	                            var date = '';
-	                            date = flippedDate[2] + '-' + flippedDate[1] + '-' + flippedDate[0];
-	                            return date;
+	                            return DateUtils.getDateFromUTCString(item.vaccinationDate);
 	                        };
 	
 	                        $scope.cancel = function () {
@@ -18967,16 +18994,6 @@
 	                        modalData: function modalData() {
 	                            return _modalData4;
 	                        }
-	                    }
-	                }).result.then(function (res) {
-	                    var def = $q.defer();
-	                    if (res.action === "OPENTEI") {
-	                        def.resolve();
-	                        openTei(res.tei);
-	                        return def.promise;
-	                    } else {
-	                        def.reject();
-	                        return def.promise;
 	                    }
 	                });
 	            }
@@ -54201,4 +54218,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-28f3c2d73f46b526d476.js.map
+//# sourceMappingURL=app-a4be2114cc7aa96e0a24.js.map
