@@ -11297,7 +11297,7 @@
 	
 	/* Services */
 	
-	var externalLookupServices = angular.module('externalLookupServices', ['ngResource']).service('FNrLookupService', ["$http", "DHIS2URL", "$translate", "NotificationService", "DateUtils", function ($http, DHIS2URL, $translate, NotificationService, DateUtils) {
+	var externalLookupServices = angular.module('externalLookupServices', ['ngResource', 'ngCookies']).service('FNrLookupService', ["$http", "DHIS2URL", "$translate", "$cookies", "NotificationService", "DateUtils", function ($http, DHIS2URL, $translate, $cookies, NotificationService, DateUtils) {
 	  var not_supported_message_shown_previously = false;
 	
 	  var land = [{
@@ -15333,7 +15333,7 @@
 	        method: 'POST',
 	        url: url,
 	        data: { fnr: fNr, kommunenr: kommuneNr, userid: userId },
-	        headers: { 'Content-Type': 'application/json' }
+	        headers: { 'Content-Type': 'application/json', 'ingress-csrf': $cookies['ingress-csrf'] }
 	      }).then(function (response) {
 	        var errorMsgHdr, errorMsgBody;
 	        errorMsgHdr = $translate.instant('error');
@@ -15382,7 +15382,7 @@
 	        method: 'POST',
 	        url: url,
 	        data: { fnr: fNr, kommunenr: kommuneNr, userid: userId },
-	        headers: { 'Content-Type': 'application/json' }
+	        headers: { 'Content-Type': 'application/json', 'ingress-csrf': $cookies['ingress-csrf'] }
 	      }).then(function (response) {
 	        return response.data;
 	      }, function (error) {
@@ -15402,6 +15402,32 @@
 	      });
 	      return promise;
 	    },
+	    lookupVaccine: function lookupVaccine(fNr, kommuneNr, userId) {
+	      var url = '../' + DHIS2URL + '/vaksine/sok';
+	      var promise = $http({
+	        method: 'POST',
+	        url: url,
+	        data: { fnr: fNr, kommunenr: kommuneNr, userid: userId },
+	        headers: { 'Content-Type': 'application/json', 'ingress-csrf': $cookies['ingress-csrf'] }
+	      }).then(function (response) {
+	        return response.data;
+	      }, function (error) {
+	        var errorMsgHdr, errorMsgBody;
+	        errorMsgHdr = $translate.instant('error');
+	
+	        errorMsgBody = 'Feil ved henting av vaksinedata:' + fNr;
+	
+	        if (error.status == 403) {
+	          errorMsgBody = 'Tjenesten Fiks vaksine er ikke tilgjengelig for deg.\n                        Det kan v\xE6re to \xE5rsaker til dette\n                        <ol>\n                        <li>Din kommune har ikke aktivert tjenesten Fiks vaksine. Les mer om aktivering av Fiks vaksine her: <a target="_blank" href="https://portal.fiks.ks.no/fiks/fiks-vaksine/">https://portal.fiks.ks.no/fiks/fiks-vaksine/</a></li>\n                        <li>Tjenesten er aktivert, men du har ikke f\xE5tt rettigheter til \xE5 gj\xF8re oppslag. Ta kontakt med Fiks administrator i din kommune.</li>\n                        </ol>';
+	        } else if (error.status == 401) {
+	          errorMsgBody = "Kunne ikke nå tjeneste for vaksinedata, prøv å logge inn på nytt.";
+	        }
+	
+	        NotificationService.showNotifcationDialog(errorMsgHdr, errorMsgBody);
+	        return null;
+	      });
+	      return promise;
+	    },
 	    getNotificationMessageTextSummary: function getNotificationMessageTextSummary(kommuneNr, tei, allEvents) {
 	      return constructNotificationMessage(tei, allEvents, kommuneNr, true);
 	    },
@@ -15412,7 +15438,7 @@
 	        method: 'POST',
 	        url: url,
 	        data: { melding: melding, kommunenr: kommuneNr, userid: userId },
-	        headers: { 'Content-Type': 'application/json' }
+	        headers: { 'Content-Type': 'application/json', 'ingress-csrf': $cookies['ingress-csrf'] }
 	      }).then(function (response) {
 	        if (response.data.status == 'ok') {
 	          NotificationService.showNotifcationDialog("Klinikermelding sendt", "Klinikermelding er sendt inn i MSIS.");
@@ -18891,15 +18917,45 @@
 	                            return _modalData3;
 	                        }
 	                    }
-	                }).result.then(function (res) {
-	                    var def = $q.defer();
-	                    if (res.action === "OPENTEI") {
-	                        def.resolve();
-	                        openTei(res.tei);
-	                        return def.promise;
-	                    } else {
-	                        def.reject();
-	                        return def.promise;
+	                });
+	            }
+	        });
+	    };
+	
+	    $scope.vaccineLookup = function () {
+	        var userId;
+	        try {
+	            userId = JSON.parse(sessionStorage.USER_PROFILE).id;
+	        } finally {}
+	        return FNrLookupService.lookupVaccine($scope.selectedTei.ZSt07qyq6Pt, CurrentSelection.currentSelection.orgUnit.code, userId);
+	    };
+	
+	    $scope.showVaccine = function () {
+	        $scope.showFetchingDataSpinner = true;
+	        $scope.vaccineLookup().then(function (response) {
+	            $scope.showFetchingDataSpinner = false;
+	            if (response) {
+	                var _modalData4 = response.immunizations;
+	
+	                return $modal.open({
+	                    templateUrl: 'components/registration/vaccination-modal.html',
+	                    controller: ["$scope", "$modalInstance", "modalData", "orderByFilter", function controller($scope, $modalInstance, modalData, orderByFilter) {
+	                        $scope.gridData = orderByFilter(modalData, '-vaccinationDate');
+	
+	                        $scope.dateFromItem = function (item) {
+	                            return DateUtils.getDateFromUTCString(item.vaccinationDate);
+	                        };
+	
+	                        $scope.noVaccinesMessage = response.kanLeverUtData ? "Det er ingen registrerte vaksineringer på dette fødselsnummeret." : "Du har ikke de nødvendige rettighetene for å hente ut vaksineinformasjon på denne personen.";
+	
+	                        $scope.cancel = function () {
+	                            $modalInstance.close({ action: "OK" });
+	                        };
+	                    }],
+	                    resolve: {
+	                        modalData: function modalData() {
+	                            return _modalData4;
+	                        }
 	                    }
 	                });
 	            }
@@ -54124,4 +54180,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-6483d6a5d998478adb89.js.map
+//# sourceMappingURL=app-b29e005b6e19faebc5ba.js.map
