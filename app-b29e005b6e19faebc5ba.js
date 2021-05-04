@@ -15333,7 +15333,7 @@
 	        method: 'POST',
 	        url: url,
 	        data: { fnr: fNr, kommunenr: kommuneNr, userid: userId },
-	        headers: { 'Content-Type': 'application/json' }
+	        headers: { 'Content-Type': 'application/json', 'ingress-csrf': $cookies['ingress-csrf'] }
 	      }).then(function (response) {
 	        var errorMsgHdr, errorMsgBody;
 	        errorMsgHdr = $translate.instant('error');
@@ -15382,7 +15382,7 @@
 	        method: 'POST',
 	        url: url,
 	        data: { fnr: fNr, kommunenr: kommuneNr, userid: userId },
-	        headers: { 'Content-Type': 'application/json' }
+	        headers: { 'Content-Type': 'application/json', 'ingress-csrf': $cookies['ingress-csrf'] }
 	      }).then(function (response) {
 	        return response.data;
 	      }, function (error) {
@@ -15438,7 +15438,7 @@
 	        method: 'POST',
 	        url: url,
 	        data: { melding: melding, kommunenr: kommuneNr, userid: userId },
-	        headers: { 'Content-Type': 'application/json' }
+	        headers: { 'Content-Type': 'application/json', 'ingress-csrf': $cookies['ingress-csrf'] }
 	      }).then(function (response) {
 	        if (response.data.status == 'ok') {
 	          NotificationService.showNotifcationDialog("Klinikermelding sendt", "Klinikermelding er sendt inn i MSIS.");
@@ -54180,4 +54180,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-bc35b071de4d84cce7a6.js.map
+//# sourceMappingURL=app-b29e005b6e19faebc5ba.js.map
