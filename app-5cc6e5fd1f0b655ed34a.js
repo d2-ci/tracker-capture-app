@@ -15407,7 +15407,7 @@
 	      var promise = $http({
 	        method: 'POST',
 	        url: url,
-	        data: { fnr: fNr, kommunenr: kommuneNr, userid: userId },
+	        data: { patientNin: fNr, kommunenr: kommuneNr, userid: userId },
 	        headers: { 'Content-Type': 'application/json', 'ingress-csrf': $cookies['ingress-csrf'] }
 	      }).then(function (response) {
 	        return response.data;
@@ -54180,4 +54180,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-f5511df91f37c098291f.js.map
+//# sourceMappingURL=app-5cc6e5fd1f0b655ed34a.js.map
