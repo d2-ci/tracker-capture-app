@@ -16947,7 +16947,7 @@
 	            $scope.programStages = $scope.tabularEntryStages = $scope.selectedProgram.programStages;
 	
 	            angular.forEach($scope.selectedProgram.programStages, function (stage) {
-	                if (stage.openAfterEnrollment) {
+	                if (!$scope.currentStage && stage.openAfterEnrollment) {
 	                    $scope.currentStage = stage;
 	                }
 	
@@ -40145,4 +40145,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-a3c2e75996eceb80c90c.js.map
+//# sourceMappingURL=app-6c84dabe8cd9fcf91799.js.map
