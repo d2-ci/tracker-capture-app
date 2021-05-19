@@ -10273,7 +10273,7 @@
 	                if (dhis2Event.eventDate) {
 	                    return 'alert-warning'; //'stage-executed';
 	                } else {
-	                    if (moment(eventDate, calendarSetting.momentFormat).isAfter(dhis2Event.dueDate)) {
+	                    if (moment(eventDate, calendarSetting.momentFormat).isAfter(moment(dhis2Event.dueDate, calendarSetting.momentFormat))) {
 	                        return 'alert-danger'; //'stage-overdue';
 	                    }
 	                    return 'alert-success'; //'stage-on-time';
@@ -39385,4 +39385,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-822ebc100957231a400b.js.map
+//# sourceMappingURL=app-404aa983901ab6edac73.js.map
