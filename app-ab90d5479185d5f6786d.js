@@ -36904,7 +36904,7 @@
 	
 	var trackerCapture = angular.module('trackerCapture');
 	
-	trackerCapture.controller('ListsController', ["$rootScope", "$scope", "$modal", "$location", "$filter", "$timeout", "$q", "Paginator", "MetaDataFactory", "DateUtils", "OrgUnitFactory", "ProgramFactory", "AttributesFactory", "EntityQueryFactory", "CurrentSelection", "TEIGridService", "TEIService", "UserDataStoreService", "ProgramWorkingListService", "OperatorFactory", "ModalService", "TeiAccessApiService", function ($rootScope, $scope, $modal, $location, $filter, $timeout, $q, Paginator, MetaDataFactory, DateUtils, OrgUnitFactory, ProgramFactory, AttributesFactory, EntityQueryFactory, CurrentSelection, TEIGridService, TEIService, UserDataStoreService, ProgramWorkingListService, OperatorFactory, ModalService, TeiAccessApiService) {
+	trackerCapture.controller('ListsController', ["$rootScope", "$scope", "$modal", "$location", "$filter", "$timeout", "$q", "Paginator", "MetaDataFactory", "DateUtils", "OrgUnitFactory", "ProgramFactory", "AttributesFactory", "EntityQueryFactory", "CurrentSelection", "TEIGridService", "TEIService", "UserDataStoreService", "ProgramWorkingListService", "OperatorFactory", "ModalService", "$http", function ($rootScope, $scope, $modal, $location, $filter, $timeout, $q, Paginator, MetaDataFactory, DateUtils, OrgUnitFactory, ProgramFactory, AttributesFactory, EntityQueryFactory, CurrentSelection, TEIGridService, TEIService, UserDataStoreService, ProgramWorkingListService, OperatorFactory, ModalService, $http) {
 	    var ouModes = [{ name: 'SELECTED' }, { name: 'CHILDREN' }, { name: 'DESCENDANTS' }, { name: 'ACCESSIBLE' }];
 	    var userGridColumns = null;
 	    var defaultCustomWorkingListValues = { ouMode: ouModes[0], programStatus: "" };
@@ -37063,10 +37063,10 @@
 	                direction: 'asc'
 	            };
 	        }
-	        $scope.numberOfSelectedRows = 0;
 	    };
 	
 	    var setCurrentTrackedEntityListData = function setCurrentTrackedEntityListData(serverResponse) {
+	        $scope.numberOfSelectedRows = 0;
 	        if (serverResponse.rows && serverResponse.rows.length > 0 && ($scope.base.selectedProgram.id == 'uYjxkTbwRNf' || $scope.base.selectedProgram.id == 'DM9n1bUw8W8')) {
 	            var allTeis = [];
 	            serverResponse.rows.forEach(function (row) {
@@ -37389,8 +37389,9 @@
 	                enrollments.enrollments.forEach(function (enrollment) {
 	                    return enrollment.status = 'COMPLETED';
 	                });
-	                TeiAccessApiService.post(selectedTeis, programId, DHIS2URL + '/enrollments', enrollments);
-	                $scope.setWorkingList($scope.currentTrackedEntityList.config);
+	                $http.post(DHIS2URL + '/enrollments', enrollments).then(function () {
+	                    $scope.setWorkingList($scope.currentTrackedEntityList.config);
+	                });
 	            });
 	        });
 	    };
@@ -54250,4 +54251,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-87088419453f40d9fdc8.js.map
+//# sourceMappingURL=app-ab90d5479185d5f6786d.js.map
