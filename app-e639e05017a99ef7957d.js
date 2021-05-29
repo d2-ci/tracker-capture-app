@@ -9103,6 +9103,32 @@
 	                return def.promise;
 	            }
 	        },
+	        getActiveEnrollments: function getActiveEnrollments(entityUidList, programUid, orgUnitId) {
+	            if (entityUidList && entityUidList.length > 0) {
+	                return TeiAccessApiService.get(null, programUid, DHIS2URL + '/trackedEntityInstances.json?trackedEntityInstance=' + entityUidList.join(';') + '&program=' + programUid + '&ou=' + orgUnitId + '&programStatus=ACTIVE&fields=trackedEntityInstance,enrollments[enrollment]').then(function (response) {
+	                    var data = { enrollments: [] };
+	                    var enrollments = data.enrollments;
+	                    if (response.data && response.data.trackedEntityInstances && response.data.trackedEntityInstances.length > 0) {
+	                        response.data.trackedEntityInstances.forEach(function (tei) {
+	                            enrollments.push({
+	                                program: programUid,
+	                                enrollment: tei.enrollments[0].enrollment,
+	                                trackedEntityInstance: tei.trackedEntityInstance
+	                            });
+	                        });
+	                    }
+	                    return data;
+	                }, function (error) {
+	                    var def = $q.defer();
+	                    def.reject(error);
+	                    return def.promise;
+	                });
+	            } else {
+	                var def = $q.defer();
+	                def.resolve([]);
+	                return def.promise;
+	            }
+	        },
 	        get: function get(entityUid, optionSets, attributesById) {
 	            var promise = $http.get(DHIS2URL + '/trackedEntityInstances/' + entityUid + '.json').then(function (response) {
 	                var tei = response.data;
@@ -10256,7 +10282,7 @@
 	            var columns = [];
 	
 	            var returnAttributes = [];
-	            i;
+	
 	            if (attributes) {
 	                if (nonConfidential) {
 	                    //Filter out attributes that is confidential, so they will not be part of any grid:
@@ -16248,10 +16274,13 @@
 	            allowFlagDuplicates: "=allowFlagDuplicates",
 	            onMarkDuplicate: "&onMarkDuplicate",
 	            onUnMarkDuplicate: "&onUnMarkDuplicate",
-	            onGetDuplicate: "&onGetDuplicate"
+	            onGetDuplicate: "&onGetDuplicate",
+	            numberOfSelectedRows: "=selectedRowsCount",
+	            isListOfActiveEnrollments: "=activeEnrollments"
 	        },
 	        controller: ["$scope", "Paginator", "TEIGridService", "CurrentSelection", function controller($scope, Paginator, TEIGridService, CurrentSelection) {
 	            var attributesById = CurrentSelection.getAttributesById();
+	
 	            if (!$scope.pager) {
 	                $scope.pager = {};
 	            }
@@ -16344,6 +16373,19 @@
 	            $scope.onChangePage = function (newPage) {
 	                $scope.pager.page = newPage;
 	                $scope.refetchData({ pager: $scope.pager, sortColumn: $scope.sortColumn });
+	            };
+	
+	            $scope.selectOne = function (tei) {
+	                tei.checkBoxTicked ? $scope.numberOfSelectedRows++ : $scope.numberOfSelectedRows--;
+	            };
+	
+	            $scope.selectAll = function () {
+	                var newState = $scope.data.selectAllChecked;
+	                var rows = $scope.data.rows.own;
+	                rows.forEach(function (tei) {
+	                    return tei.checkBoxTicked = newState;
+	                });
+	                $scope.numberOfSelectedRows = newState ? rows.length : 0;
 	            };
 	        }]
 	    };
@@ -37166,7 +37208,7 @@
 	
 	var trackerCapture = angular.module('trackerCapture');
 	
-	trackerCapture.controller('ListsController', ["$rootScope", "$scope", "$modal", "$location", "$filter", "$timeout", "$q", "Paginator", "MetaDataFactory", "DateUtils", "OrgUnitFactory", "ProgramFactory", "AttributesFactory", "EntityQueryFactory", "CurrentSelection", "TEIGridService", "TEIService", "UserDataStoreService", "ProgramWorkingListService", "OperatorFactory", function ($rootScope, $scope, $modal, $location, $filter, $timeout, $q, Paginator, MetaDataFactory, DateUtils, OrgUnitFactory, ProgramFactory, AttributesFactory, EntityQueryFactory, CurrentSelection, TEIGridService, TEIService, UserDataStoreService, ProgramWorkingListService, OperatorFactory) {
+	trackerCapture.controller('ListsController', ["$rootScope", "$scope", "$modal", "$location", "$filter", "$timeout", "$q", "Paginator", "MetaDataFactory", "DateUtils", "OrgUnitFactory", "ProgramFactory", "AttributesFactory", "EntityQueryFactory", "CurrentSelection", "TEIGridService", "TEIService", "UserDataStoreService", "ProgramWorkingListService", "OperatorFactory", "ModalService", "$http", function ($rootScope, $scope, $modal, $location, $filter, $timeout, $q, Paginator, MetaDataFactory, DateUtils, OrgUnitFactory, ProgramFactory, AttributesFactory, EntityQueryFactory, CurrentSelection, TEIGridService, TEIService, UserDataStoreService, ProgramWorkingListService, OperatorFactory, ModalService, $http) {
 	    var ouModes = [{ name: 'SELECTED' }, { name: 'CHILDREN' }, { name: 'DESCENDANTS' }, { name: 'ACCESSIBLE' }];
 	    var userGridColumns = null;
 	    var defaultCustomWorkingListValues = { ouMode: ouModes[0], programStatus: "" };
@@ -37328,6 +37370,7 @@
 	    };
 	
 	    var setCurrentTrackedEntityListData = function setCurrentTrackedEntityListData(serverResponse) {
+	        $scope.numberOfSelectedRows = 0;
 	        if (serverResponse.rows && serverResponse.rows.length > 0 && ($scope.base.selectedProgram.id == 'uYjxkTbwRNf' || $scope.base.selectedProgram.id == 'DM9n1bUw8W8')) {
 	            var allTeis = [];
 	            serverResponse.rows.forEach(function (row) {
@@ -37628,6 +37671,34 @@
 	            };
 	            $scope.base.setFrontPageData(viewData);
 	        }
+	    };
+	
+	    $scope.completeSelectedEnrollments = function () {
+	        var modalOptions = {
+	            closeButtonText: 'no',
+	            actionButtonText: 'yes',
+	            headerText: 'complete_selected_enrollments',
+	            bodyText: 'are_you_sure_to_complete_selected_enrollments'
+	        };
+	
+	        ModalService.showModal({}, modalOptions).then(function (result) {
+	
+	            var selectedTeis = [];
+	            $scope.currentTrackedEntityList.data.rows.own.forEach(function (row) {
+	                if (row.checkBoxTicked) {
+	                    selectedTeis.push(row.id);
+	                }
+	            });
+	            var programId = $scope.base.selectedProgram.id;
+	            TEIService.getActiveEnrollments(selectedTeis, programId, $scope.selectedOrgUnit.id).then(function (enrollments) {
+	                enrollments.enrollments.forEach(function (enrollment) {
+	                    return enrollment.status = 'COMPLETED';
+	                });
+	                $http.post(DHIS2URL + '/enrollments', enrollments).then(function () {
+	                    $scope.setWorkingList($scope.currentTrackedEntityList.config);
+	                });
+	            });
+	        });
 	    };
 	}]);
 
@@ -54485,4 +54556,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-f8884b6bacc86eb83636.js.map
+//# sourceMappingURL=app-e639e05017a99ef7957d.js.map
