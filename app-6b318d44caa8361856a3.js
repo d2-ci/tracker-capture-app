@@ -15605,6 +15605,26 @@
 	        return null;
 	      });
 	      return promise;
+	    },
+	    getPrøveSvarStatus: function getPrVeSvarStatus(kommuneNr, userId) {
+	      var url = '../' + DHIS2URL + '/innreise/synkroniser/status';
+	      var promise = $http({
+	        method: 'POST',
+	        url: url,
+	        data: { kommunenr: kommuneNr, userid: userId },
+	        headers: { 'Content-Type': 'application/json', 'ingress-csrf': $cookies['ingress-csrf'] }
+	      }).then(function (response) {
+	        return response.data;
+	      }, function (error) {
+	        var errorMsgHdr, errorMsgBody;
+	        errorMsgHdr = $translate.instant('error');
+	
+	        errorMsgBody = 'Feil ved henting av prøvesvarStatus: ' + error.status + ' En feil oppsto';
+	
+	        NotificationService.showNotifcationDialog(errorMsgHdr, errorMsgBody);
+	        return null;
+	      });
+	      return promise;
 	    }
 	  };
 	}]);
@@ -37423,7 +37443,7 @@
 	
 	var trackerCapture = angular.module('trackerCapture');
 	
-	trackerCapture.controller('ListsController', ["$rootScope", "$scope", "$modal", "$location", "$filter", "$timeout", "$q", "Paginator", "MetaDataFactory", "DateUtils", "OrgUnitFactory", "ProgramFactory", "AttributesFactory", "EntityQueryFactory", "CurrentSelection", "TEIGridService", "TEIService", "UserDataStoreService", "ProgramWorkingListService", "OperatorFactory", "ModalService", "$http", function ($rootScope, $scope, $modal, $location, $filter, $timeout, $q, Paginator, MetaDataFactory, DateUtils, OrgUnitFactory, ProgramFactory, AttributesFactory, EntityQueryFactory, CurrentSelection, TEIGridService, TEIService, UserDataStoreService, ProgramWorkingListService, OperatorFactory, ModalService, $http) {
+	trackerCapture.controller('ListsController', ["$rootScope", "$scope", "$modal", "$location", "$filter", "$timeout", "$q", "Paginator", "MetaDataFactory", "DateUtils", "OrgUnitFactory", "ProgramFactory", "AttributesFactory", "EntityQueryFactory", "CurrentSelection", "TEIGridService", "TEIService", "UserDataStoreService", "ProgramWorkingListService", "FNrLookupService", "OperatorFactory", "ModalService", "$http", function ($rootScope, $scope, $modal, $location, $filter, $timeout, $q, Paginator, MetaDataFactory, DateUtils, OrgUnitFactory, ProgramFactory, AttributesFactory, EntityQueryFactory, CurrentSelection, TEIGridService, TEIService, UserDataStoreService, ProgramWorkingListService, FNrLookupService, OperatorFactory, ModalService, $http) {
 	    var ouModes = [{ name: 'SELECTED' }, { name: 'CHILDREN' }, { name: 'DESCENDANTS' }, { name: 'ACCESSIBLE' }];
 	    var userGridColumns = null;
 	    var defaultCustomWorkingListValues = { ouMode: ouModes[0], programStatus: "" };
@@ -37798,6 +37818,30 @@
 	            return UserDataStoreService.set(userGridColumns, gridColumnsContainer, $scope.base.selectedProgram.id);
 	        }, function () {});
 	    };
+	
+	    $scope.canSyncLabTests = true;
+	    $scope.syncLabTests = function () {
+	        $scope.canSyncLabTests = false;
+	    };
+	
+	    $scope.prøveSvarAktivert = false;
+	    $scope.prøveSvarIkkeAktivert = false;
+	    $scope.prøveSvarSyncDate = null;
+	    $scope.innreiseSyncDate = null;
+	
+	    $scope.checkPrøveSvar = function () {
+	        var userId;
+	        try {
+	            userId = JSON.parse(sessionStorage.USER_PROFILE).id;
+	        } finally {}
+	        var svar = FNrLookupService.getPrøveSvarStatus($scope.selectedOrgUnit.code, userId);
+	        $scope.prøveSvarAktivert = svar.provesvarAktivert;
+	        $scope.prøveSvarIkkeAktivert = !svar.provesvarAktivert;
+	        $scope.prøveSvarSyncDate = innreiseProvesvarSistOppdatert;
+	        $scope.innreiseSyncDate = innreiseSistOppdatert;
+	    };
+	
+	    $scope.checkPrøveSvar();
 	
 	    $scope.getExportList = function (format) {
 	        var deferred = $q.defer();
@@ -54771,4 +54815,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-a3f0c6afb43813e65b2e.js.map
+//# sourceMappingURL=app-6b318d44caa8361856a3.js.map
