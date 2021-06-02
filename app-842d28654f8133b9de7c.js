@@ -15606,7 +15606,7 @@
 	      });
 	      return promise;
 	    },
-	    getPrøveSvarStatus: function getPrVeSvarStatus(kommuneNr, userId) {
+	    getProveSvarStatus: function getProveSvarStatus(kommuneNr, userId) {
 	      var url = '../' + DHIS2URL + '/innreise/synkroniser/status';
 	      var promise = $http({
 	        method: 'POST',
@@ -37824,24 +37824,24 @@
 	        $scope.canSyncLabTests = false;
 	    };
 	
-	    $scope.prøveSvarAktivert = false;
-	    $scope.prøveSvarIkkeAktivert = false;
-	    $scope.prøveSvarSyncDate = null;
+	    $scope.proveSvarAktivert = false;
+	    $scope.proveSvarIkkeAktivert = false;
+	    $scope.proveSvarSyncDate = null;
 	    $scope.innreiseSyncDate = null;
 	
-	    $scope.checkPrøveSvar = function () {
+	    $scope.checkProveSvar = function () {
 	        var userId;
 	        try {
 	            userId = JSON.parse(sessionStorage.USER_PROFILE).id;
 	        } finally {}
-	        var svar = FNrLookupService.getPrøveSvarStatus($scope.selectedOrgUnit.code, userId);
-	        $scope.prøveSvarAktivert = svar.provesvarAktivert;
-	        $scope.prøveSvarIkkeAktivert = !svar.provesvarAktivert;
-	        $scope.prøveSvarSyncDate = innreiseProvesvarSistOppdatert;
+	        var svar = FNrLookupService.getProveSvarStatus($scope.selectedOrgUnit.code, userId);
+	        $scope.proveSvarAktivert = svar.provesvarAktivert;
+	        $scope.proveSvarIkkeAktivert = !svar.provesvarAktivert;
+	        $scope.proveSvarSyncDate = innreiseProvesvarSistOppdatert;
 	        $scope.innreiseSyncDate = innreiseSistOppdatert;
 	    };
 	
-	    $scope.checkPrøveSvar();
+	    $scope.checkProveSvar();
 	
 	    $scope.getExportList = function (format) {
 	        var deferred = $q.defer();
@@ -54815,4 +54815,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-6b318d44caa8361856a3.js.map
+//# sourceMappingURL=app-842d28654f8133b9de7c.js.map
