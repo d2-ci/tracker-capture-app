@@ -15606,7 +15606,7 @@
 	      });
 	      return promise;
 	    },
-	    getPrøveSvarStatus: function getPrVeSvarStatus(kommuneNr, userId) {
+	    getLabTestStatus: function getLabTestStatus(kommuneNr, userId) {
 	      var url = '../' + DHIS2URL + '/innreise/synkroniser/status';
 	      var promise = $http({
 	        method: 'POST',
@@ -15616,12 +15616,6 @@
 	      }).then(function (response) {
 	        return response.data;
 	      }, function (error) {
-	        var errorMsgHdr, errorMsgBody;
-	        errorMsgHdr = $translate.instant('error');
-	
-	        errorMsgBody = 'Feil ved henting av prøvesvarStatus: ' + error.status + ' En feil oppsto';
-	
-	        NotificationService.showNotifcationDialog(errorMsgHdr, errorMsgBody);
 	        return null;
 	      });
 	      return promise;
@@ -37819,29 +37813,42 @@
 	        }, function () {});
 	    };
 	
+	    $scope.useLabTestForProgram = function (program) {
+	        return program && program.id == 'B7gOGodZkcs';
+	    };
+	
 	    $scope.canSyncLabTests = true;
 	    $scope.syncLabTests = function () {
 	        $scope.canSyncLabTests = false;
 	    };
 	
-	    $scope.prøveSvarAktivert = false;
-	    $scope.prøveSvarIkkeAktivert = false;
-	    $scope.prøveSvarSyncDate = null;
-	    $scope.innreiseSyncDate = null;
+	    $scope.labTestActivated = false;
+	    $scope.labTestNotActivated = false;
+	    $scope.labTestQueryFailed = false;
+	    $scope.labTestSyncDate = null;
+	    $scope.immigrationSyncDate = null;
+	    $scope.canNotAccessLabTests = false;
 	
-	    $scope.checkPrøveSvar = function () {
-	        var userId;
-	        try {
-	            userId = JSON.parse(sessionStorage.USER_PROFILE).id;
-	        } finally {}
-	        var svar = FNrLookupService.getPrøveSvarStatus($scope.selectedOrgUnit.code, userId);
-	        $scope.prøveSvarAktivert = svar.provesvarAktivert;
-	        $scope.prøveSvarIkkeAktivert = !svar.provesvarAktivert;
-	        $scope.prøveSvarSyncDate = innreiseProvesvarSistOppdatert;
-	        $scope.innreiseSyncDate = innreiseSistOppdatert;
+	    $scope.checkLabTestStatus = function () {
+	        if ($scope.useLabTestForProgram($scope.selectedProgram)) {
+	            var userId;
+	            try {
+	                userId = JSON.parse(sessionStorage.USER_PROFILE).id;
+	            } finally {}
+	            var svar = FNrLookupService.getLabTestStatus($scope.selectedOrgUnit.code, userId);
+	            if (svar) {
+	                $scope.labTestActivated = svar.labTestActivated;
+	                $scope.labTestNotActivated = !svar.labTestActivated;
+	                $scope.labTestSyncDate = svar.innreiseProvesvarSistOppdatert;
+	                $scope.immigrationSyncDate = svar.innreiseSistOppdatert;
+	                $scope.canNotAccessLabTests = !svar.harTilgangTilProvesvar;
+	            } else {
+	                $scope.labTestQueryFailed = true;
+	            }
+	        }
 	    };
 	
-	    $scope.checkPrøveSvar();
+	    $scope.checkLabTestStatus();
 	
 	    $scope.getExportList = function (format) {
 	        var deferred = $q.defer();
@@ -54815,4 +54822,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-c7c2b29d6eda9bd0f331.js.map
+//# sourceMappingURL=app-27747af8ec749e144bce.js.map
