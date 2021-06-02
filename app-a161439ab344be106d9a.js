@@ -15616,12 +15616,6 @@
 	      }).then(function (response) {
 	        return response.data;
 	      }, function (error) {
-	        var errorMsgHdr, errorMsgBody;
-	        errorMsgHdr = $translate.instant('error');
-	
-	        errorMsgBody = 'Feil ved henting av prøvesvarStatus: ' + error.status + ' En feil oppsto';
-	
-	        NotificationService.showNotifcationDialog(errorMsgHdr, errorMsgBody);
 	        return null;
 	      });
 	      return promise;
@@ -37830,6 +37824,7 @@
 	
 	    $scope.labTestActivated = false;
 	    $scope.labTestNotActivated = false;
+	    $scope.labTestQueryFailed = false;
 	    $scope.labTestSyncDate = null;
 	    $scope.immigrationSyncDate = null;
 	
@@ -37840,10 +37835,14 @@
 	                userId = JSON.parse(sessionStorage.USER_PROFILE).id;
 	            } finally {}
 	            var svar = FNrLookupService.getLabTestStatus($scope.selectedOrgUnit.code, userId);
-	            $scope.labTestActivated = svar.labTestActivated;
-	            $scope.labTestNotActivated = !svar.labTestActivated;
-	            $scope.labTestSyncDate = innreiseProvesvarSistOppdatert;
-	            $scope.immigrationSyncDate = innreiseSistOppdatert;
+	            if (svar) {
+	                $scope.labTestActivated = svar.labTestActivated;
+	                $scope.labTestNotActivated = !svar.labTestActivated;
+	                $scope.labTestSyncDate = innreiseProvesvarSistOppdatert;
+	                $scope.immigrationSyncDate = innreiseSistOppdatert;
+	            } else {
+	                $scope.labTestQueryFailed = true;
+	            }
 	        }
 	    };
 	
@@ -54821,4 +54820,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-ddabfaa977b0d4f90a28.js.map
+//# sourceMappingURL=app-a161439ab344be106d9a.js.map
