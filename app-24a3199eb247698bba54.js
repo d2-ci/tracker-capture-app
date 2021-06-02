@@ -13597,7 +13597,12 @@
 	            $scope.selectedEnrollment.coordinate = $scope.selectedEnrollment.coordinate ? $scope.selectedEnrollment.coordinate : {};
 	        }
 	
+	        var trackedEntityType = $scope.trackedEntityTypes.selected;
+	
 	        if ($scope.selectedProgram) {
+	            if (!trackedEntityType) {
+	                trackedEntityType = $scope.selectedProgram.trackedEntityType;
+	            }
 	            AttributesFactory.getByProgram($scope.selectedProgram).then(function (atts) {
 	                $scope.attributes = TEIGridService.generateGridColumns(atts, null, false).columns;
 	                fetchGeneratedAttributes();
@@ -13644,7 +13649,6 @@
 	            });
 	        }
 	
-	        var trackedEntityType = $scope.trackedEntityTypes.selected || $scope.selectedProgram.trackedEntityType;
 	        if (trackedEntityType) {
 	            AttributesFactory.getByTrackedEntityType(trackedEntityType).then(function (atts) {
 	                $scope.teTypeAttributesById = {};
@@ -13654,8 +13658,8 @@
 	
 	                if (!$scope.selectedProgram) {
 	                    $scope.attributes = TEIGridService.generateGridColumns(atts, null, false).columns;
+	                    fetchGeneratedAttributes();
 	                }
-	                fetchGeneratedAttributes();
 	            });
 	        }
 	    };
@@ -39400,4 +39404,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-43ca96785d5c73b79deb.js.map
+//# sourceMappingURL=app-24a3199eb247698bba54.js.map
