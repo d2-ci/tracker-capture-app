@@ -37415,10 +37415,10 @@
 	    });
 	
 	    $scope.shouldShowButton = function (view) {
-	        if ($scope.selectedProgram.id === _constants.INNREISE_PROGRAM_ID && view.name === 'Registrere') {
+	        if ($scope.selectedProgram && $scope.selectedProgram.id === _constants.INNREISE_PROGRAM_ID && view.name === 'Registrere') {
 	            return false;
 	        }
-	        if ($scope.selectedProgram.id === _constants.DUPLIKAT_INNREISE_PROGRAM_ID && view.name === 'Registrere') {
+	        if ($scope.selectedProgram && $scope.selectedProgram.id === _constants.DUPLIKAT_INNREISE_PROGRAM_ID && view.name === 'Registrere') {
 	            return false;
 	        }
 	        return true;
@@ -54822,4 +54822,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-a255779fb0196c0d06a8.js.map
+//# sourceMappingURL=app-1866ed51588c83bebebb.js.map
