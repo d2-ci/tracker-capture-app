@@ -12731,7 +12731,7 @@
 	
 	                TEIService.getPotentialDuplicatesForTei($scope.selectedTeiId).then(function (duplicates) {
 	                    $scope.potentialDuplicates = duplicates.identifiableObjects;
-	                    $scope.duplicateExists = $scope.potentialDuplicates.length > 0 ? true : false;
+	                    $scope.duplicateExists = $scope.potentialDuplicates.length > 0;
 	                });
 	
 	                //get option sets
@@ -12741,104 +12741,96 @@
 	                        obj.optionsById = obj.options.toHashMap('id');
 	                    });
 	                    CurrentSelection.setOptionGroupsById(optionGroupsById);
-	
-	                    MetaDataFactory.getAll('optionSets').then(function (optionSets) {
-	                        angular.forEach(optionSets, function (optionSet) {
-	                            $scope.optionSets[optionSet.id] = optionSet;
-	                        });
-	
-	                        AttributesFactory.getAll().then(function (atts) {
-	
-	                            $scope.attributesById = [];
-	                            angular.forEach(atts, function (att) {
-	                                $scope.attributesById[att.id] = att;
-	                            });
-	
-	                            CurrentSelection.setAttributesById($scope.attributesById);
-	                            var teiPromise;
-	
-	                            if ($scope.selectedProgramId) {
-	                                teiPromise = TEIService.getWithProgramData($scope.selectedTeiId, $scope.selectedProgramId, $scope.optionSets, $scope.attributesById, fromAudit);
-	                            } else {
-	                                teiPromise = TEIService.get($scope.selectedTeiId, $scope.optionSets, $scope.attributesById);
-	                            }
-	                            //Fetch the selected entity
-	                            teiPromise.then(function (response) {
-	                                $rootScope.hasAccess = true;
-	                                if (response) {
-	                                    $scope.selectedTei = response;
-	
-	                                    //get the entity type
-	                                    loadTrackedEntityType().then(function () {
-	                                        var enrollments = $scope.selectedTei && $scope.selectedTei.enrollments || [];
-	                                        $scope.allEnrollments = angular.copy(enrollments);
-	                                        var selectedEnrollment = null;
-	                                        if (enrollments) {
-	                                            selectedEnrollment = enrollments.find(function (e) {
-	                                                return e.program === $scope.selectedProgramId && e.status === 'ACTIVE';
-	                                            });
-	                                        }
-	
-	                                        ProgramFactory.getProgramsByOu($scope.selectedOrgUnit, selectedEnrollment ? true : false, selectedEnrollment ? { id: selectedEnrollment.program } : null).then(function (response) {
-	                                            $scope.programs = [];
-	                                            $scope.programNames = [];
-	                                            $scope.programStageNames = [];
-	
-	                                            //get programs valid for the selected ou and tei
-	                                            angular.forEach(response.programs, function (program) {
-	                                                if (program.trackedEntityType && program.trackedEntityType.id === $scope.selectedTei.trackedEntityType) {
-	                                                    $scope.programs.push(program);
-	                                                    $scope.programNames[program.id] = {
-	                                                        id: program.id,
-	                                                        displayName: program.displayName
-	                                                    };
-	                                                    angular.forEach(program.programStages, function (stage) {
-	                                                        $scope.programStageNames[stage.id] = {
-	                                                            id: stage.id,
-	                                                            displayName: stage.displayName
-	                                                        };
-	                                                    });
-	
-	                                                    if ($scope.selectedProgramId && program.id === $scope.selectedProgramId) {
-	                                                        $scope.selectedProgram = program;
-	                                                    }
-	                                                }
-	                                            });
-	
-	                                            var events = enrollments.reduce(function (previousEvents, e) {
-	                                                var events = previousEvents.concat(e.events);
-	                                                return events;
-	                                            }, []);
-	
-	                                            //var events = (selectedEnrollment && selectedEnrollment.events) || [];
-	                                            //prepare selected items for broadcast
-	                                            CurrentSelection.setSelectedTeiEvents(events);
-	                                            CurrentSelection.set({
-	                                                tei: $scope.selectedTei,
-	                                                te: $scope.trackedEntityType,
-	                                                prs: $scope.programs,
-	                                                pr: $scope.selectedProgram,
-	                                                prNames: $scope.programNames,
-	                                                prStNames: $scope.programStageNames,
-	                                                enrollments: enrollments,
-	                                                selectedEnrollment: selectedEnrollment,
-	                                                optionSets: $scope.optionSets,
-	                                                orgUnit: $scope.selectedOrgUnit
-	                                            });
-	                                            getDashboardLayout();
-	                                        });
-	                                    });
-	                                }
-	                            }, function (error) {
-	                                if (error && error.auditDismissed) {
-	                                    $rootScope.hasAccess = false;
-	                                }
-	                            });
-	                        });
+	                    return MetaDataFactory.getAll('optionSets');
+	                }).then(function (optionSets) {
+	                    angular.forEach(optionSets, function (optionSet) {
+	                        $scope.optionSets[optionSet.id] = optionSet;
 	                    });
+	                    return AttributesFactory.getAll();
+	                }).then(function (atts) {
+	                    $scope.attributesById = [];
+	                    angular.forEach(atts, function (att) {
+	                        $scope.attributesById[att.id] = att;
+	                    });
+	
+	                    CurrentSelection.setAttributesById($scope.attributesById);
+	
+	                    return $scope.selectedProgramId ? TEIService.getWithProgramData($scope.selectedTeiId, $scope.selectedProgramId, $scope.optionSets, $scope.attributesById, fromAudit) : TEIService.get($scope.selectedTeiId, $scope.optionSets, $scope.attributesById);
+	                }).then(getTeiEvents, function (error) {
+	                    if (error && error.auditDismissed) {
+	                        $rootScope.hasAccess = false;
+	                    }
 	                });
 	            }
 	        });
+	    }
+	
+	    function getTeiEvents(tei) {
+	        //Fetch the selected entity
+	        $rootScope.hasAccess = true;
+	        if (tei) {
+	            var enrollments, selectedEnrollment;
+	            $scope.selectedTei = tei;
+	
+	            //get the entity type
+	            loadTrackedEntityType().then(function () {
+	                enrollments = $scope.selectedTei && $scope.selectedTei.enrollments || [];
+	                $scope.allEnrollments = angular.copy(enrollments);
+	                selectedEnrollment = null;
+	                if (enrollments) {
+	                    selectedEnrollment = enrollments.find(function (e) {
+	                        return e.program === $scope.selectedProgramId && e.status === 'ACTIVE';
+	                    });
+	                }
+	
+	                return ProgramFactory.getProgramsByOu($scope.selectedOrgUnit, selectedEnrollment ? true : false, selectedEnrollment ? { id: selectedEnrollment.program } : null);
+	            }).then(function (response) {
+	                $scope.programs = [];
+	                $scope.programNames = [];
+	                $scope.programStageNames = [];
+	
+	                //get programs valid for the selected ou and tei
+	                angular.forEach(response.programs, function (program) {
+	                    if (program.trackedEntityType && program.trackedEntityType.id === $scope.selectedTei.trackedEntityType) {
+	                        $scope.programs.push(program);
+	                        $scope.programNames[program.id] = {
+	                            id: program.id,
+	                            displayName: program.displayName
+	                        };
+	                        angular.forEach(program.programStages, function (stage) {
+	                            $scope.programStageNames[stage.id] = {
+	                                id: stage.id,
+	                                displayName: stage.displayName
+	                            };
+	                        });
+	
+	                        if ($scope.selectedProgramId && program.id === $scope.selectedProgramId) {
+	                            $scope.selectedProgram = program;
+	                        }
+	                    }
+	                });
+	
+	                var events = enrollments.reduce(function (previousEvents, e) {
+	                    return previousEvents.concat(e.events);
+	                }, []);
+	
+	                //prepare selected items for broadcast
+	                CurrentSelection.setSelectedTeiEvents(events);
+	                CurrentSelection.set({
+	                    tei: $scope.selectedTei,
+	                    te: $scope.trackedEntityType,
+	                    prs: $scope.programs,
+	                    pr: $scope.selectedProgram,
+	                    prNames: $scope.programNames,
+	                    prStNames: $scope.programStageNames,
+	                    enrollments: enrollments,
+	                    selectedEnrollment: selectedEnrollment,
+	                    optionSets: $scope.optionSets,
+	                    orgUnit: $scope.selectedOrgUnit
+	                });
+	                getDashboardLayout();
+	            });
+	        }
 	    }
 	
 	    //dashboard items
@@ -16260,7 +16252,15 @@
 	    };
 	
 	    function broadcastDataEntryControllerData() {
-	        $rootScope.$broadcast('dataEntryControllerData', { programStages: $scope.programStages, allEventsSorted: $scope.allEventsSorted, eventsByStage: $scope.eventsByStage, addNewEvent: $scope.addNewEvent, openEvent: $scope.openEventExternal, deleteScheduleOverDueEvents: $scope.deleteScheduleAndOverdueEvents, executeRules: $scope.executeRules });
+	        $rootScope.$broadcast('dataEntryControllerData', {
+	            programStages: $scope.programStages,
+	            allEventsSorted: $scope.allEventsSorted,
+	            eventsByStage: $scope.eventsByStage,
+	            addNewEvent: $scope.addNewEvent,
+	            openEvent: $scope.openEventExternal,
+	            deleteScheduleOverDueEvents: $scope.deleteScheduleAndOverdueEvents,
+	            executeRules: $scope.executeRules
+	        });
 	    }
 	
 	    $scope.getEvents = function () {
@@ -16475,6 +16475,7 @@
 	        newEvent = EventUtils.processEvent(newEvent, $scope.stagesById[newEvent.programStage], $scope.optionSets, $scope.prStDes);
 	        if (setProgramStage) $scope.currentStage = $scope.stagesById[newEvent.programStage];
 	        sortEventsByStage('ADD', newEvent);
+	        CurrentSelection.setSelectedTeiEvents($scope.allEventsSorted);
 	        broadcastDataEntryControllerData();
 	    };
 	
@@ -17673,20 +17674,19 @@
 	
 	        return DHIS2EventFactory.delete($scope.currentEvent).then(function (data) {
 	
-	            var continueLoop = true,
-	                index = -1;
-	            for (var i = 0; i < $scope.eventsByStage[$scope.currentEvent.programStage].length && continueLoop; i++) {
-	                if ($scope.eventsByStage[$scope.currentEvent.programStage][i].event === $scope.currentEvent.event) {
-	                    $scope.eventsByStage[$scope.currentEvent.programStage][i] = $scope.currentEvent;
-	                    continueLoop = false;
+	            var programStageID = $scope.currentEvent.programStage;
+	            var events = $scope.eventsByStage[programStageID];
+	
+	            var index = -1;
+	            for (var i = 0; i < events.length; i++) {
+	                if (events[i].event === $scope.currentEvent.event) {
 	                    index = i;
+	                    events.splice(i, 1);
+	                    break;
 	                }
 	            }
 	
-	            var programStageID = $scope.currentEvent.programStage;
-	
-	            $scope.eventsByStage[programStageID].splice(index, 1);
-	            $scope.currentStageEvents = $scope.eventsByStage[programStageID];
+	            $scope.currentStageEvents = events;
 	
 	            //if event is last event in allEventsSorted and only element on page, show previous page
 	            var GetPreviousEventPage = false;
@@ -17722,8 +17722,7 @@
 	                }
 	            }
 	
-	            CurrentSelection.setSelectedTeiEvents();
-	
+	            CurrentSelection.setSelectedTeiEvents($scope.allEventsSorted);
 	            broadcastDataEntryControllerData();
 	        }, function (error) {
 	
@@ -21768,17 +21767,19 @@
 	        $scope.displayTextEffects = [];
 	        $scope.displayKeyDataEffects = [];
 	
-	        angular.forEach(Object.keys(data.displayKeyDataEffects), function (key) {
-	            if (data.displayKeyDataEffects[key].ineffect) {
-	                $scope.displayKeyDataEffects.push({ title: data.displayKeyDataEffects[key].content, value: data.displayKeyDataEffects[key].data });
-	            }
-	        });
+	        if (data) {
+	            angular.forEach(Object.keys(data.displayKeyDataEffects), function (key) {
+	                if (data.displayKeyDataEffects[key].ineffect) {
+	                    $scope.displayKeyDataEffects.push({ title: data.displayKeyDataEffects[key].content, value: data.displayKeyDataEffects[key].data });
+	                }
+	            });
 	
-	        angular.forEach(Object.keys(data.displayTextEffects), function (key) {
-	            if (data.displayTextEffects[key].ineffect) {
-	                $scope.displayTextEffects.push({ title: data.displayTextEffects[key].content, value: data.displayTextEffects[key].data });
-	            }
-	        });
+	            angular.forEach(Object.keys(data.displayTextEffects), function (key) {
+	                if (data.displayTextEffects[key].ineffect) {
+	                    $scope.displayTextEffects.push({ title: data.displayTextEffects[key].content, value: data.displayTextEffects[key].data });
+	                }
+	            });
+	        }
 	    };
 	}]);
 
@@ -39404,4 +39405,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-24a3199eb247698bba54.js.map
+//# sourceMappingURL=app-31dd21ebf02aba011cf8.js.map
