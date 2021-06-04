@@ -17261,6 +17261,7 @@
 	        newEvent = EventUtils.processEvent(newEvent, $scope.stagesById[newEvent.programStage], $scope.optionSets, $scope.prStDes);
 	        if (setProgramStage) $scope.currentStage = $scope.stagesById[newEvent.programStage];
 	        sortEventsByStage('ADD', newEvent);
+	        CurrentSelection.setSelectedTeiEvents($scope.allEventsSorted);
 	        broadcastDataEntryControllerData();
 	    };
 	
@@ -18495,7 +18496,7 @@
 	                }
 	            }
 	
-	            CurrentSelection.setSelectedTeiEvents();
+	            CurrentSelection.setSelectedTeiEvents($scope.allEventsSorted);
 	
 	            broadcastDataEntryControllerData();
 	        }, function (error) {
@@ -40144,4 +40145,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-5eeae79a0c1cd35c3b8e.js.map
+//# sourceMappingURL=app-1a7cbef5d3f3b3ab6f65.js.map
