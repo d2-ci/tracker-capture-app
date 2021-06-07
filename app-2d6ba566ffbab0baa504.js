@@ -5686,6 +5686,7 @@
 	                });
 	
 	                modalInstance.result.then(function (geoJson) {
+	                    $scope.d2Object.featureType = geoJson ? $scope.d2GeometryType : "NONE";
 	                    $scope.d2Object[$scope.d2ObjectId] = geoJson;
 	                    $scope.d2CallbackFunction();
 	                    $scope.currentGeometryTypeDefinition.setGeoObject();
@@ -7096,16 +7097,21 @@
 	                    currentOuLayer.removeFrom(map);
 	                }
 	                var latlngs = [];
+	
+	                var convertPolygonCoordinates = function convertPolygonCoordinates(polygon) {
+	                    angular.forEach(polygon, function (linearRing) {
+	                        angular.forEach(linearRing, function (coordinate) {
+	                            latlngs.push(L.GeoJSON.coordsToLatLng(coordinate));
+	                        });
+	                    });
+	                };
+	
 	                angular.forEach(response.data.features, function (feature) {
 	                    feature.properties.type = "ou";
-	                    if (feature.geometry.type != "Point") {
-	                        angular.forEach(feature.geometry.coordinates, function (coordinate) {
-	                            angular.forEach(coordinate, function (point) {
-	                                angular.forEach(point, function (p) {
-	                                    return latlngs.push(L.GeoJSON.coordsToLatLng(p));
-	                                });
-	                            });
-	                        });
+	                    if (feature.geometry.type === "Polygon") {
+	                        convertPolygonCoordinates(feature.geometry.coordinates);
+	                    } else if (feature.geometry.type === "MultiPolygon") {
+	                        angular.forEach(feature.geometry.coordinates, convertPolygonCoordinates);
 	                    }
 	                });
 	
@@ -7204,7 +7210,7 @@
 	                        allowIntersection: false, // Restricts shapes to simple polygons
 	                        drawError: {
 	                            color: '#e74c3c', // Color the shape will turn when intersects
-	                            message: '<strong>Intersecting<strong> not allowed!' // Message that will show when intersect
+	                            message: '<strong>Intersecting</strong> not allowed!' // Message that will show when intersect
 	                        },
 	                        shapeOptions: {
 	                            color: '#3498db'
@@ -13927,6 +13933,7 @@
 	            $scope.selectedTei.orgUnit = $scope.tei.orgUnit = $scope.selectedOrgUnit.id;
 	            $scope.selectedTei.attributes = $scope.tei.attributes = [];
 	        }
+	        $scope.tei.featureType = $scope.selectedTei.featureType;
 	        $scope.tei.geometry = $scope.selectedTei.geometry;
 	        //get tei attributes and their values
 	        //but there could be a case where attributes are non-mandatory and
@@ -39386,4 +39393,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-2ba3de7cba7dac299992.js.map
+//# sourceMappingURL=app-2d6ba566ffbab0baa504.js.map
