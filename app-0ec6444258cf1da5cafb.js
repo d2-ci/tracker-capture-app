@@ -14528,6 +14528,9 @@
 	            }
 	        });
 	
+	        // Ask backend to delete previously saved polygon if no polygon is selected
+	        $scope.tei.featureType = $scope.tei.geometry ? $scope.trackedEntityTypes.selected.featureType : "NONE";
+	
 	        $scope.tei.attributes = tempAttributes;
 	
 	        RegistrationService.registerOrUpdate($scope.tei, $scope.optionSets, $scope.attributesById, $scope.selectedEnrollment.program).then(function (regResponse) {
@@ -40140,4 +40143,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-347991d9f9241c8e3432.js.map
+//# sourceMappingURL=app-0ec6444258cf1da5cafb.js.map
