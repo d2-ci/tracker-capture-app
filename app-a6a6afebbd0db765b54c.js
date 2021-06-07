@@ -37838,16 +37838,17 @@
 	            try {
 	                userId = JSON.parse(sessionStorage.USER_PROFILE).id;
 	            } finally {}
-	            var svar = FNrLookupService.getLabTestStatus($scope.selectedOrgUnit.code, userId);
-	            if (svar) {
-	                $scope.labTestActivated = svar.labTestActivated;
-	                $scope.labTestNotActivated = !svar.labTestActivated;
-	                $scope.labTestSyncDate = svar.innreiseProvesvarSistOppdatert;
-	                $scope.immigrationSyncDate = svar.innreiseSistOppdatert;
-	                $scope.canNotAccessLabTests = !svar.harTilgangTilProvesvar;
-	            } else {
-	                $scope.labTestQueryFailed = true;
-	            }
+	            FNrLookupService.getLabTestStatus($scope.selectedOrgUnit.code, userId).then(function (svar) {
+	                if (svar) {
+	                    $scope.labTestActivated = svar.labTestActivated;
+	                    $scope.labTestNotActivated = !svar.labTestActivated;
+	                    $scope.labTestSyncDate = svar.innreiseProvesvarSistOppdatert;
+	                    $scope.immigrationSyncDate = svar.innreiseSistOppdatert;
+	                    $scope.canNotAccessLabTests = !svar.harTilgangTilProvesvar;
+	                } else {
+	                    $scope.labTestQueryFailed = true;
+	                }
+	            });
 	        }
 	    };
 	
@@ -54825,4 +54826,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-7fb69531df5719d76e0a.js.map
+//# sourceMappingURL=app-a6a6afebbd0db765b54c.js.map
