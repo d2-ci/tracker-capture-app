@@ -14494,7 +14494,7 @@
 	        }
 	    };
 	
-	    var reloadProfileWidget = function reloadProfileWidget() {
+	    var setSelectedTei = function setSelectedTei() {
 	        var selections = CurrentSelection.get();
 	        CurrentSelection.set({
 	            tei: $scope.selectedTei,
@@ -14508,6 +14508,10 @@
 	            optionSets: selections.optionSets,
 	            orgUnit: selections.orgUnit
 	        });
+	    };
+	
+	    var reloadProfileWidget = function reloadProfileWidget() {
+	        setSelectedTei();
 	        $timeout(function () {
 	            $rootScope.$broadcast('profileWidget', {});
 	        }, 200);
@@ -14538,6 +14542,9 @@
 	            }
 	        });
 	
+	        // Ask backend to delete previously saved polygon if no polygon is selected
+	        $scope.tei.featureType = $scope.tei.geometry ? $scope.trackedEntityTypes.selected.featureType : "NONE";
+	
 	        $scope.tei.attributes = tempAttributes;
 	
 	        RegistrationService.registerOrUpdate($scope.tei, $scope.optionSets, $scope.attributesById, $scope.selectedEnrollment.program).then(function (regResponse) {
@@ -14556,6 +14563,7 @@
 	                        $location.path('/').search({ program: $scope.selectedProgram.id });
 	                    }
 	                } else {
+	                    setSelectedTei();
 	                    if ($scope.selectedProgram) {
 	
 	                        //enroll TEI
@@ -40150,4 +40158,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-b2662204d16054819107.js.map
+//# sourceMappingURL=app-0399996e22d0c22c76e9.js.map
