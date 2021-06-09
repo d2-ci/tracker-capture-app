@@ -13722,7 +13722,7 @@
 	        }
 	    };
 	
-	    var reloadProfileWidget = function reloadProfileWidget() {
+	    var setSelectedTei = function setSelectedTei() {
 	        var selections = CurrentSelection.get();
 	        CurrentSelection.set({
 	            tei: $scope.selectedTei,
@@ -13736,6 +13736,10 @@
 	            optionSets: selections.optionSets,
 	            orgUnit: selections.orgUnit
 	        });
+	    };
+	
+	    var reloadProfileWidget = function reloadProfileWidget() {
+	        setSelectedTei();
 	        $timeout(function () {
 	            $rootScope.$broadcast('profileWidget', {});
 	        }, 200);
@@ -13793,6 +13797,7 @@
 	                        }
 	                    }
 	                } else {
+	                    setSelectedTei();
 	                    if ($scope.selectedProgram) {
 	
 	                        //enroll TEI
@@ -39397,4 +39402,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-b6687452a8cd0a1dde8b.js.map
+//# sourceMappingURL=app-b9dc2fbb9e35b842b8a1.js.map
