@@ -25430,7 +25430,7 @@
 	                            }
 	                        });
 	
-	                        if (!endDate || contactDateMoment.isBefore(endDate)) {
+	                        if (contactDateMoment && (!endDate || contactDateMoment.isBefore(endDate))) {
 	                            relative.contactDateMoment = contactDateMoment;
 	                            relative.contactDate = DateUtils.formatFromApiToUser(contactDateMoment);;
 	                            relative.created = DateUtils.formatFromApiToUser(contactDateMoment);;
@@ -25439,7 +25439,7 @@
 	                    //TODO: Check wether we keep the API behavior of returning other programs the user has access to as well as the requested program:
 	                    if (enrollment.program == 'uYjxkTbwRNf') {
 	                        var symptomsOnsetMoment = moment(DateUtils.formatFromUserToApi(enrollment.incidentDate));
-	                        if (!endDate || symptomsOnsetMoment.isBefore(endDate)) {
+	                        if ((symptomsOnsetMoment.isSame(startDate) || symptomsOnsetMoment.isAfter(startDate)) && (!endDate || symptomsOnsetMoment.isBefore(endDate))) {
 	                            angular.forEach(enrollment.events, function (event) {
 	                                if ((!endDate || moment(event.eventDate).isBefore(endDate)) && moment(event.eventDate).isAfter(startDate)) {
 	                                    //Health condition:
@@ -25743,7 +25743,7 @@
 	        return programAttributes;
 	    };
 	    $scope.isDuplikatsjekk = function () {
-	        return $scope.selectedProgram.id === _constants.DUPLIKAT_PROGRAM_ID;
+	        return $scope.selectedProgram && $scope.selectedProgram.id === _constants.DUPLIKAT_PROGRAM_ID;
 	    };
 	
 	    $scope.registerNewInInnreise = function () {
@@ -54826,4 +54826,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-eaf049b9aca39aea8a7d.js.map
+//# sourceMappingURL=app-06d5d29c1dd3d0eeab3a.js.map
