@@ -25763,8 +25763,8 @@
 	    };
 	    $scope.addToDuplicateAndAddInnreise = function (rel) {
 	        var modalOptions = {
-	            headerText: 'Registrer på eksisterende person',
-	            bodyText: 'Vil du registrere på eksisterende person? Det vil opprettes et nytt innslag i innreiseregistrering. Tomme felt i profilen vil fylles inn med verdier fra denne. Eksisterende felt vil ikke oppdateres.'
+	            headerText: 'Ønsker du å slå sammen  personprofilene?',
+	            bodyText: 'Importert informasjon fra innreiseregisteret vil legge seg i tomme felt i profilen. Der hvor det alledere ligger informasjon i feltene vil ny informasjon legges som et notat på profilen.' + 'Ingen informasjon vil bli overskrevet i Fiks innreiseoppfølging.'
 	        };
 	        ModalService.showModal({}, modalOptions).then(function () {
 	            (0, _innreise_duplicates.registerInnreiseDuplicateToExisting)($scope.selectedTei, rel.trackedEntityInstance, $scope.selectedEnrollment, $scope.optionSets, $scope.attributesById, $scope.selectedOrgUnit.id, TEIService, EnrollmentService, DHIS2EventFactory).then(function (newTeiId) {
@@ -54826,4 +54826,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-df171bc922e632ba8539.js.map
+//# sourceMappingURL=app-0934d04e1b8ce7b508d1.js.map
