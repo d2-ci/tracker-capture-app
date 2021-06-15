@@ -6470,7 +6470,7 @@
 	    var date = new Date(Date.parse(datestring));
 	    var day = date.getDay();
 	    day = day > 9 ? day : '0' + day;
-	    var month = date.getMonth();
+	    var month = date.getMonth() + 1; // Month starts indexing on 0
 	    month = month > 9 ? month : '0' + month;
 	    var year = date.getFullYear();
 	
@@ -54976,4 +54976,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-2758c18515f2e9fa865a.js.map
+//# sourceMappingURL=app-a488e52bc749e035d575.js.map
