@@ -6375,6 +6375,7 @@
 	});
 	exports.convertToCorrectDateString = convertToCorrectDateString;
 	exports.getFullYear = getFullYear;
+	exports.convertDatestringToDDMMYYYY = convertDatestringToDDMMYYYY;
 	function convertToCorrectDateString(datestring, dateformat) {
 	    var day;
 	    var month;
@@ -6463,6 +6464,17 @@
 	    }
 	
 	    return true;
+	}
+	
+	function convertDatestringToDDMMYYYY(datestring) {
+	    var date = new Date(Date.parse(datestring));
+	    var day = date.getDay();
+	    day = day > 9 ? day : '0' + day;
+	    var month = date.getMonth();
+	    month = month > 9 ? month : '0' + month;
+	    var year = date.getFullYear();
+	
+	    return day + '-' + month + '-' + year;
 	}
 
 /***/ }),
@@ -9078,6 +9090,7 @@
 	                                                event.dataValues.forEach(function (dataValue) {
 	                                                    if (dataValue.dataElement == dataElementId) {
 	                                                        teiDictionary[tei.trackedEntityInstance].dataValue = dataValue.value;
+	                                                        teiDictionary[tei.trackedEntityInstance].eventDate = event.eventDate;
 	                                                    }
 	                                                });
 	                                            }
@@ -16318,6 +16331,12 @@
 	                }
 	            });
 	
+	            $scope.isInnreiseList = function (teis) {
+	                return teis.some(function (tei) {
+	                    return tei.Oppfolgingstatus;
+	                });
+	            };
+	
 	            $scope.$watch("data", function () {
 	                $scope.pager.recordsCount = $scope.data && $scope.data.length || 0;
 	                setGridColumns();
@@ -19545,6 +19564,15 @@
 	
 	// Entity types
 	var INNREISE_ENTITY_TYPE = exports.INNREISE_ENTITY_TYPE = 'MCPQUTHX1Ze';
+	
+	// Data elements
+	var INNREISE_AVREISELAND_DATA_ELEMENT_ID = exports.INNREISE_AVREISELAND_DATA_ELEMENT_ID = 'EwrMxsQG3OX';
+	var INNREISE_OPPFOLGINGSTATUS_ID = exports.INNREISE_OPPFOLGINGSTATUS_ID = 'uI17SVSOZmQ';
+	
+	// Lookup IDs
+	
+	var COUNTRY_LOOKUP_ID = exports.COUNTRY_LOOKUP_ID = 'ynHtyLDVeJO';
+	var STATUS_OPPFOLGNING_LOOKUP_ID = exports.STATUS_OPPFOLGNING_LOOKUP_ID = 'IDHxRNOGuSS';
 
 /***/ }),
 /* 29 */
@@ -37430,11 +37458,15 @@
 
 /***/ }),
 /* 300 */
-/***/ (function(module, exports) {
+/***/ (function(module, exports, __webpack_require__) {
 
-	'use strict';
+	"use strict";
 	
 	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+	
+	var _constants = __webpack_require__(28);
+	
+	var _converters = __webpack_require__(6);
 	
 	function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
 	
@@ -37644,7 +37676,7 @@
 	                                        }
 	
 	                                    case 3:
-	                                    case 'end':
+	                                    case "end":
 	                                        return _context.stop();
 	                                }
 	                            }
@@ -37674,6 +37706,76 @@
 	            }, function (error) {
 	                $scope.setServerResponse(serverResponse);
 	            });
+	        } else if (serverResponse.rows && serverResponse.rows.length > 0 && $scope.base.selectedProgram.id == _constants.INNREISE_PROGRAM_ID) {
+	            try {
+	                var teis = [];
+	                serverResponse.rows.forEach(function (row) {
+	                    teis.push(row[0]);
+	                });
+	                MetaDataFactory.getAll('optionSets').then(function (optionSets) {
+	                    console.log(optionSets);
+	                    serverResponse.headers.push({
+	                        name: 'Avreiseland',
+	                        column: 'Avreiseland',
+	                        hidden: false,
+	                        meta: false,
+	                        type: 'java.lang.String'
+	                    });
+	                    serverResponse.headers.push({
+	                        name: 'Innreisedato',
+	                        column: 'Innreisedato',
+	                        hidden: false,
+	                        meta: false,
+	                        type: 'java.lang.String'
+	                    });
+	                    TEIService.getListWithProgramData(teis, $scope.base.selectedProgram.id, _constants.INNREISE_AVREISELAND_DATA_ELEMENT_ID, _constants.INNREISEINFORMASJON_PROGRAM_STAGE_ID, $scope.selectedOrgUnit.id, 'transferStage').then(function (res) {
+	                        try {
+	                            serverResponse.rows.forEach(function (row) {
+	                                var countryCode = res[row[0]].dataValue;
+	                                var countryLookup = optionSets.find(function (option) {
+	                                    return option.id === _constants.COUNTRY_LOOKUP_ID;
+	                                });
+	                                var country = countryLookup && countryLookup.options.find(function (country) {
+	                                    return country.code === countryCode;
+	                                });
+	                                row.push(country ? country.displayName : countryCode);
+	                                var eventDate = (0, _converters.convertDatestringToDDMMYYYY)(res[row[0]].eventDate);
+	                                row.push(eventDate);
+	                            });
+	                            $scope.setServerResponse(serverResponse);
+	                        } catch (err) {
+	                            $scope.setServerResponse(serverResponse);
+	                        }
+	                    }).then(function () {
+	                        serverResponse.headers.push({
+	                            name: 'Oppfolgingstatus',
+	                            column: 'Oppfolgingstatus',
+	                            hidden: false,
+	                            meta: false,
+	                            type: 'java.lang.String'
+	                        });
+	
+	                        TEIService.getListWithProgramData(teis, $scope.base.selectedProgram.id, _constants.INNREISE_OPPFOLGINGSTATUS_ID, _constants.INNREISEINFORMASJON_PROGRAM_STAGE_ID, $scope.selectedOrgUnit.id, 'transferStage').then(function (res) {
+	                            serverResponse.rows.forEach(function (row) {
+	                                var statusCode = res[row[0]].dataValue;
+	                                var statusLookup = optionSets.find(function (option) {
+	                                    return option.id === _constants.STATUS_OPPFOLGNING_LOOKUP_ID;
+	                                });
+	                                var status = statusLookup && statusLookup.options.find(function (status) {
+	                                    return status.code === statusCode;
+	                                });
+	
+	                                row.push(status ? status.displayName : statusCode);
+	                            });
+	                            $scope.setServerResponse(serverResponse);
+	                        });
+	                    });
+	                    $scope.setServerResponse(serverResponse);
+	                });
+	            } catch (err) {
+	                console.log(err);
+	                $scope.setServerResponse(serverResponse);
+	            }
 	        } else {
 	            $scope.setServerResponse(serverResponse);
 	        }
@@ -54826,4 +54928,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-e0801c8064ad6793de17.js.map
+//# sourceMappingURL=app-4657ff56d78edd45bf66.js.map
