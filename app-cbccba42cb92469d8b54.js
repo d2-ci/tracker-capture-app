@@ -19099,7 +19099,9 @@
 	        try {
 	            userId = JSON.parse(sessionStorage.USER_PROFILE).id;
 	        } finally {}
-	        return FNrLookupService.lookupLabSvar($scope.selectedTei.ZSt07qyq6Pt, CurrentSelection.currentSelection.orgUnit.code, userId);
+	        var fnr = $scope.selectedTei.ZSt07qyq6Pt ? $scope.selectedTei.ZSt07qyq6Pt : $scope.selectedTei.fkUN6jLp7K4;
+	
+	        return FNrLookupService.lookupLabSvar(fnr, CurrentSelection.currentSelection.orgUnit.code, userId);
 	    };
 	
 	    $scope.showLabTest = function () {
@@ -54976,4 +54978,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-a887d7ca38bde3f0bfc0.js.map
+//# sourceMappingURL=app-cbccba42cb92469d8b54.js.map
