@@ -38199,10 +38199,7 @@
 	        metaDataFactory.getAll('optionSets').then(function (optionSets) {
 	            try {
 	                setHeader(serverResponse, 'Avreiseland');
-	                var countryLookupFun = function countryLookupFun(countryCode) {
-	                    return optionSetsDataLookup(optionSets, _constants.COUNTRY_LOOKUP_ID, countryCode);
-	                };
-	                setDataValue(serverResponse, eventData, _constants.INNREISE_AVREISELAND_DATA_ELEMENT_ID, countryLookupFun);
+	                setDataValue(serverResponse, eventData, _constants.INNREISE_AVREISELAND_DATA_ELEMENT_ID);
 	
 	                setHeader(serverResponse, 'Innreisedato');
 	                setDataValue(serverResponse, eventData, 'eventDate', _converters.convertDatestringToDDMMYYYY);
@@ -55147,4 +55144,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-39e0d66667477697ad45.js.map
+//# sourceMappingURL=app-3e210a1b56a66737c19f.js.map
