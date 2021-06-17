@@ -19571,7 +19571,6 @@
 	var OPPFOLGING_STAGE_ID = exports.OPPFOLGING_STAGE_ID = 'htARRqRQNnz';
 	var DUPLIKAT_OPPFOLGING_STAGE_ID = exports.DUPLIKAT_OPPFOLGING_STAGE_ID = 'ggzSsCfSnZh';
 	var DUPLIKAT_INNREISE_STAGE_ID = exports.DUPLIKAT_INNREISE_STAGE_ID = 'yfGvhpnZCxq';
-	
 	// Entity types
 	var INNREISE_ENTITY_TYPE = exports.INNREISE_ENTITY_TYPE = 'MCPQUTHX1Ze';
 	
@@ -20260,12 +20259,15 @@
 /* 32 */
 /***/ (function(module, exports, __webpack_require__) {
 
-	'use strict';
+	"use strict";
 	
 	var _custom_override_flags = __webpack_require__(30);
 	
-	var trackerCapture = angular.module('trackerCapture'); /* global angular, trackerCapture */
+	var _constants = __webpack_require__(28);
 	
+	/* global angular, trackerCapture */
+	
+	var trackerCapture = angular.module('trackerCapture');
 	trackerCapture.controller('DataEntryController', ["$rootScope", "$scope", "$modal", "$filter", "$log", "$timeout", "$translate", "$window", "$q", "$parse", "$location", "CommonUtils", "DateUtils", "DashboardLayoutService", "EventUtils", "orderByFilter", "SessionStorageService", "EnrollmentService", "DHIS2EventFactory", "ModalService", "NotificationService", "CurrentSelection", "TrackerRulesExecutionService", "CustomFormService", "PeriodService", "OptionSetService", "AttributesFactory", "TrackerRulesFactory", "EventCreationService", "AuthorityService", "AccessUtils", "TCOrgUnitService", "UsersService", function ($rootScope, $scope, $modal, $filter, $log, $timeout, $translate, $window, $q, $parse, $location, CommonUtils, DateUtils, DashboardLayoutService, EventUtils, orderByFilter, SessionStorageService, EnrollmentService, DHIS2EventFactory, ModalService, NotificationService, CurrentSelection, TrackerRulesExecutionService, CustomFormService, PeriodService, OptionSetService, AttributesFactory, TrackerRulesFactory, EventCreationService, AuthorityService, AccessUtils, TCOrgUnitService, UsersService) {
 	
 	    //Unique instance id for the controller:
@@ -22551,12 +22553,16 @@
 	    };
 	
 	    $scope.eventEditable = function (isButton) {
+	
 	        if (!$scope.currentStage || !$scope.currentStage.access || !$scope.currentStage.access.data.write) return false;
 	        if ($scope.selectedOrgUnit.closedStatus || $scope.selectedEnrollment.status !== 'ACTIVE') return false;
 	        if (isButton) {
 	            if (!$scope.currentEvent || $scope.currentEvent.editingNotAllowed && !$scope.userAuthority.canUncompleteEvent || $scope.currentEvent.expired && !$scope.userAuthority.canEditExpiredStuff) return false;
 	        } else {
 	            if (!$scope.currentEvent || $scope.currentEvent.editingNotAllowed || $scope.currentEvent.expired && !$scope.userAuthority.canEditExpiredStuff) return false;
+	        }
+	        if ($scope.currentEvent.programStage === _constants.INNREISEINFORMASJON_PROGRAM_STAGE_ID) {
+	            return false;
 	        }
 	        return true;
 	    };
@@ -54978,4 +54984,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-e9ef5049b838c52fb3c7.js.map
+//# sourceMappingURL=app-5822896e62584feec499.js.map
