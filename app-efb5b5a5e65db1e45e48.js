@@ -38112,18 +38112,20 @@
 	    teis.forEach(function (tei) {
 	        var enrollment = getNewestEnrollment(tei);
 	        var event = getNewestEventFromProgramStageWithData(enrollment, programStageId);
-	        elementIds.forEach(function (elementId) {
-	            var dataValue = getDataElementFromEvent(event, elementId);
+	        if (event && enrollment) {
+	            elementIds.forEach(function (elementId) {
+	                var dataValue = getDataElementFromEvent(event, elementId);
 	
-	            if (dataValue) {
-	                teiDictionary[tei.trackedEntityInstance] = _extends({}, teiDictionary[tei.trackedEntityInstance], _defineProperty({}, elementId, dataValue));
-	            }
-	        });
-	        if (teiDictionary[tei.trackedEntityInstance]) {
-	            teiDictionary[tei.trackedEntityInstance] = _extends({}, teiDictionary[tei.trackedEntityInstance], {
-	                eventDate: event.eventDate,
-	                enrollmentDate: enrollment.enrollmentDate
+	                if (dataValue) {
+	                    teiDictionary[tei.trackedEntityInstance] = _extends({}, teiDictionary[tei.trackedEntityInstance], _defineProperty({}, elementId, dataValue));
+	                }
 	            });
+	            if (teiDictionary[tei.trackedEntityInstance]) {
+	                teiDictionary[tei.trackedEntityInstance] = _extends({}, teiDictionary[tei.trackedEntityInstance], {
+	                    eventDate: event.eventDate,
+	                    enrollmentDate: enrollment.enrollmentDate
+	                });
+	            }
 	        }
 	    });
 	    return teiDictionary;
@@ -38139,18 +38141,18 @@
 	            return firstDateIsBeforeSecond(e1.eventDate, e2.eventDate);
 	        })[0];
 	    }
-	    return [];
+	    return undefined;
 	}
 	
 	function getNewestEventFromProgramStageWithData(enrollment, programStageId) {
-	    if (enrollment.events && enrollment.events.length > 0) {
+	    if (enrollment && enrollment.events && enrollment.events.length > 0) {
 	        return enrollment.events.filter(function (event) {
 	            return event.programStage == programStageId && event.dataValues && event.dataValues.length > 0;
 	        }).sort(function (e1, e2) {
 	            return firstDateIsBeforeSecond(e1.eventDate, e2.eventDate);
 	        })[0];
 	    }
-	    return [];
+	    return undefined;
 	}
 	
 	function getDataElementFromEvent(event, dataElementId) {
@@ -55144,4 +55146,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-577c56d9009e5c7d53e1.js.map
+//# sourceMappingURL=app-efb5b5a5e65db1e45e48.js.map
