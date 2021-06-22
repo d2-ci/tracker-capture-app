@@ -38112,7 +38112,7 @@
 	    teis.forEach(function (tei) {
 	        var enrollment = getNewestEnrollment(tei);
 	        var event = getNewestEventFromProgramStageWithData(enrollment, programStageId);
-	        if (event && enrollment) {
+	        if (event && enrollment && elementIds) {
 	            elementIds.forEach(function (elementId) {
 	                var dataValue = getDataElementFromEvent(event, elementId);
 	
@@ -38157,11 +38157,13 @@
 	
 	function getDataElementFromEvent(event, dataElementId) {
 	    var outValue;
-	    event.dataValues.forEach(function (dataValue) {
-	        if (dataValue.dataElement == dataElementId) {
-	            outValue = dataValue.value;
-	        }
-	    });
+	    if (event && event.dataValues) {
+	        event.dataValues.forEach(function (dataValue) {
+	            if (dataValue.dataElement == dataElementId) {
+	                outValue = dataValue.value;
+	            }
+	        });
+	    }
 	
 	    return outValue;
 	}
@@ -38265,7 +38267,13 @@
 	
 	    serverResponse.rows.forEach(function (row) {
 	        var teiId = row[0];
-	        var dataValue = dataConverter(eventData[teiId][dataId]);
+	        var dataValue;
+	        if (eventData && teiId && eventData[teiId] && dataId && eventData[teiId][dataId]) {
+	            dataValue = dataConverter(eventData[teiId][dataId]);
+	        } else {
+	            dataValue = undefined;
+	        }
+	
 	        row.push(dataValue);
 	    });
 	}
@@ -55146,4 +55154,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-c7d90025d782ee9c0efd.js.map
+//# sourceMappingURL=app-447fef616033a82cf429.js.map
