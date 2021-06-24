@@ -6376,6 +6376,7 @@
 	exports.convertToCorrectDateString = convertToCorrectDateString;
 	exports.getFullYear = getFullYear;
 	exports.convertDatestringToDDMMYYYY = convertDatestringToDDMMYYYY;
+	exports.convertDatestringToFullTime = convertDatestringToFullTime;
 	function convertToCorrectDateString(datestring, dateformat) {
 	    var day;
 	    var month;
@@ -6475,6 +6476,10 @@
 	    var year = date.getFullYear();
 	
 	    return day + '-' + month + '-' + year;
+	}
+	
+	function convertDatestringToFullTime(datestring) {
+	    return new Intl.DateTimeFormat('nb-no', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(datestring));
 	}
 
 /***/ }),
@@ -37960,28 +37965,27 @@
 	        return program && program.id == 'B7gOGodZkcs';
 	    };
 	
-	    $scope.canSyncLabTests = true;
+	    $scope.hasStartedSync = false;
 	    $scope.syncLabTests = function () {
-	        $scope.canSyncLabTests = false;
 	        if ($scope.useLabTestForProgram($scope.selectedProgram)) {
 	            var userId;
 	            try {
 	                userId = JSON.parse(sessionStorage.USER_PROFILE).id;
 	            } finally {}
+	            $scope.hasStartedSync = true;
 	            FNrLookupService.startLabTestSync($scope.selectedOrgUnit.code, userId).then(function (svar) {
 	                if (!svar) {
-	                    $scope.canSyncLabTests = true;
+	                    $scope.hasStartedSync = false;
 	                }
 	            });
 	        }
 	    };
 	
-	    $scope.labTestActivated = false;
-	    $scope.labTestNotActivated = false;
-	    $scope.labTestQueryFailed = false;
-	    $scope.labTestSyncDate = null;
-	    $scope.immigrationSyncDate = null;
-	    $scope.canNotAccessLabTests = false;
+	    $scope.provesvarAktivert = false;
+	    $scope.harTilgangTilProvesvar = false;
+	    $scope.innreiseSistOppdatert = false;
+	    $scope.innreiseProvesvarSistOppdatert = false;
+	    $scope.kanStarteNyProvesvarSynk = null;
 	
 	    $scope.checkLabTestStatus = function () {
 	        if ($scope.useLabTestForProgram($scope.selectedProgram)) {
@@ -37991,16 +37995,24 @@
 	            } finally {}
 	            FNrLookupService.getLabTestStatus($scope.selectedOrgUnit.code, userId).then(function (svar) {
 	                if (svar) {
-	                    $scope.labTestActivated = svar.harTilgangTilProvesvar;
-	                    $scope.labTestNotActivated = !svar.harTilgangTilProvesvar;
-	                    $scope.labTestSyncDate = svar.innreiseProvesvarSistOppdatert;
-	                    $scope.immigrationSyncDate = svar.innreiseSistOppdatert;
-	                    $scope.canNotAccessLabTests = !svar.harTilgangTilProvesvar;
+	                    $scope.provesvarAktivert = svar.provesvarAktivert;
+	                    $scope.innreiseProvesvarSistOppdatert = svar.innreiseProvesvarSistOppdatert ? (0, _converters.convertDatestringToFullTime)(svar.innreiseProvesvarSistOppdatert) : undefined;
+	                    $scope.innreiseSistOppdatert = svar.innreiseSistOppdatert ? (0, _converters.convertDatestringToFullTime)(svar.innreiseSistOppdatert) : undefined;
+	                    $scope.kanStarteNyProvesvarSynk = svar.kanStarteNyProvesvarSynk;
+	                    $scope.harTilgangTilProvesvar = svar.harTilgangTilProvesvar;
 	                } else {
 	                    $scope.labTestQueryFailed = true;
 	                }
 	            });
 	        }
+	    };
+	
+	    $scope.showNoProvesvardataHentet = function () {
+	        return !$scope.innreiseProvesvarSistOppdatert && !$scope.hasStartedSync;
+	    };
+	
+	    $scope.showProvesvarSyncButton = function () {
+	        return $scope.harTilgangTilProvesvar && $scope.provesvarAktivert && $scope.kanStarteNyProvesvarSynk && !$scope.hasStartedSync;
 	    };
 	
 	    $scope.checkLabTestStatus();
@@ -55198,4 +55210,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-4e5d24e5ccbfb722213d.js.map
+//# sourceMappingURL=app-0899bf93a7cb69a66085.js.map
