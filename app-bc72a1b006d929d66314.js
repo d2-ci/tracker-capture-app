@@ -19094,14 +19094,30 @@
 	        return attributeMandatory || $scope.mandatoryFields[attributeId];
 	    };
 	
+	    $scope.shouldShowLabTest = function () {
+	        return !!$scope.getBestNumberForLabTest();
+	    };
+	
+	    $scope.getBestNumberForLabTest = function () {
+	        if ($scope.selectedTei[_constants.PROFIL_NASJONALT_FELLES_HJELPENUMMER] && $scope.selectedTei[_constants.PROFIL_NASJONALT_FELLES_HJELPENUMMER].toString().length === 11) {
+	            return $scope.selectedTei[_constants.PROFIL_NASJONALT_FELLES_HJELPENUMMER];
+	        }
+	        if ($scope.selectedTei[_constants.PROFIL_FNR] && $scope.selectedTei[_constants.PROFIL_FNR].length === 11) {
+	            return $scope.selectedTei[_constants.PROFIL_FNR];
+	        }
+	        if ($scope.selectedTei[_constants.PROFIL_FNR_AS_WELL] && $scope.selectedTei[_constants.PROFIL_FNR_AS_WELL].length === 11) {
+	            return $scope.selectedTei[_constants.PROFIL_FNR_AS_WELL];
+	        }
+	        return undefined;
+	    };
+	
 	    $scope.labTestLookup = function () {
 	        var userId;
 	        try {
 	            userId = JSON.parse(sessionStorage.USER_PROFILE).id;
 	        } finally {}
-	        var fnr = $scope.selectedTei.ZSt07qyq6Pt ? $scope.selectedTei.ZSt07qyq6Pt : $scope.selectedTei.fkUN6jLp7K4;
-	
-	        return FNrLookupService.lookupLabSvar(fnr, CurrentSelection.currentSelection.orgUnit.code, userId);
+	        var labTestLookupNumber = $scope.getBestNumberForLabTest();
+	        return FNrLookupService.lookupLabSvar(labTestLookupNumber, CurrentSelection.currentSelection.orgUnit.code, userId);
 	    };
 	
 	    $scope.showLabTest = function () {
@@ -19586,6 +19602,9 @@
 	var INNREISE_OPPHOLDSSTED_ID = exports.INNREISE_OPPHOLDSSTED_ID = 'LYrjfgwVNVn';
 	var INNREISE_ARBEIDSGIVER_NAVN_ID = exports.INNREISE_ARBEIDSGIVER_NAVN_ID = 'uncjwHvpOWP';
 	
+	var PROFIL_NASJONALT_FELLES_HJELPENUMMER = exports.PROFIL_NASJONALT_FELLES_HJELPENUMMER = 'WBjHgYajTsb';
+	var PROFIL_FNR = exports.PROFIL_FNR = 'fkUN6jLp7K4';
+	var PROFIL_FNR_AS_WELL = exports.PROFIL_FNR_AS_WELL = 'ZSt07qyq6Pt';
 	// Lookup IDs
 	
 	var COUNTRY_LOOKUP_ID = exports.COUNTRY_LOOKUP_ID = 'ynHtyLDVeJO';
@@ -55154,4 +55173,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-26e419a58963241b8046.js.map
+//# sourceMappingURL=app-bc72a1b006d929d66314.js.map
