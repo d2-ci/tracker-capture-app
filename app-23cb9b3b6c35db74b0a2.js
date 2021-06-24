@@ -7753,7 +7753,7 @@
 	
 	
 	// module
-	exports.push([module.id, "\n.optionListContainer {\n    position: relative;\n}\n\n.optionListContainerAssignUser {\n    position: relative;\n    margin: 5px 0px;\n}\n\n.optionListInput {\n    width: 100%;\n    height: 34px;\n    display: flex;\n    border-radius: 4px;\n    border: 1px solid #aaa;\n    background-color: white;\n    cursor: pointer;\n}\n.optionListInputTextPlaceholder {\n    color: grey;\n}\n.optionListInputOpen {\n    border-bottom-left-radius: 0px;\n    border-bottom-right-radius: 0px;\n}\n.optionListInputText {\n    flex-grow: 1;\n    line-height: 34px;\n    padding-left: 5px;\n    font-size: 14px;\n    overflow: hidden;\n    white-space: nowrap;\n    text-overflow: ellipsis;\n}\n.optionListInputDelete {\n    padding-right: 5px;\n    padding-left: 5px;\n    line-height: 34px;\n}\n.optionListInputToggle {\n    background-color: #ccc;\n    border-left: 1px solid #aaa;\n    width:18px;\n    line-height: 34px;\n    padding-left: 4px;\n}\n.optionListPopup {\n    position: absolute;\n    background-color:white;\n    border:1px solid #aaa;\n    border-top: none;\n    border-bottom-left-radius: 4px;\n    border-bottom-right-radius: 4px;\n    z-index: 100;\n    width: 100%;\n    box-shadow: 0px 0px 2px 0px #aaa;\n    user-select: none;\n}\n.optionListSearchInputContainer {\n    padding:5px;\n}\n.optionListItem {\n    height:30px;\n    line-height:30px;\n    padding-left:5px;\n    padding-right: 5px;\n    width: 100%;\n    overflow: hidden;\n    white-space: nowrap;\n    text-overflow: ellipsis;\n    cursor: pointer;\n}\n.optionListItemSelected {\n    background-color: lightgray;\n}\n.optionListItem:hover {\n    background-color: lightgray;\n}\n.optionListVsRepeater {\n    max-height:200px;\n    width: 100%;\n    overflow: auto;\n}\n\n.inputDnD .form-control-file {\n    position: relative;\n    width: 100%;\n    height: 100%;\n    min-height: 6em;\n    outline: none;\n    visibility: hidden;\n    cursor: pointer;\n    background-color: #c61c23;\n    box-shadow: 0 0 5px solid currentColor;\n}\n.inputDnD .form-control-file:before {\n    content: attr(data-title);\n    position: absolute;\n    top: 0.5em;\n    left: 0;\n    width: 100%;\n    min-height: 6em;\n    line-height: 2em;\n    padding-top: 1.5em;\n    opacity: 1;\n    visibility: visible;\n    text-align: center;\n    border: 0.15em dashed currentColor;\n    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);\n    overflow: hidden;\n    border-top-left-radius: 15px;\n    border-top-right-radius: 15px;\n    border-bottom-left-radius: 15px;\n    border-bottom-right-radius: 15px;\n}\n.inputDnD .form-control-file:hover:before {\n    border-style: solid;\n    box-shadow: inset 0px 0px 0px 0.05em currentColor;\n    border-bottom-right-radius: 15px;\n    border-top-right-radius: 15px;\n    border-bottom-left-radius: 15px;\n    border-top-left-radius: 15px;\n}\n\n.has-float-label {\n    position: relative;\n}\n.has-float-label label {\n    position: absolute;\n    cursor: text;\n    font-size: 75%;\n    opacity: 1;\n    -webkit-transition: all .2s;\n    transition: all .2s;\n    top: -.5em;\n    left: 5px;\n    z-index: 3;\n    line-height: 1;\n    padding: 0 1px;\n}\n.has-float-label label::after {\n    content: \" \";\n    display: block;\n    position: absolute;\n    height: 2px;\n    top: 50%;\n    left: -.2em;\n    right: -.2em;\n    z-index: -1;\n}\n.has-float-label .form-control::-webkit-input-placeholder {\n    opacity: 1;\n    -webkit-transition: all .2s;\n    transition: all .2s;\n}\n.has-float-label .form-control:placeholder-shown:not(:focus)::-webkit-input-placeholder {\n    opacity: 1;\n}\n.has-float-label .form-control:placeholder-shown:not(:focus)+label {\n    pointer-events: none;\n    font-size: 14px;\n    opacity: 0;\n    top: 1em;\n    font-weight: 400;\n}\n.input-group .has-float-label {\n    display: table-cell;\n}\n.input-group .has-float-label .form-control {\n    border-radius: 4px;\n}\n.input-group .has-float-label:not(:last-child) .form-control {\n    border-bottom-right-radius: 0;\n    border-top-right-radius: 0;\n}\n.input-group .has-float-label:not(:first-child) .form-control {\n    border-bottom-left-radius: 0;\n    border-top-left-radius: 0;\n    margin-left: -1px;\n}\n\ndiv .paging-navigation {\n    margin-right: 0;\n    text-align: right;\n}", ""]);
+	exports.push([module.id, "\n.optionListContainer {\n    position: relative;\n}\n\n.optionListContainerAssignUser {\n    position: relative;\n    margin: 5px 0px;\n}\n\n.optionListInput {\n    width: 100%;\n    height: 34px;\n    display: flex;\n    border-radius: 4px;\n    border: 1px solid #aaa;\n    background-color: white;\n    cursor: pointer;\n}\n.optionListInputTextPlaceholder {\n    color: grey;\n}\n.optionListInputOpen {\n    border-bottom-left-radius: 0px;\n    border-bottom-right-radius: 0px;\n}\n.optionListInputText {\n    flex-grow: 1;\n    line-height: 34px;\n    padding-left: 5px;\n    font-size: 14px;\n    overflow: hidden;\n    white-space: nowrap;\n    text-overflow: ellipsis;\n}\n.optionListInputDelete {\n    padding-right: 5px;\n    padding-left: 5px;\n    line-height: 34px;\n}\n.optionListInputToggle {\n    background-color: #ccc;\n    border-left: 1px solid #aaa;\n    width:18px;\n    line-height: 34px;\n    padding-left: 4px;\n}\n.optionListPopup {\n    position: absolute;\n    background-color:white;\n    border:1px solid #aaa;\n    border-top: none;\n    border-bottom-left-radius: 4px;\n    border-bottom-right-radius: 4px;\n    z-index: 100;\n    width: 100%;\n    box-shadow: 0px 0px 2px 0px #aaa;\n    user-select: none;\n}\n.optionListSearchInputContainer {\n    padding:5px;\n}\n.optionListItem {\n    height:30px;\n    line-height:30px;\n    padding-left:5px;\n    padding-right: 5px;\n    width: 100%;\n    overflow: hidden;\n    white-space: nowrap;\n    text-overflow: ellipsis;\n    cursor: pointer;\n}\n.optionListItemSelected {\n    background-color: lightgray;\n}\n.optionListItem:hover {\n    background-color: lightgray;\n}\n.optionListVsRepeater {\n    max-height:200px;\n    width: 100%;\n    overflow: auto;\n}\n\n.inputDnD .form-control-file {\n    position: relative;\n    width: 100%;\n    height: 100%;\n    min-height: 6em;\n    outline: none;\n    visibility: hidden;\n    cursor: pointer;\n    background-color: #c61c23;\n    box-shadow: 0 0 5px solid currentColor;\n}\n.inputDnD .form-control-file:before {\n    content: attr(data-title);\n    position: absolute;\n    top: 0.5em;\n    left: 0;\n    width: 100%;\n    min-height: 6em;\n    line-height: 2em;\n    padding-top: 1.5em;\n    opacity: 1;\n    visibility: visible;\n    text-align: center;\n    border: 0.15em dashed currentColor;\n    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);\n    overflow: hidden;\n    border-top-left-radius: 15px;\n    border-top-right-radius: 15px;\n    border-bottom-left-radius: 15px;\n    border-bottom-right-radius: 15px;\n}\n.inputDnD .form-control-file:hover:before {\n    border-style: solid;\n    box-shadow: inset 0px 0px 0px 0.05em currentColor;\n    border-bottom-right-radius: 15px;\n    border-top-right-radius: 15px;\n    border-bottom-left-radius: 15px;\n    border-top-left-radius: 15px;\n}\n\n.has-float-label {\n    position: relative;\n}\n.has-float-label label {\n    position: absolute;\n    cursor: text;\n    font-size: 75%;\n    opacity: 1;\n    -webkit-transition: all .2s;\n    transition: all .2s;\n    top: -.5em;\n    left: 5px;\n    z-index: 3;\n    line-height: 1;\n    padding: 0 1px;\n}\n.has-float-label label::after {\n    content: \" \";\n    display: block;\n    position: absolute;\n    height: 2px;\n    top: 50%;\n    left: -.2em;\n    right: -.2em;\n    z-index: -1;\n}\n.has-float-label .form-control::-webkit-input-placeholder {\n    opacity: 1;\n    -webkit-transition: all .2s;\n    transition: all .2s;\n}\n.has-float-label .form-control:placeholder-shown:not(:focus)::-webkit-input-placeholder {\n    opacity: 1;\n}\n.has-float-label .form-control:placeholder-shown:not(:focus)+label {\n    pointer-events: none;\n    font-size: 14px;\n    opacity: 0;\n    top: 1em;\n    font-weight: 400;\n}\n.input-group .has-float-label {\n    display: table-cell;\n}\n.input-group .has-float-label .form-control {\n    border-radius: 4px;\n}\n.input-group .has-float-label:not(:last-child) .form-control {\n    border-bottom-right-radius: 0;\n    border-top-right-radius: 0;\n}\n.input-group .has-float-label:not(:first-child) .form-control {\n    border-bottom-left-radius: 0;\n    border-top-left-radius: 0;\n    margin-left: -1px;\n}\n\ndiv .paging-navigation {\n    margin-right: 0;\n    text-align: right;\n}\n", ""]);
 	
 	// exports
 
@@ -15621,6 +15621,20 @@
 	    },
 	    getLabTestStatus: function getLabTestStatus(kommuneNr, userId) {
 	      var url = '../' + DHIS2URL + '/innreise/synkroniser/status';
+	      var promise = $http({
+	        method: 'POST',
+	        url: url,
+	        data: { kommunenr: kommuneNr, userid: userId },
+	        headers: { 'Content-Type': 'application/json', 'ingress-csrf': $cookies['ingress-csrf'] }
+	      }).then(function (response) {
+	        return response.data;
+	      }, function (error) {
+	        return null;
+	      });
+	      return promise;
+	    },
+	    startLabTestSync: function startLabTestSync(kommuneNr, userId) {
+	      var url = '../' + DHIS2URL + '/innreise/synkroniser/start';
 	      var promise = $http({
 	        method: 'POST',
 	        url: url,
@@ -37949,6 +37963,17 @@
 	    $scope.canSyncLabTests = true;
 	    $scope.syncLabTests = function () {
 	        $scope.canSyncLabTests = false;
+	        if ($scope.useLabTestForProgram($scope.selectedProgram)) {
+	            var userId;
+	            try {
+	                userId = JSON.parse(sessionStorage.USER_PROFILE).id;
+	            } finally {}
+	            FNrLookupService.startLabTestSync($scope.selectedOrgUnit.code, userId).then(function (svar) {
+	                if (!svar) {
+	                    $scope.canSyncLabTests = true;
+	                }
+	            });
+	        }
 	    };
 	
 	    $scope.labTestActivated = false;
@@ -37966,8 +37991,8 @@
 	            } finally {}
 	            FNrLookupService.getLabTestStatus($scope.selectedOrgUnit.code, userId).then(function (svar) {
 	                if (svar) {
-	                    $scope.labTestActivated = svar.labTestActivated;
-	                    $scope.labTestNotActivated = !svar.labTestActivated;
+	                    $scope.labTestActivated = svar.harTilgangTilProvesvar;
+	                    $scope.labTestNotActivated = !svar.harTilgangTilProvesvar;
 	                    $scope.labTestSyncDate = svar.innreiseProvesvarSistOppdatert;
 	                    $scope.immigrationSyncDate = svar.innreiseSistOppdatert;
 	                    $scope.canNotAccessLabTests = !svar.harTilgangTilProvesvar;
@@ -55173,4 +55198,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-98dfa3858e0b3818db96.js.map
+//# sourceMappingURL=app-23cb9b3b6c35db74b0a2.js.map
