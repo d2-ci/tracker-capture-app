@@ -38387,11 +38387,13 @@
 
 /***/ }),
 /* 304 */
-/***/ (function(module, exports) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
 	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+	
+	var _constants = __webpack_require__(28);
 	
 	var trackerCapture = angular.module('trackerCapture');
 	
@@ -38645,7 +38647,11 @@
 	    };
 	
 	    var _canOpenRegistration = function _canOpenRegistration() {
+	
 	        if ($scope.base.selectedProgramForSearch) {
+	            if ($scope.base.selectedProgramForSearch.id === _constants.INNREISE_PROGRAM_ID) {
+	                return false;
+	            }
 	            return AccessUtils.isWritable($scope.base.selectedProgramForSearch) && AccessUtils.isWritable($scope.trackedEntityTypes.selected);
 	        } else if ($scope.trackedEntityTypes.selected) {
 	            return AccessUtils.isWritable($scope.trackedEntityTypes.selected);
@@ -55239,4 +55245,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-89c8fa834beff536ea36.js.map
+//# sourceMappingURL=app-6f1d76c7001bc3f7c873.js.map
