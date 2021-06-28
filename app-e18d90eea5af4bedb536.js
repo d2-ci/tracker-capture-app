@@ -19926,6 +19926,7 @@
 	        $scope.programStageNames = selections.prStNames;
 	        $scope.attributesById = CurrentSelection.getAttributesById();
 	        $scope.activeEnrollments = [];
+	        $scope.inactiveEnrollments = [];
 	
 	        $scope.enrollmentDateState = getDefaultReportDateState();
 	        $scope.incidentDateState = getDefaultReportDateState();
@@ -19933,6 +19934,13 @@
 	        angular.forEach(selections.enrollments, function (en) {
 	            if (en.status === "ACTIVE" && $scope.selectedProgram && $scope.selectedProgram.id !== en.program) {
 	                $scope.activeEnrollments.push(en);
+	            }
+	            if (en.status === "COMPLETED" && $scope.selectedProgram && $scope.selectedProgram.id !== en.program) {
+	                if (!$scope.inactiveEnrollments.find(function (inactive) {
+	                    return inactive.program === en.program;
+	                })) {
+	                    $scope.inactiveEnrollments.push(en);
+	                }
 	            }
 	        });
 	        if ($scope.selectedProgram) {
@@ -55252,4 +55260,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-95fa1bc9ba089314b86d.js.map
+//# sourceMappingURL=app-e18d90eea5af4bedb536.js.map
