@@ -78,8 +78,6 @@
 	
 	__webpack_require__(17);
 	
-	__webpack_require__(18);
-	
 	__webpack_require__(19);
 	
 	__webpack_require__(20);
@@ -93,6 +91,8 @@
 	__webpack_require__(24);
 	
 	__webpack_require__(25);
+	
+	__webpack_require__(26);
 	
 	__webpack_require__(32);
 	
@@ -15702,13 +15702,15 @@
 
 /***/ }),
 /* 17 */
-/***/ (function(module, exports) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	/* global directive, selection, dhis2, angular */
 	
 	'use strict';
 	
 	/* Directives */
+	
+	var _constants = __webpack_require__(18);
 	
 	var trackerCaptureDirectives = angular.module('trackerCaptureDirectives', []).directive('stringToNumber', function () {
 	    return {
@@ -16439,12 +16441,99 @@
 	                });
 	                $scope.numberOfSelectedRows = newState ? rows.length : 0;
 	            };
+	            $scope.setColTitle = function (tei, attrId) {
+	                if (attrId === _constants.INNREISE_KARANTENEKODE_2_ATTRIBUTE_ID && tei['Karantenekode2_tekst']) {
+	                    return tei['Karantenekode2_tekst'];
+	                }
+	                if (attrId === _constants.INNREISE_KARANTENEKODE_4_ATTRIBUTE_ID && tei['Karantenekode4_tekst']) {
+	                    return tei['Karantenekode4_tekst'];
+	                }
+	                if (attrId === _constants.INNREISE_KARANTENETYPE_ATTRIBUTE_ID && tei['Karantenetype_tekst']) {
+	                    return tei['Karantenetype_tekst'];
+	                }
+	
+	                return 'Velg';
+	            };
+	            $scope.setColClass = function (tei, attrId) {
+	                if (attrId === _constants.INNREISE_OPPFOLGINGSTATUS_ATTRIBUTE_ID) {
+	                    if (tei[attrId] === 'OK') {
+	                        return 'tei-status-ok';
+	                    }
+	                    if (tei[attrId] === 'Ikke satt') {
+	                        return 'tei-status-not-satt';
+	                    }
+	                    if (tei[attrId] === 'Ikke svar') {
+	                        return 'tei-status-not-svar';
+	                    }
+	                    if (tei[attrId] === 'Ikke OK') {
+	                        return 'tei-status-not-ok';
+	                    }
+	                }
+	            };
 	        }]
 	    };
 	});
 
 /***/ }),
 /* 18 */
+/***/ (function(module, exports) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	// Fields
+	var DNUMBER_FIELD_ID = exports.DNUMBER_FIELD_ID = 'ZSt07qyq6Pt';
+	var BIRTH_DATE_FIELD_ID = exports.BIRTH_DATE_FIELD_ID = 'NI0QRzJvQ0k';
+	
+	// Programs
+	var NEARKONTAKT_PROGRAM_ID = exports.NEARKONTAKT_PROGRAM_ID = 'DM9n1bUw8W8';
+	var INDEKSERING_PROGRAM_ID = exports.INDEKSERING_PROGRAM_ID = 'uYjxkTbwRNf';
+	var DUPLIKAT_PROGRAM_ID = exports.DUPLIKAT_PROGRAM_ID = 'STKyXc3OT7i';
+	var INNREISE_PROGRAM_ID = exports.INNREISE_PROGRAM_ID = 'B7gOGodZkcs';
+	var DUPLIKAT_INNREISE_PROGRAM_ID = exports.DUPLIKAT_INNREISE_PROGRAM_ID = 'STKyXc3OT7i';
+	
+	// Events
+	var NAERKONTAKT_TESTRESULT_PROGRAM_STAGE_ID = exports.NAERKONTAKT_TESTRESULT_PROGRAM_STAGE_ID = 'cMEGZf48YkC';
+	var INDEKSERING_TESTRESULT_PROGRAM_STAGE_ID = exports.INDEKSERING_TESTRESULT_PROGRAM_STAGE_ID = 'dDHkBd3X8Ce';
+	var NAERKONTAKT_HELSESTATUS_PROGRAM_STAGE_ID = exports.NAERKONTAKT_HELSESTATUS_PROGRAM_STAGE_ID = 'mtYQyjaiLIU';
+	var INDEKSERING_HELSESTATUS_PROGRAM_STAGE_ID = exports.INDEKSERING_HELSESTATUS_PROGRAM_STAGE_ID = 'oqsk2Jv4k3s';
+	var INNREISEINFORMASJON_PROGRAM_STAGE_ID = exports.INNREISEINFORMASJON_PROGRAM_STAGE_ID = 'pQRu1RLcfLX';
+	var OPPFOLGING_STAGE_ID = exports.OPPFOLGING_STAGE_ID = 'htARRqRQNnz';
+	var DUPLIKAT_OPPFOLGING_STAGE_ID = exports.DUPLIKAT_OPPFOLGING_STAGE_ID = 'ggzSsCfSnZh';
+	var DUPLIKAT_INNREISE_STAGE_ID = exports.DUPLIKAT_INNREISE_STAGE_ID = 'yfGvhpnZCxq';
+	// Entity types
+	var INNREISE_ENTITY_TYPE = exports.INNREISE_ENTITY_TYPE = 'MCPQUTHX1Ze';
+	
+	// Data elements
+	var INNREISE_AVREISELAND_DATA_ELEMENT_ID = exports.INNREISE_AVREISELAND_DATA_ELEMENT_ID = 'EwrMxsQG3OX';
+	var INNREISE_OPPFOLGINGSTATUS_ID = exports.INNREISE_OPPFOLGINGSTATUS_ID = 'uI17SVSOZmQ';
+	var INNREISE_KARANTENE_ALTERNATIV_TEXT_ID = exports.INNREISE_KARANTENE_ALTERNATIV_TEXT_ID = 'YMfxPPwVfOi';
+	var INNREISE_KARANTENE_ALTERNATIV_CODE_ID = exports.INNREISE_KARANTENE_ALTERNATIV_CODE_ID = 'bllUT5vac3r';
+	var INNREISE_UNNTAK_TYPE_TEXT_ID = exports.INNREISE_UNNTAK_TYPE_TEXT_ID = 'woCg1rzHYkn';
+	var INNREISE_UNNTAK_TYPE_CODE_ID = exports.INNREISE_UNNTAK_TYPE_CODE_ID = 'CoSw0VqJgn7';
+	var INNREISE_KARANTENE_GJENOMFORING_TYPE_TEXT_ID = exports.INNREISE_KARANTENE_GJENOMFORING_TYPE_TEXT_ID = 'IWhH4IfCOX9';
+	var INNREISE_KARANTENE_GJENOMFORING_TYPE_CODE_ID = exports.INNREISE_KARANTENE_GJENOMFORING_TYPE_CODE_ID = 'fJcTMI7RD9u';
+	var INNREISE_OPPHOLDSSTED_ID = exports.INNREISE_OPPHOLDSSTED_ID = 'LYrjfgwVNVn';
+	var INNREISE_ARBEIDSGIVER_NAVN_ID = exports.INNREISE_ARBEIDSGIVER_NAVN_ID = 'uncjwHvpOWP';
+	
+	var PROFIL_NASJONALT_FELLES_HJELPENUMMER = exports.PROFIL_NASJONALT_FELLES_HJELPENUMMER = 'WBjHgYajTsb';
+	var PROFIL_FNR = exports.PROFIL_FNR = 'fkUN6jLp7K4';
+	var PROFIL_FNR_AS_WELL = exports.PROFIL_FNR_AS_WELL = 'ZSt07qyq6Pt';
+	// Lookup IDs
+	
+	var COUNTRY_LOOKUP_ID = exports.COUNTRY_LOOKUP_ID = 'ynHtyLDVeJO';
+	var STATUS_OPPFOLGNING_LOOKUP_ID = exports.STATUS_OPPFOLGNING_LOOKUP_ID = 'IDHxRNOGuSS';
+	
+	// Atrributes
+	var INNREISE_OPPFOLGINGSTATUS_ATTRIBUTE_ID = exports.INNREISE_OPPFOLGINGSTATUS_ATTRIBUTE_ID = 'fYNNIxUOddv';
+	var INNREISE_KARANTENEKODE_2_ATTRIBUTE_ID = exports.INNREISE_KARANTENEKODE_2_ATTRIBUTE_ID = 'bjujLWjT1Eq';
+	var INNREISE_KARANTENEKODE_4_ATTRIBUTE_ID = exports.INNREISE_KARANTENEKODE_4_ATTRIBUTE_ID = 'bJvyD0inEh0';
+	var INNREISE_KARANTENETYPE_ATTRIBUTE_ID = exports.INNREISE_KARANTENETYPE_ATTRIBUTE_ID = 'XamASy7t0Jv';
+
+/***/ }),
+/* 19 */
 /***/ (function(module, exports) {
 
 	'use strict';
@@ -16463,7 +16552,7 @@
 	}]);
 
 /***/ }),
-/* 19 */
+/* 20 */
 /***/ (function(module, exports) {
 
 	'use strict';
@@ -16493,7 +16582,7 @@
 	}]);
 
 /***/ }),
-/* 20 */
+/* 21 */
 /***/ (function(module, exports) {
 
 	'use strict';
@@ -16508,7 +16597,7 @@
 	}]);
 
 /***/ }),
-/* 21 */
+/* 22 */
 /***/ (function(module, exports) {
 
 	'use strict';
@@ -16862,7 +16951,7 @@
 	})();
 
 /***/ }),
-/* 22 */
+/* 23 */
 /***/ (function(module, exports) {
 
 	'use strict';
@@ -17077,7 +17166,7 @@
 	})(window, document);
 
 /***/ }),
-/* 23 */
+/* 24 */
 /***/ (function(module, exports) {
 
 	'use strict';
@@ -17761,7 +17850,7 @@
 	}]);
 
 /***/ }),
-/* 24 */
+/* 25 */
 /***/ (function(module, exports) {
 
 	'use strict';
@@ -17776,7 +17865,7 @@
 	}]);
 
 /***/ }),
-/* 25 */
+/* 26 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -17784,15 +17873,15 @@
 	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; /* global trackerCapture, angular */
 	
 	
-	var _processRegistration = __webpack_require__(26);
+	var _processRegistration = __webpack_require__(27);
 	
-	var _field_updates = __webpack_require__(27);
+	var _field_updates = __webpack_require__(28);
 	
 	var _data_transfer = __webpack_require__(29);
 	
 	var _custom_override_flags = __webpack_require__(30);
 	
-	var _constants = __webpack_require__(28);
+	var _constants = __webpack_require__(18);
 	
 	var _provesvar_utils = __webpack_require__(31);
 	
@@ -19311,7 +19400,7 @@
 	}]);
 
 /***/ }),
-/* 26 */
+/* 27 */
 /***/ (function(module, exports) {
 
 	"use strict";
@@ -19535,7 +19624,7 @@
 	}
 
 /***/ }),
-/* 27 */
+/* 28 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -19545,7 +19634,7 @@
 	});
 	exports.conditionalAutofillBirthdateOnDnumberChange = conditionalAutofillBirthdateOnDnumberChange;
 	
-	var _constants = __webpack_require__(28);
+	var _constants = __webpack_require__(18);
 	
 	var _converters = __webpack_require__(6);
 	
@@ -19581,58 +19670,6 @@
 	}
 
 /***/ }),
-/* 28 */
-/***/ (function(module, exports) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	// Fields
-	var DNUMBER_FIELD_ID = exports.DNUMBER_FIELD_ID = 'ZSt07qyq6Pt';
-	var BIRTH_DATE_FIELD_ID = exports.BIRTH_DATE_FIELD_ID = 'NI0QRzJvQ0k';
-	
-	// Programs
-	var NEARKONTAKT_PROGRAM_ID = exports.NEARKONTAKT_PROGRAM_ID = 'DM9n1bUw8W8';
-	var INDEKSERING_PROGRAM_ID = exports.INDEKSERING_PROGRAM_ID = 'uYjxkTbwRNf';
-	var DUPLIKAT_PROGRAM_ID = exports.DUPLIKAT_PROGRAM_ID = 'STKyXc3OT7i';
-	var INNREISE_PROGRAM_ID = exports.INNREISE_PROGRAM_ID = 'B7gOGodZkcs';
-	var DUPLIKAT_INNREISE_PROGRAM_ID = exports.DUPLIKAT_INNREISE_PROGRAM_ID = 'STKyXc3OT7i';
-	
-	// Events
-	var NAERKONTAKT_TESTRESULT_PROGRAM_STAGE_ID = exports.NAERKONTAKT_TESTRESULT_PROGRAM_STAGE_ID = 'cMEGZf48YkC';
-	var INDEKSERING_TESTRESULT_PROGRAM_STAGE_ID = exports.INDEKSERING_TESTRESULT_PROGRAM_STAGE_ID = 'dDHkBd3X8Ce';
-	var NAERKONTAKT_HELSESTATUS_PROGRAM_STAGE_ID = exports.NAERKONTAKT_HELSESTATUS_PROGRAM_STAGE_ID = 'mtYQyjaiLIU';
-	var INDEKSERING_HELSESTATUS_PROGRAM_STAGE_ID = exports.INDEKSERING_HELSESTATUS_PROGRAM_STAGE_ID = 'oqsk2Jv4k3s';
-	var INNREISEINFORMASJON_PROGRAM_STAGE_ID = exports.INNREISEINFORMASJON_PROGRAM_STAGE_ID = 'pQRu1RLcfLX';
-	var OPPFOLGING_STAGE_ID = exports.OPPFOLGING_STAGE_ID = 'htARRqRQNnz';
-	var DUPLIKAT_OPPFOLGING_STAGE_ID = exports.DUPLIKAT_OPPFOLGING_STAGE_ID = 'ggzSsCfSnZh';
-	var DUPLIKAT_INNREISE_STAGE_ID = exports.DUPLIKAT_INNREISE_STAGE_ID = 'yfGvhpnZCxq';
-	// Entity types
-	var INNREISE_ENTITY_TYPE = exports.INNREISE_ENTITY_TYPE = 'MCPQUTHX1Ze';
-	
-	// Data elements
-	var INNREISE_AVREISELAND_DATA_ELEMENT_ID = exports.INNREISE_AVREISELAND_DATA_ELEMENT_ID = 'EwrMxsQG3OX';
-	var INNREISE_OPPFOLGINGSTATUS_ID = exports.INNREISE_OPPFOLGINGSTATUS_ID = 'uI17SVSOZmQ';
-	var INNREISE_KARANTENE_ALTERNATIV_TEXT_ID = exports.INNREISE_KARANTENE_ALTERNATIV_TEXT_ID = 'YMfxPPwVfOi';
-	var INNREISE_KARANTENE_ALTERNATIV_CODE_ID = exports.INNREISE_KARANTENE_ALTERNATIV_CODE_ID = 'bllUT5vac3r';
-	var INNREISE_UNNTAK_TYPE_TEXT_ID = exports.INNREISE_UNNTAK_TYPE_TEXT_ID = 'woCg1rzHYkn';
-	var INNREISE_UNNTAK_TYPE_CODE_ID = exports.INNREISE_UNNTAK_TYPE_CODE_ID = 'CoSw0VqJgn7';
-	var INNREISE_KARANTENE_GJENOMFORING_TYPE_TEXT_ID = exports.INNREISE_KARANTENE_GJENOMFORING_TYPE_TEXT_ID = 'IWhH4IfCOX9';
-	var INNREISE_KARANTENE_GJENOMFORING_TYPE_CODE_ID = exports.INNREISE_KARANTENE_GJENOMFORING_TYPE_CODE_ID = 'fJcTMI7RD9u';
-	var INNREISE_OPPHOLDSSTED_ID = exports.INNREISE_OPPHOLDSSTED_ID = 'LYrjfgwVNVn';
-	var INNREISE_ARBEIDSGIVER_NAVN_ID = exports.INNREISE_ARBEIDSGIVER_NAVN_ID = 'uncjwHvpOWP';
-	
-	var PROFIL_NASJONALT_FELLES_HJELPENUMMER = exports.PROFIL_NASJONALT_FELLES_HJELPENUMMER = 'WBjHgYajTsb';
-	var PROFIL_FNR = exports.PROFIL_FNR = 'fkUN6jLp7K4';
-	var PROFIL_FNR_AS_WELL = exports.PROFIL_FNR_AS_WELL = 'ZSt07qyq6Pt';
-	// Lookup IDs
-	
-	var COUNTRY_LOOKUP_ID = exports.COUNTRY_LOOKUP_ID = 'ynHtyLDVeJO';
-	var STATUS_OPPFOLGNING_LOOKUP_ID = exports.STATUS_OPPFOLGNING_LOOKUP_ID = 'IDHxRNOGuSS';
-
-/***/ }),
 /* 29 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -19645,7 +19682,7 @@
 	exports.transferNotesFromNaerkontaktToIndeksering = transferNotesFromNaerkontaktToIndeksering;
 	exports.mergeTransferedEventsAndAutogeneratedEvents = mergeTransferedEventsAndAutogeneratedEvents;
 	
-	var _constants = __webpack_require__(28);
+	var _constants = __webpack_require__(18);
 	
 	function duplicateEventsFromNaerkontaktToIndeksering(enrollmentResponse, tei, program) {
 	    // Transfer only to indeksregistrering og oppfølging
@@ -20338,7 +20375,7 @@
 	
 	var _custom_override_flags = __webpack_require__(30);
 	
-	var _constants = __webpack_require__(28);
+	var _constants = __webpack_require__(18);
 	
 	/* global angular, trackerCapture */
 	
@@ -25387,7 +25424,7 @@
 
 	"use strict";
 	
-	var _constants = __webpack_require__(28);
+	var _constants = __webpack_require__(18);
 	
 	var _innreise_duplicates = __webpack_require__(45);
 	
@@ -25952,7 +25989,7 @@
 	exports.registerInnreiseDuplicateToExisting = registerInnreiseDuplicateToExisting;
 	exports.registerNewInnreiseProfil = registerNewInnreiseProfil;
 	
-	var _constants = __webpack_require__(28);
+	var _constants = __webpack_require__(18);
 	
 	function registerInnreiseDuplicateToExisting(selectedTei, existingTeiId, selectedEnrollment, optionSets, attributesById, orgId, teiService, enrollmentService, eventFactory) {
 	    return updateAndAddInnreise(selectedTei, existingTeiId, true, optionSets, attributesById, orgId, teiService, enrollmentService, eventFactory).then(function () {
@@ -35991,7 +36028,7 @@
 
 	'use strict';
 	
-	var _field_updates = __webpack_require__(27);
+	var _field_updates = __webpack_require__(28);
 	
 	var trackerCapture = angular.module('trackerCapture'); /* global trackerCapture, angular */
 	
@@ -37306,7 +37343,7 @@
 
 	'use strict';
 	
-	var _constants = __webpack_require__(28);
+	var _constants = __webpack_require__(18);
 	
 	var trackerCapture = angular.module('trackerCapture');
 	
@@ -37595,7 +37632,7 @@
 	
 	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 	
-	var _constants = __webpack_require__(28);
+	var _constants = __webpack_require__(18);
 	
 	var _converters = __webpack_require__(6);
 	
@@ -38270,7 +38307,7 @@
 	});
 	exports.addEventDataToInnreiseList = addEventDataToInnreiseList;
 	
-	var _constants = __webpack_require__(28);
+	var _constants = __webpack_require__(18);
 	
 	var _import_event_to_list = __webpack_require__(302);
 	
@@ -38287,44 +38324,14 @@
 	    (0, _import_event_to_list.importEventToListAsync)(teis, scope.base.selectedProgram.id, _constants.INNREISEINFORMASJON_PROGRAM_STAGE_ID, scope.selectedOrgUnit.id, dataValuesToExtract, teiAccessApiService).then(function (eventData) {
 	        metaDataFactory.getAll('optionSets').then(function (optionSets) {
 	            try {
-	                setHeader(serverResponse, 'Avreiseland');
-	                setDataValue(serverResponse, eventData, _constants.INNREISE_AVREISELAND_DATA_ELEMENT_ID);
+	                setHeader(serverResponse, 'Karantenekode4_tekst');
+	                setDataValue(serverResponse, eventData, _constants.INNREISE_KARANTENE_GJENOMFORING_TYPE_TEXT_ID);
 	
-	                setHeader(serverResponse, 'Innreisedato');
-	                setDataValue(serverResponse, eventData, 'eventDate', _converters.convertDatestringToDDMMYYYY);
-	
-	                setHeader(serverResponse, 'Oppfolgingstatus');
-	                var statusLookup = function statusLookup(status) {
-	                    return optionSetsDataLookup(optionSets, _constants.STATUS_OPPFOLGNING_LOOKUP_ID, status);
-	                };
-	                setDataValue(serverResponse, eventData, _constants.INNREISE_OPPFOLGINGSTATUS_ID, statusLookup);
-	
-	                setHeader(serverResponse, 'Karantenetype_kode');
-	                setDataValue(serverResponse, eventData, _constants.INNREISE_KARANTENE_ALTERNATIV_CODE_ID);
-	
-	                setHeader(serverResponse, 'Karantenetype_tekst_short');
-	                setDataValue(serverResponse, eventData, _constants.INNREISE_KARANTENE_ALTERNATIV_CODE_ID, karantenekodeToShortTekst);
+	                setHeader(serverResponse, 'Karantenekode2_tekst');
+	                setDataValue(serverResponse, eventData, _constants.INNREISE_UNNTAK_TYPE_TEXT_ID);
 	
 	                setHeader(serverResponse, 'Karantenetype_tekst');
 	                setDataValue(serverResponse, eventData, _constants.INNREISE_KARANTENE_ALTERNATIV_TEXT_ID);
-	
-	                setHeader(serverResponse, 'Unntaktype_kode');
-	                setDataValue(serverResponse, eventData, _constants.INNREISE_UNNTAK_TYPE_CODE_ID);
-	
-	                setHeader(serverResponse, 'Unntaktype_tekst');
-	                setDataValue(serverResponse, eventData, _constants.INNREISE_UNNTAK_TYPE_TEXT_ID);
-	
-	                setHeader(serverResponse, 'Gjennomforingstype_kode');
-	                setDataValue(serverResponse, eventData, _constants.INNREISE_KARANTENE_GJENOMFORING_TYPE_CODE_ID);
-	
-	                setHeader(serverResponse, 'Gjennomforingstype_tekst');
-	                setDataValue(serverResponse, eventData, _constants.INNREISE_KARANTENE_GJENOMFORING_TYPE_TEXT_ID);
-	
-	                setHeader(serverResponse, 'Oppholdsted');
-	                setDataValue(serverResponse, eventData, _constants.INNREISE_OPPHOLDSSTED_ID);
-	
-	                setHeader(serverResponse, 'Arbeidsgivernavn');
-	                setDataValue(serverResponse, eventData, _constants.INNREISE_ARBEIDSGIVER_NAVN_ID);
 	
 	                scope.setServerResponse(serverResponse);
 	            } catch (err) {
@@ -38393,7 +38400,7 @@
 	
 	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 	
-	var _constants = __webpack_require__(28);
+	var _constants = __webpack_require__(18);
 	
 	var trackerCapture = angular.module('trackerCapture');
 	
@@ -55245,4 +55252,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-6f1d76c7001bc3f7c873.js.map
+//# sourceMappingURL=app-95fa1bc9ba089314b86d.js.map
