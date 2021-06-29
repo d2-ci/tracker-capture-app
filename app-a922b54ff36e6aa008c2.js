@@ -16456,19 +16456,42 @@
 	            };
 	            $scope.setColClass = function (tei, attrId) {
 	                if (attrId === _constants.INNREISE_OPPFOLGINGSTATUS_ATTRIBUTE_ID) {
-	                    if (tei[attrId] === 'OK') {
+	                    var value = $scope.getBackupValueFromEvent(tei, attrId);
+	                    if (value === 'OK') {
 	                        return 'tei-status-ok';
 	                    }
-	                    if (tei[attrId] === 'Ikke satt') {
+	                    if (value === 'Ikke satt') {
 	                        return 'tei-status-not-satt';
 	                    }
-	                    if (tei[attrId] === 'Ikke svar') {
+	                    if (value === 'Ikke svar') {
 	                        return 'tei-status-not-svar';
 	                    }
-	                    if (tei[attrId] === 'Ikke OK') {
+	                    if (value === 'Ikke OK') {
 	                        return 'tei-status-not-ok';
 	                    }
 	                }
+	            };
+	
+	            $scope.getBackupValueFromEvent = function (tei, attrId) {
+	                if (tei[attrId]) {
+	                    return tei[attrId];
+	                }
+	                switch (attrId) {
+	                    case _constants.INNREISE_OPPFOLGINGSTATUS_ATTRIBUTE_ID:
+	                        return tei['Oppfolgingstatus'];
+	                    case _constants.INNREISE_INNREISE_DATO_ATTRIBUTE_ID:
+	                        return tei['Innreisedato'];
+	                    case _constants.INNREISE_AVREISELAND_ATTRIBUTE_ID:
+	                        return tei['Avreiseland'];
+	                    case _constants.INNREISE_KARANTENETYPE_ATTRIBUTE_ID:
+	                        return tei['Karantenetype_tekst_short'];
+	                    case _constants.INNREISE_KARANTENEKODE_2_ATTRIBUTE_ID:
+	                        return tei['Unntaktype_kode'];
+	                    case _constants.INNREISE_KARANTENEKODE_4_ATTRIBUTE_ID:
+	                        return tei['Gjennomforingstype_kode'];
+	                }
+	
+	                return '';
 	            };
 	        }]
 	    };
@@ -38396,6 +38419,45 @@
 	                setHeader(serverResponse, 'Karantenetype_tekst');
 	                setDataValue(serverResponse, eventData, _constants.INNREISE_KARANTENE_ALTERNATIV_TEXT_ID);
 	
+	                setHeader(serverResponse, 'Avreiseland');
+	                setDataValue(serverResponse, eventData, _constants.INNREISE_AVREISELAND_DATA_ELEMENT_ID);
+	
+	                setHeader(serverResponse, 'Innreisedato');
+	                setDataValue(serverResponse, eventData, 'eventDate', _converters.convertDatestringToDDMMYYYY);
+	
+	                setHeader(serverResponse, 'Oppfolgingstatus');
+	                var statusLookup = function statusLookup(status) {
+	                    return optionSetsDataLookup(optionSets, _constants.STATUS_OPPFOLGNING_LOOKUP_ID, status);
+	                };
+	                setDataValue(serverResponse, eventData, _constants.INNREISE_OPPFOLGINGSTATUS_ID, statusLookup);
+	
+	                setHeader(serverResponse, 'Karantenetype_kode');
+	                setDataValue(serverResponse, eventData, _constants.INNREISE_KARANTENE_ALTERNATIV_CODE_ID);
+	
+	                setHeader(serverResponse, 'Karantenetype_tekst_short');
+	                setDataValue(serverResponse, eventData, _constants.INNREISE_KARANTENE_ALTERNATIV_CODE_ID, karantenekodeToShortTekst);
+	
+	                setHeader(serverResponse, 'Karantenetype_tekst');
+	                setDataValue(serverResponse, eventData, _constants.INNREISE_KARANTENE_ALTERNATIV_TEXT_ID);
+	
+	                setHeader(serverResponse, 'Unntaktype_kode');
+	                setDataValue(serverResponse, eventData, _constants.INNREISE_UNNTAK_TYPE_CODE_ID);
+	
+	                setHeader(serverResponse, 'Unntaktype_tekst');
+	                setDataValue(serverResponse, eventData, _constants.INNREISE_UNNTAK_TYPE_TEXT_ID);
+	
+	                setHeader(serverResponse, 'Gjennomforingstype_kode');
+	                setDataValue(serverResponse, eventData, _constants.INNREISE_KARANTENE_GJENOMFORING_TYPE_CODE_ID);
+	
+	                setHeader(serverResponse, 'Gjennomforingstype_tekst');
+	                setDataValue(serverResponse, eventData, _constants.INNREISE_KARANTENE_GJENOMFORING_TYPE_TEXT_ID);
+	
+	                setHeader(serverResponse, 'Oppholdsted');
+	                setDataValue(serverResponse, eventData, _constants.INNREISE_OPPHOLDSSTED_ID);
+	
+	                setHeader(serverResponse, 'Arbeidsgivernavn');
+	                setDataValue(serverResponse, eventData, _constants.INNREISE_ARBEIDSGIVER_NAVN_ID);
+	
 	                scope.setServerResponse(serverResponse);
 	            } catch (err) {
 	                console.log(err);
@@ -55315,4 +55377,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-b84027d21d838e24eb97.js.map
+//# sourceMappingURL=app-a922b54ff36e6aa008c2.js.map
