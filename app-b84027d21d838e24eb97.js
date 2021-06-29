@@ -19840,7 +19840,7 @@
 	
 	function setCustomShowOnAttributes(attributes, programId) {
 	    console.log(programId);
-	    if (programId === _constants.INNREISE_PROGRAM_ID) {
+	    if (programId === _constants.INNREISE_PROGRAM_ID || programId === _constants.DUPLIKAT_PROGRAM_ID) {
 	        attributes = attributes.map(function (attribute) {
 	            if (attributesToHideFromProfileInInnreise.find(function (attId) {
 	                return attId === attribute.id;
@@ -55315,4 +55315,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-66a6d2eac1abb8aa8915.js.map
+//# sourceMappingURL=app-b84027d21d838e24eb97.js.map
