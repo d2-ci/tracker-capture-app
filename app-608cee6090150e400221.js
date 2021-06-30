@@ -37964,7 +37964,7 @@
 	            }, function (error) {
 	                $scope.setServerResponse(serverResponse);
 	            });
-	        } else if (serverResponse.rows && serverResponse.rows.length > 0 && $scope.base.selectedProgram.id == _constants.INNREISE_PROGRAM_ID) {
+	        } else if (serverResponse.rows && serverResponse.rows.length > 0 && ($scope.base.selectedProgram.id == _constants.INNREISE_PROGRAM_ID || $scope.base.selectedProgram.id == _constants.DUPLIKAT_INNREISE_PROGRAM_ID)) {
 	            try {
 	                (0, _add_event_data_to_innreise_list.addEventDataToInnreiseList)($scope, serverResponse, TeiAccessApiService, MetaDataFactory);
 	            } catch (err) {
@@ -55377,4 +55377,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-a922b54ff36e6aa008c2.js.map
+//# sourceMappingURL=app-608cee6090150e400221.js.map
