@@ -19240,8 +19240,19 @@
 	        return attributeMandatory || $scope.mandatoryFields[attributeId];
 	    };
 	
+	    $scope.labTestLookupNr = undefined;
+	    $scope.labTestLookupNrGetterSetter = function (value) {
+	        if (angular.isDefined(value)) {
+	            $scope.labTestLookupNr = value;
+	        } else {
+	            if ($scope.labTestLookupNr === undefined) {
+	                $scope.labTestLookupNr = $scope.getBestNumberForLabTest();
+	            }
+	            return $scope.labTestLookupNr;
+	        }
+	    };
 	    $scope.shouldShowLabTest = function () {
-	        return !!$scope.getBestNumberForLabTest();
+	        return $scope.labTestLookupNr && $scope.labTestLookupNr.toString().length === 11;
 	    };
 	
 	    $scope.getBestNumberForLabTest = function () {
@@ -19262,8 +19273,7 @@
 	        try {
 	            userId = JSON.parse(sessionStorage.USER_PROFILE).id;
 	        } finally {}
-	        var labTestLookupNumber = $scope.getBestNumberForLabTest();
-	        return FNrLookupService.lookupLabSvar(labTestLookupNumber, CurrentSelection.currentSelection.orgUnit.code, userId);
+	        return FNrLookupService.lookupLabSvar($scope.labTestLookupNrGetterSetter(), CurrentSelection.currentSelection.orgUnit.code, userId);
 	    };
 	
 	    $scope.showLabTest = function () {
@@ -19849,7 +19859,7 @@
 /* 32 */
 /***/ (function(module, exports, __webpack_require__) {
 
-	"use strict";
+	'use strict';
 	
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
@@ -19858,11 +19868,11 @@
 	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 	
 	exports.setCustomShowOnAttributes = setCustomShowOnAttributes;
+	exports.setCustomShowOnAttributesInList = setCustomShowOnAttributesInList;
 	
 	var _constants = __webpack_require__(18);
 	
 	function setCustomShowOnAttributes(attributes, programId) {
-	    console.log(programId);
 	    if (programId === _constants.INNREISE_PROGRAM_ID || programId === _constants.DUPLIKAT_PROGRAM_ID) {
 	        attributes = attributes.map(function (attribute) {
 	            if (attributesToHideFromProfileInInnreise.find(function (attId) {
@@ -19877,15 +19887,30 @@
 	            }
 	            return attribute;
 	        });
-	        console.log(attributes);
 	        return attributes;
 	    }
 	    return attributes;
 	}
 	
+	function setCustomShowOnAttributesInList(attributes, programId) {
+	    if (programId === _constants.INNREISE_PROGRAM_ID || programId === _constants.DUPLIKAT_PROGRAM_ID) {
+	        attributes = attributes.map(function (attribute) {
+	            if (attributesToHideInInnreiseArbeidsliste.find(function (attId) {
+	                return attId === attribute.id;
+	            })) {
+	                return _extends({}, attribute, { show: false });
+	            }
+	            return attribute;
+	        });
+	        return attributes;
+	    }
+	    return attributes;
+	}
 	var attributesToHideFromProfileInInnreise = [_constants.INNREISE_OPPFOLGINGSTATUS_ATTRIBUTE_ID, _constants.INNREISE_KARANTENEKODE_4_ATTRIBUTE_ID, _constants.INNREISE_KARANTENEKODE_2_ATTRIBUTE_ID, _constants.INNREISE_KARANTENETYPE_ATTRIBUTE_ID, _constants.INNREISE_INNREISE_DATO_ATTRIBUTE_ID, _constants.INNREISE_SISTE_PROVESVAR_DATO_ATTRIBUTE_ID, _constants.INNREISE_SISTE_PROVESVAR_ATTRIBUTE_ID, _constants.INNREISE_OPPHOLDSADRESSE_ATTRIBUTE_ID, _constants.INNREISE_ARBEIDSGIVER_ATTRIBUTE_ID, _constants.INNREISE_AVREISELAND_ATTRIBUTE_ID];
 	
 	var attributesToShowInProfileInInnreise = [_constants.PROFIL_FORETRUKKET_SPRAAK_ATTRIBUTE_ID, _constants.PROFIL_EPOST_ATTRIBUTE_ID, _constants.PROFIL_MOBIL_TLF_ATTRIBUTE_ID, _constants.PROFIL_FNR_ATTRIBUTE_ID];
+	
+	var attributesToHideInInnreiseArbeidsliste = ['orgUnitName', 'created'];
 
 /***/ }),
 /* 33 */
@@ -37722,9 +37747,9 @@
 	
 	var _converters = __webpack_require__(6);
 	
-	var _import_event_to_list = __webpack_require__(303);
+	var _add_event_data_to_innreise_list = __webpack_require__(303);
 	
-	var _add_event_data_to_innreise_list = __webpack_require__(304);
+	var _hide_show_attributes = __webpack_require__(32);
 	
 	function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
 	
@@ -37785,6 +37810,7 @@
 	                var lastDateName = $scope.base.selectedProgram.id == 'uYjxkTbwRNf' ? 'last_date_in_isolation' : $scope.base.selectedProgram.id == 'DM9n1bUw8W8' ? 'last_date_in_quarantine' : '';
 	
 	                $scope.gridColumns = TEIGridService.makeGridColumns($scope.programAttributes, gridColumnConfig, savedGridColumns, lastDateName);
+	                $scope.gridColumns = (0, _hide_show_attributes.setCustomShowOnAttributesInList)($scope.gridColumns, $scope.base.selectedProgram.id);
 	                /*
 	                $scope.gridColumns = [];
 	                angular.forEach($scope.programAttributes, function(attr){
@@ -38300,101 +38326,6 @@
 
 /***/ }),
 /* 303 */
-/***/ (function(module, exports) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	
-	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
-	
-	exports.importEventToListAsync = importEventToListAsync;
-	
-	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-	
-	function importEventToListAsync(teiIds, programId, programStageId, orgUnitId, elementIds, teiAccessApiService) {
-	    return getTeisWithEnrollmentsAsync(teiIds, programId, orgUnitId, teiAccessApiService).then(function (response) {
-	        var teis = getTEIs(response);
-	        var elementDictionary = getValuesFromEvent(teis, elementIds, programStageId);
-	        return elementDictionary;
-	    });
-	}
-	
-	function getTeisWithEnrollmentsAsync(teiIds, programId, orgUnitId, teiAccessApiService) {
-	    return teiAccessApiService.get(null, programId, DHIS2URL + '/trackedEntityInstances.json?trackedEntityInstance=' + teiIds.join(';') + '&program=' + programId + '&ou=' + orgUnitId + '&fields=trackedEntityInstance,orgUnit,enrollments[enrollment,program,enrollmentDate,events[status,dataValues,programStage,eventDate]]');
-	}
-	
-	function getValuesFromEvent(teis, elementIds, programStageId) {
-	    var teiDictionary = {};
-	    teis.forEach(function (tei) {
-	        var enrollment = getNewestEnrollment(tei);
-	        var event = getNewestEventFromProgramStageWithData(enrollment, programStageId);
-	        if (event && enrollment && elementIds) {
-	            elementIds.forEach(function (elementId) {
-	                var dataValue = getDataElementFromEvent(event, elementId);
-	
-	                if (dataValue) {
-	                    teiDictionary[tei.trackedEntityInstance] = _extends({}, teiDictionary[tei.trackedEntityInstance], _defineProperty({}, elementId, dataValue));
-	                }
-	            });
-	            if (teiDictionary[tei.trackedEntityInstance]) {
-	                teiDictionary[tei.trackedEntityInstance] = _extends({}, teiDictionary[tei.trackedEntityInstance], {
-	                    eventDate: event.eventDate,
-	                    enrollmentDate: enrollment.enrollmentDate
-	                });
-	            }
-	        }
-	    });
-	    return teiDictionary;
-	}
-	
-	function getTEIs(response) {
-	    return response.data && response.data.trackedEntityInstances && response.data.trackedEntityInstances.length > 0 ? response.data.trackedEntityInstances : [];
-	}
-	
-	function getNewestEnrollment(tei) {
-	    if (tei.enrollments && tei.enrollments.length > 0) {
-	        return tei.enrollments.sort(function (e1, e2) {
-	            return firstDateIsBeforeSecond(e1.eventDate, e2.eventDate);
-	        })[0];
-	    }
-	    return undefined;
-	}
-	
-	function getNewestEventFromProgramStageWithData(enrollment, programStageId) {
-	    if (enrollment && enrollment.events && enrollment.events.length > 0) {
-	        return enrollment.events.filter(function (event) {
-	            return event.programStage == programStageId && event.dataValues && event.dataValues.length > 0;
-	        }).sort(function (e1, e2) {
-	            return firstDateIsBeforeSecond(e1.eventDate, e2.eventDate);
-	        })[0];
-	    }
-	    return undefined;
-	}
-	
-	function getDataElementFromEvent(event, dataElementId) {
-	    var outValue;
-	    if (event && event.dataValues) {
-	        event.dataValues.forEach(function (dataValue) {
-	            if (dataValue.dataElement == dataElementId) {
-	                outValue = dataValue.value;
-	            }
-	        });
-	    }
-	
-	    return outValue;
-	}
-	
-	function firstDateIsBeforeSecond(first, second) {
-	    var firstDate = new Date(first);
-	    var secondDate = new Date(second);
-	    return firstDate.getTime() < secondDate.getTime();
-	}
-
-/***/ }),
-/* 304 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -38406,7 +38337,7 @@
 	
 	var _constants = __webpack_require__(18);
 	
-	var _import_event_to_list = __webpack_require__(303);
+	var _import_event_to_list = __webpack_require__(304);
 	
 	var _converters = __webpack_require__(6);
 	
@@ -38526,6 +38457,101 @@
 	    }
 	
 	    return kode;
+	}
+
+/***/ }),
+/* 304 */
+/***/ (function(module, exports) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	
+	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+	
+	exports.importEventToListAsync = importEventToListAsync;
+	
+	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+	
+	function importEventToListAsync(teiIds, programId, programStageId, orgUnitId, elementIds, teiAccessApiService) {
+	    return getTeisWithEnrollmentsAsync(teiIds, programId, orgUnitId, teiAccessApiService).then(function (response) {
+	        var teis = getTEIs(response);
+	        var elementDictionary = getValuesFromEvent(teis, elementIds, programStageId);
+	        return elementDictionary;
+	    });
+	}
+	
+	function getTeisWithEnrollmentsAsync(teiIds, programId, orgUnitId, teiAccessApiService) {
+	    return teiAccessApiService.get(null, programId, DHIS2URL + '/trackedEntityInstances.json?trackedEntityInstance=' + teiIds.join(';') + '&program=' + programId + '&ou=' + orgUnitId + '&fields=trackedEntityInstance,orgUnit,enrollments[enrollment,program,enrollmentDate,events[status,dataValues,programStage,eventDate]]');
+	}
+	
+	function getValuesFromEvent(teis, elementIds, programStageId) {
+	    var teiDictionary = {};
+	    teis.forEach(function (tei) {
+	        var enrollment = getNewestEnrollment(tei);
+	        var event = getNewestEventFromProgramStageWithData(enrollment, programStageId);
+	        if (event && enrollment && elementIds) {
+	            elementIds.forEach(function (elementId) {
+	                var dataValue = getDataElementFromEvent(event, elementId);
+	
+	                if (dataValue) {
+	                    teiDictionary[tei.trackedEntityInstance] = _extends({}, teiDictionary[tei.trackedEntityInstance], _defineProperty({}, elementId, dataValue));
+	                }
+	            });
+	            if (teiDictionary[tei.trackedEntityInstance]) {
+	                teiDictionary[tei.trackedEntityInstance] = _extends({}, teiDictionary[tei.trackedEntityInstance], {
+	                    eventDate: event.eventDate,
+	                    enrollmentDate: enrollment.enrollmentDate
+	                });
+	            }
+	        }
+	    });
+	    return teiDictionary;
+	}
+	
+	function getTEIs(response) {
+	    return response.data && response.data.trackedEntityInstances && response.data.trackedEntityInstances.length > 0 ? response.data.trackedEntityInstances : [];
+	}
+	
+	function getNewestEnrollment(tei) {
+	    if (tei.enrollments && tei.enrollments.length > 0) {
+	        return tei.enrollments.sort(function (e1, e2) {
+	            return firstDateIsBeforeSecond(e1.eventDate, e2.eventDate);
+	        })[0];
+	    }
+	    return undefined;
+	}
+	
+	function getNewestEventFromProgramStageWithData(enrollment, programStageId) {
+	    if (enrollment && enrollment.events && enrollment.events.length > 0) {
+	        return enrollment.events.filter(function (event) {
+	            return event.programStage == programStageId && event.dataValues && event.dataValues.length > 0;
+	        }).sort(function (e1, e2) {
+	            return firstDateIsBeforeSecond(e1.eventDate, e2.eventDate);
+	        })[0];
+	    }
+	    return undefined;
+	}
+	
+	function getDataElementFromEvent(event, dataElementId) {
+	    var outValue;
+	    if (event && event.dataValues) {
+	        event.dataValues.forEach(function (dataValue) {
+	            if (dataValue.dataElement == dataElementId) {
+	                outValue = dataValue.value;
+	            }
+	        });
+	    }
+	
+	    return outValue;
+	}
+	
+	function firstDateIsBeforeSecond(first, second) {
+	    var firstDate = new Date(first);
+	    var secondDate = new Date(second);
+	    return firstDate.getTime() < secondDate.getTime();
 	}
 
 /***/ }),
@@ -55388,4 +55414,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-65c463e7866ddb93716f.js.map
+//# sourceMappingURL=app-07e2bd89fe4f2c93d324.js.map
