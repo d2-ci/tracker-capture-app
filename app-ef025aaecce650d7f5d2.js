@@ -9228,8 +9228,9 @@
 	                TCStorageService.currentStore.open().done(function () {
 	                    TCStorageService.currentStore.getAll('programs').done(function (prs) {
 	                        var programs = [];
+	                        var teiFromURL = $location.search().tei;
 	                        angular.forEach(prs, function (pr) {
-	                            if (loadSelectedProgram && selectedProgram && pr.id == selectedProgram.id || pr.organisationUnits.hasOwnProperty(ou.id) && accesses.programsById[pr.id] && accesses.programsById[pr.id].data.read) {
+	                            if (loadSelectedProgram && selectedProgram && pr.id == selectedProgram.id && teiFromURL || pr.organisationUnits.hasOwnProperty(ou.id) && accesses.programsById[pr.id] && accesses.programsById[pr.id].data.read) {
 	                                if (pr.programTrackedEntityAttributes) {
 	                                    pr.programTrackedEntityAttributes = pr.programTrackedEntityAttributes.filter(function (attr) {
 	                                        return attr.access && attr.access.read;
@@ -40158,4 +40159,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-79d24db41b7448ac38a9.js.map
+//# sourceMappingURL=app-ef025aaecce650d7f5d2.js.map
