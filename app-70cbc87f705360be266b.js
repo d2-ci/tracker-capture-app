@@ -19720,7 +19720,7 @@
 /* 29 */
 /***/ (function(module, exports, __webpack_require__) {
 
-	"use strict";
+	'use strict';
 	
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
@@ -19776,7 +19776,7 @@
 	function createDuplicateEvents(events, enrollmentId, fromProgramStage, toProgram, toProgramStage) {
 	    var outEvents = [];
 	    events.forEach(function (event) {
-	        if (event.programStage == fromProgramStage && event.status === "COMPLETED") {
+	        if (event.programStage == fromProgramStage && event.dataValues.length > 0) {
 	            var newEvent = angular.copy(event);
 	            newEvent.program = toProgram;
 	            newEvent.programStage = toProgramStage;
@@ -55531,4 +55531,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-f51141e22809230a6ef8.js.map
+//# sourceMappingURL=app-70cbc87f705360be266b.js.map
