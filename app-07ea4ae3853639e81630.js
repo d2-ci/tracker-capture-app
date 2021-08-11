@@ -6382,6 +6382,23 @@
 	    var month;
 	    var year;
 	    var matched = false;
+	
+	    // format dd-mm-yy
+	    if (datestring.match(/^\d{2}\-\d{2}\-\d{2}$/)) {
+	        day = datestring.substr(0, 2);
+	        month = datestring.substr(3, 2);
+	        year = getFullYear(datestring.substr(6, 2));
+	        matched = true;
+	    }
+	
+	    // format dd-mm-yyyy
+	    if (datestring.match(/^\d{2}\-\d{2}\-\d{4}$/)) {
+	        day = datestring.substr(0, 2);
+	        month = datestring.substr(3, 2);
+	        year = datestring.substr(6, 4);
+	        matched = true;
+	    }
+	
 	    // format dd.mm.yy
 	    if (datestring.match(/^\d{2}\.\d{2}\.\d{2}$/)) {
 	        day = datestring.substr(0, 2);
@@ -25547,14 +25564,14 @@
 
 	"use strict";
 	
+	var _converters = __webpack_require__(6);
+	
 	var _constants = __webpack_require__(18);
 	
 	var _innreise_duplicates = __webpack_require__(46);
 	
-	/* global trackerCapture, angular */
-	
 	var _require = __webpack_require__(47),
-	    program = _require.program;
+	    program = _require.program; /* global trackerCapture, angular */
 	
 	var trackerCapture = angular.module('trackerCapture');
 	trackerCapture.controller('RelationshipController', ["$scope", "$rootScope", "$modal", "$location", "TEIService", "AttributesFactory", "CurrentSelection", "RelationshipFactory", "OrgUnitFactory", "ProgramFactory", "EnrollmentService", "ModalService", "CommonUtils", "TEService", "$timeout", "$q", "DHIS2EventFactory", "DateUtils", function ($scope, $rootScope, $modal, $location, TEIService, AttributesFactory, CurrentSelection, RelationshipFactory, OrgUnitFactory, ProgramFactory, EnrollmentService, ModalService, CommonUtils, TEService, $timeout, $q, DHIS2EventFactory, DateUtils) {
@@ -25615,6 +25632,34 @@
 	        });
 	        $scope.selectedOrgUnit = $scope.selections.orgUnit;
 	    });
+	
+	    $scope.orderTeiBy = 'created';
+	    $scope.orderReverse = true;
+	
+	    $scope.getTeiOrderValue = function (tei) {
+	        var val = tei[$scope.orderTeiBy] || tei.attributes[$scope.orderTeiBy];
+	        if (!val) {
+	            return undefined;
+	        }
+	        // Change from dd-mm-yyyy to yyyy-mm-dd to get proper ordering of dates using string sort
+	        var valAsDate = (0, _converters.convertToCorrectDateString)(val, 'yyyy-mm-dd');
+	        if (valAsDate) {
+	            return valAsDate;
+	        }
+	        return val;
+	    };
+	
+	    $scope.setOrderTeiBy = function (field) {
+	        if (field && $scope.orderTeiBy !== field) {
+	            $scope.orderTeiBy = field;
+	            $scope.orderReverse = false;
+	        } else if (!$scope.orderReverse) {
+	            $scope.orderReverse = true;
+	        } else {
+	            $scope.orderTeiBy = 'created';
+	            $scope.orderReverse = true;
+	        }
+	    };
 	
 	    $scope.showAddRelationship = function (related) {
 	        $scope.relatedProgramRelationship = related;
@@ -38008,7 +38053,7 @@
 	            }, function (error) {
 	                $scope.setServerResponse(serverResponse);
 	            });
-	        } else if (serverResponse.rows && serverResponse.rows.length > 0 && ($scope.base.selectedProgram.id == _constants.INNREISE_PROGRAM_ID || $scope.base.selectedProgram.id == DUPLIKAT_INNREISE_PROGRAM_ID)) {
+	        } else if (serverResponse.rows && serverResponse.rows.length > 0 && ($scope.base.selectedProgram.id == _constants.INNREISE_PROGRAM_ID || $scope.base.selectedProgram.id == _constants.DUPLIKAT_PROGRAM_ID)) {
 	            try {
 	                (0, _add_event_data_to_innreise_list.addEventDataToInnreiseList)($scope, serverResponse, TeiAccessApiService, MetaDataFactory);
 	            } catch (err) {
@@ -38191,6 +38236,7 @@
 	        }
 	    };
 	
+	    $scope.provesvarStatusLastet = false;
 	    $scope.provesvarStartFailed = false;
 	    $scope.provesvarAktivert = false;
 	    $scope.harTilgangTilProvesvar = false;
@@ -38201,6 +38247,7 @@
 	    $scope.innreiseStatus = null;
 	
 	    $scope.mapInnreiseStatusToScope = function (svar) {
+	        $scope.provesvarStatusLastet = true;
 	        $scope.provesvarAktivert = svar.provesvarAktivert;
 	        $scope.innreiseProvesvarSistOppdatert = svar.innreiseProvesvarSistOppdatert ? (0, _converters.convertDatestringToFullTime)(svar.innreiseProvesvarSistOppdatert) : undefined;
 	        $scope.innreiseSistOppdatert = svar.innreiseSistOppdatert ? (0, _converters.convertDatestringToFullTime)(svar.innreiseSistOppdatert) : undefined;
@@ -55531,4 +55578,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-70cbc87f705360be266b.js.map
+//# sourceMappingURL=app-07ea4ae3853639e81630.js.map
