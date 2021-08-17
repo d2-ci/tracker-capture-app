@@ -19269,8 +19269,12 @@
 	            return $scope.fNrOrEquivalent;
 	        }
 	    };
-	    $scope.shouldShowLabTestAndVaccine = function () {
+	    $scope.shouldEnableLabTestAndVaccine = function () {
 	        return $scope.fNrOrEquivalent && $scope.fNrOrEquivalent.toString().length === 11;
+	    };
+	
+	    $scope.shouldShowVaccineButton = function () {
+	        return $scope.selectedProgram.id === _constants.INDEKSERING_PROGRAM_ID || $scope.selectedProgram.id === _constants.NEARKONTAKT_PROGRAM_ID;
 	    };
 	
 	    $scope.getBestNumberForLabTestAndVaccine = function () {
@@ -55577,4 +55581,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-b63f2e5866fed09d431e.js.map
+//# sourceMappingURL=app-ee19f0a78c2a05acec4b.js.map
