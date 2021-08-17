@@ -74,9 +74,9 @@
 	
 	__webpack_require__(15);
 	
-	__webpack_require__(16);
-	
 	__webpack_require__(17);
+	
+	__webpack_require__(18);
 	
 	__webpack_require__(19);
 	
@@ -11469,13 +11469,17 @@
 
 /***/ }),
 /* 15 */
-/***/ (function(module, exports) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	/* global angular, moment, dhis2 */
 	
 	'use strict';
 	
 	/* Services */
+	
+	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+	
+	var _constants = __webpack_require__(16);
 	
 	var externalLookupServices = angular.module('externalLookupServices', ['ngResource', 'ngCookies']).service('FNrLookupService', ["$http", "DHIS2URL", "$translate", "$cookies", "NotificationService", "DateUtils", function ($http, DHIS2URL, $translate, $cookies, NotificationService, DateUtils) {
 	  var not_supported_message_shown_previously = false;
@@ -15096,6 +15100,25 @@
 	    "verdi": "21",
 	    "beskrivelse": "Test etter varsel fra Smittestopp-app",
 	    "oid": 80014
+	  }, {
+	    "id": 4778,
+	    "verdi": "22",
+	    "beskrivelse": "Screening/massetesting covid-19",
+	    "oid": 80014
+	  }];
+	
+	  var vaksinestatuser = [{
+	    "verdi": "1",
+	    "beskrivelse": "Ja",
+	    "oid": 80017
+	  }, {
+	    "verdi": "2",
+	    "beskrivelse": "Nei",
+	    "oid": 80017
+	  }, {
+	    "verdi": "3",
+	    "beskrivelse": "Ukjent",
+	    "oid": 80017
 	  }];
 	
 	  var codeLookup = function codeLookup(codes, field, value) {
@@ -15202,6 +15225,20 @@
 	
 	  var getIndikasjon = function getIndikasjon(indikasjon) {
 	    return codeLookup(indikasjoner, 'beskrivelse', indikasjon);
+	  };
+	
+	  var getVaksinestatuskode = function getVaksinestatuskode(vaksine) {
+	    console.log(vaksine);
+	    var vaksinestatus;
+	    if (vaksine === 'Ikke Vaksinert') {
+	      vaksinestatus = 'Nei';
+	    } else if (vaksine) {
+	      // If anything else is set, we assume it to be a vaccine
+	      vaksinestatus = 'Ja';
+	    } else {
+	      vaksinestatus = 'Ukjent';
+	    };
+	    return codeLookup(vaksinestatuser, 'beskrivelse', vaksinestatus);
 	  };
 	
 	  var getSykdomsBilde = function getSykdomsBilde(helseutfall) {
@@ -15465,6 +15502,7 @@
 	    }
 	
 	    var indikasjon = getIndikasjon(bakgrunnsUndersokelse.vrrQP9OrjOB);
+	    console.log(indikasjon);
 	    if (indikasjon) {
 	      textMessages.push("Indikasjon: " + indikasjon.beskrivelse);
 	      diagnoseforhold.indikasjon = indikasjon;
@@ -15483,6 +15521,12 @@
 	      });
 	      diagnoseforhold.underliggendeSykdom = underliggendeSykdom;
 	    }
+	
+	    //------Vaksineringsstatus
+	    var vaksinestatus = tei[_constants.PROFIL_VAKSINE_1_TYPE_ID];
+	    var erVaksinert = getVaksinestatuskode(vaksinestatus);
+	    textMessages.push("Er vaksinert: " + erVaksinert.beskrivelse);
+	    smitteforhold = _extends({}, smitteforhold, { erVaksinert: erVaksinert });
 	
 	    //-------MELDING
 	
@@ -15678,6 +15722,78 @@
 
 	'use strict';
 	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	// Fields
+	var DNUMBER_FIELD_ID = exports.DNUMBER_FIELD_ID = 'ZSt07qyq6Pt';
+	var BIRTH_DATE_FIELD_ID = exports.BIRTH_DATE_FIELD_ID = 'NI0QRzJvQ0k';
+	
+	// Programs
+	var NEARKONTAKT_PROGRAM_ID = exports.NEARKONTAKT_PROGRAM_ID = 'DM9n1bUw8W8';
+	var INDEKSERING_PROGRAM_ID = exports.INDEKSERING_PROGRAM_ID = 'uYjxkTbwRNf';
+	var DUPLIKAT_PROGRAM_ID = exports.DUPLIKAT_PROGRAM_ID = 'STKyXc3OT7i';
+	var INNREISE_PROGRAM_ID = exports.INNREISE_PROGRAM_ID = 'B7gOGodZkcs';
+	
+	// Events
+	var NAERKONTAKT_TESTRESULT_PROGRAM_STAGE_ID = exports.NAERKONTAKT_TESTRESULT_PROGRAM_STAGE_ID = 'cMEGZf48YkC';
+	var INDEKSERING_TESTRESULT_PROGRAM_STAGE_ID = exports.INDEKSERING_TESTRESULT_PROGRAM_STAGE_ID = 'dDHkBd3X8Ce';
+	var NAERKONTAKT_HELSESTATUS_PROGRAM_STAGE_ID = exports.NAERKONTAKT_HELSESTATUS_PROGRAM_STAGE_ID = 'mtYQyjaiLIU';
+	var INDEKSERING_HELSESTATUS_PROGRAM_STAGE_ID = exports.INDEKSERING_HELSESTATUS_PROGRAM_STAGE_ID = 'oqsk2Jv4k3s';
+	var INNREISEINFORMASJON_PROGRAM_STAGE_ID = exports.INNREISEINFORMASJON_PROGRAM_STAGE_ID = 'pQRu1RLcfLX';
+	var OPPFOLGING_STAGE_ID = exports.OPPFOLGING_STAGE_ID = 'htARRqRQNnz';
+	var DUPLIKAT_OPPFOLGING_STAGE_ID = exports.DUPLIKAT_OPPFOLGING_STAGE_ID = 'ggzSsCfSnZh';
+	var DUPLIKAT_INNREISE_STAGE_ID = exports.DUPLIKAT_INNREISE_STAGE_ID = 'yfGvhpnZCxq';
+	var NAERKONTAKT_OPPFOLGING_PROGRAM_STAGE_ID = exports.NAERKONTAKT_OPPFOLGING_PROGRAM_STAGE_ID = 'sAV9jAajr8x';
+	// Entity types
+	var INNREISE_ENTITY_TYPE = exports.INNREISE_ENTITY_TYPE = 'MCPQUTHX1Ze';
+	
+	// Data elements
+	var INNREISE_AVREISELAND_DATA_ELEMENT_ID = exports.INNREISE_AVREISELAND_DATA_ELEMENT_ID = 'EwrMxsQG3OX';
+	var INNREISE_OPPFOLGINGSTATUS_ID = exports.INNREISE_OPPFOLGINGSTATUS_ID = 'uI17SVSOZmQ';
+	var INNREISE_KARANTENE_ALTERNATIV_TEXT_ID = exports.INNREISE_KARANTENE_ALTERNATIV_TEXT_ID = 'YMfxPPwVfOi';
+	var INNREISE_KARANTENE_ALTERNATIV_CODE_ID = exports.INNREISE_KARANTENE_ALTERNATIV_CODE_ID = 'bllUT5vac3r';
+	var INNREISE_UNNTAK_TYPE_TEXT_ID = exports.INNREISE_UNNTAK_TYPE_TEXT_ID = 'woCg1rzHYkn';
+	var INNREISE_UNNTAK_TYPE_CODE_ID = exports.INNREISE_UNNTAK_TYPE_CODE_ID = 'CoSw0VqJgn7';
+	var INNREISE_KARANTENE_GJENOMFORING_TYPE_TEXT_ID = exports.INNREISE_KARANTENE_GJENOMFORING_TYPE_TEXT_ID = 'IWhH4IfCOX9';
+	var INNREISE_KARANTENE_GJENOMFORING_TYPE_CODE_ID = exports.INNREISE_KARANTENE_GJENOMFORING_TYPE_CODE_ID = 'fJcTMI7RD9u';
+	var INNREISE_OPPHOLDSSTED_ID = exports.INNREISE_OPPHOLDSSTED_ID = 'LYrjfgwVNVn';
+	var INNREISE_ARBEIDSGIVER_NAVN_ID = exports.INNREISE_ARBEIDSGIVER_NAVN_ID = 'uncjwHvpOWP';
+	
+	var PROFIL_NASJONALT_FELLES_HJELPENUMMER = exports.PROFIL_NASJONALT_FELLES_HJELPENUMMER = 'WBjHgYajTsb';
+	var PROFIL_FNR = exports.PROFIL_FNR = 'fkUN6jLp7K4';
+	var PROFIL_FNR_AS_WELL = exports.PROFIL_FNR_AS_WELL = 'ZSt07qyq6Pt';
+	// Lookup IDs
+	
+	var COUNTRY_LOOKUP_ID = exports.COUNTRY_LOOKUP_ID = 'ynHtyLDVeJO';
+	var STATUS_OPPFOLGNING_LOOKUP_ID = exports.STATUS_OPPFOLGNING_LOOKUP_ID = 'IDHxRNOGuSS';
+	
+	// Attributes
+	var INNREISE_OPPFOLGINGSTATUS_ATTRIBUTE_ID = exports.INNREISE_OPPFOLGINGSTATUS_ATTRIBUTE_ID = 'fYNNIxUOddv';
+	var INNREISE_KARANTENEKODE_2_ATTRIBUTE_ID = exports.INNREISE_KARANTENEKODE_2_ATTRIBUTE_ID = 'bjujLWjT1Eq';
+	var INNREISE_KARANTENEKODE_4_ATTRIBUTE_ID = exports.INNREISE_KARANTENEKODE_4_ATTRIBUTE_ID = 'bJvyD0inEh0';
+	var INNREISE_KARANTENETYPE_ATTRIBUTE_ID = exports.INNREISE_KARANTENETYPE_ATTRIBUTE_ID = 'XamASy7t0Jv';
+	var INNREISE_INNREISE_DATO_ATTRIBUTE_ID = exports.INNREISE_INNREISE_DATO_ATTRIBUTE_ID = 'VpUtJW18CiY';
+	var INNREISE_SISTE_PROVESVAR_DATO_ATTRIBUTE_ID = exports.INNREISE_SISTE_PROVESVAR_DATO_ATTRIBUTE_ID = 'M3FtWmK8YEP';
+	var INNREISE_SISTE_PROVESVAR_ATTRIBUTE_ID = exports.INNREISE_SISTE_PROVESVAR_ATTRIBUTE_ID = 'CMF6k9jvOuU';
+	var INNREISE_OPPHOLDSADRESSE_ATTRIBUTE_ID = exports.INNREISE_OPPHOLDSADRESSE_ATTRIBUTE_ID = 'DeHufwWNjmh';
+	var INNREISE_ARBEIDSGIVER_ATTRIBUTE_ID = exports.INNREISE_ARBEIDSGIVER_ATTRIBUTE_ID = 'rGDv6a0AvWF';
+	var INNREISE_AVREISELAND_ATTRIBUTE_ID = exports.INNREISE_AVREISELAND_ATTRIBUTE_ID = 'nv5gV7eM3u6';
+	var PROFIL_FORETRUKKET_SPRAAK_ATTRIBUTE_ID = exports.PROFIL_FORETRUKKET_SPRAAK_ATTRIBUTE_ID = 'xTdN78uRiJm';
+	var PROFIL_EPOST_ATTRIBUTE_ID = exports.PROFIL_EPOST_ATTRIBUTE_ID = 'Ym6yIceP4RO';
+	var PROFIL_MOBIL_TLF_ATTRIBUTE_ID = exports.PROFIL_MOBIL_TLF_ATTRIBUTE_ID = 'h1PoxEMqi9t';
+	var PROFIL_FNR_ATTRIBUTE_ID = exports.PROFIL_FNR_ATTRIBUTE_ID = 'NI0QRzJvQ0k';
+	var PROFIL_VAKSINE_1_TYPE_ID = exports.PROFIL_VAKSINE_1_TYPE_ID = 'cnSOCLFGmLz';
+	var PROFIL_VAKSINE_1_DATO_ID = exports.PROFIL_VAKSINE_1_DATO_ID = 'dvNLTk22BAG';
+	var PROFIL_VAKSINE_2_TYPE_ID = exports.PROFIL_VAKSINE_2_TYPE_ID = 'dO29Prg9siS';
+	var PROFIL_VAKSINE_2_DATO_ID = exports.PROFIL_VAKSINE_2_DATO_ID = 'q5Zc3PCGtC7';
+
+/***/ }),
+/* 17 */
+/***/ (function(module, exports) {
+
+	'use strict';
+	
 	/* Filters */
 	
 	var trackerCaptureFilters = angular.module('trackerCaptureFilters', []).filter('eventListFilter', ["$filter", function ($filter) {
@@ -15718,7 +15834,7 @@
 	}]);
 
 /***/ }),
-/* 17 */
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	/* global directive, selection, dhis2, angular */
@@ -15727,7 +15843,7 @@
 	
 	/* Directives */
 	
-	var _constants = __webpack_require__(18);
+	var _constants = __webpack_require__(16);
 	
 	var trackerCaptureDirectives = angular.module('trackerCaptureDirectives', []).directive('stringToNumber', function () {
 	    return {
@@ -16513,74 +16629,6 @@
 	        }]
 	    };
 	});
-
-/***/ }),
-/* 18 */
-/***/ (function(module, exports) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	// Fields
-	var DNUMBER_FIELD_ID = exports.DNUMBER_FIELD_ID = 'ZSt07qyq6Pt';
-	var BIRTH_DATE_FIELD_ID = exports.BIRTH_DATE_FIELD_ID = 'NI0QRzJvQ0k';
-	
-	// Programs
-	var NEARKONTAKT_PROGRAM_ID = exports.NEARKONTAKT_PROGRAM_ID = 'DM9n1bUw8W8';
-	var INDEKSERING_PROGRAM_ID = exports.INDEKSERING_PROGRAM_ID = 'uYjxkTbwRNf';
-	var DUPLIKAT_PROGRAM_ID = exports.DUPLIKAT_PROGRAM_ID = 'STKyXc3OT7i';
-	var INNREISE_PROGRAM_ID = exports.INNREISE_PROGRAM_ID = 'B7gOGodZkcs';
-	
-	// Events
-	var NAERKONTAKT_TESTRESULT_PROGRAM_STAGE_ID = exports.NAERKONTAKT_TESTRESULT_PROGRAM_STAGE_ID = 'cMEGZf48YkC';
-	var INDEKSERING_TESTRESULT_PROGRAM_STAGE_ID = exports.INDEKSERING_TESTRESULT_PROGRAM_STAGE_ID = 'dDHkBd3X8Ce';
-	var NAERKONTAKT_HELSESTATUS_PROGRAM_STAGE_ID = exports.NAERKONTAKT_HELSESTATUS_PROGRAM_STAGE_ID = 'mtYQyjaiLIU';
-	var INDEKSERING_HELSESTATUS_PROGRAM_STAGE_ID = exports.INDEKSERING_HELSESTATUS_PROGRAM_STAGE_ID = 'oqsk2Jv4k3s';
-	var INNREISEINFORMASJON_PROGRAM_STAGE_ID = exports.INNREISEINFORMASJON_PROGRAM_STAGE_ID = 'pQRu1RLcfLX';
-	var OPPFOLGING_STAGE_ID = exports.OPPFOLGING_STAGE_ID = 'htARRqRQNnz';
-	var DUPLIKAT_OPPFOLGING_STAGE_ID = exports.DUPLIKAT_OPPFOLGING_STAGE_ID = 'ggzSsCfSnZh';
-	var DUPLIKAT_INNREISE_STAGE_ID = exports.DUPLIKAT_INNREISE_STAGE_ID = 'yfGvhpnZCxq';
-	var NAERKONTAKT_OPPFOLGING_PROGRAM_STAGE_ID = exports.NAERKONTAKT_OPPFOLGING_PROGRAM_STAGE_ID = 'sAV9jAajr8x';
-	// Entity types
-	var INNREISE_ENTITY_TYPE = exports.INNREISE_ENTITY_TYPE = 'MCPQUTHX1Ze';
-	
-	// Data elements
-	var INNREISE_AVREISELAND_DATA_ELEMENT_ID = exports.INNREISE_AVREISELAND_DATA_ELEMENT_ID = 'EwrMxsQG3OX';
-	var INNREISE_OPPFOLGINGSTATUS_ID = exports.INNREISE_OPPFOLGINGSTATUS_ID = 'uI17SVSOZmQ';
-	var INNREISE_KARANTENE_ALTERNATIV_TEXT_ID = exports.INNREISE_KARANTENE_ALTERNATIV_TEXT_ID = 'YMfxPPwVfOi';
-	var INNREISE_KARANTENE_ALTERNATIV_CODE_ID = exports.INNREISE_KARANTENE_ALTERNATIV_CODE_ID = 'bllUT5vac3r';
-	var INNREISE_UNNTAK_TYPE_TEXT_ID = exports.INNREISE_UNNTAK_TYPE_TEXT_ID = 'woCg1rzHYkn';
-	var INNREISE_UNNTAK_TYPE_CODE_ID = exports.INNREISE_UNNTAK_TYPE_CODE_ID = 'CoSw0VqJgn7';
-	var INNREISE_KARANTENE_GJENOMFORING_TYPE_TEXT_ID = exports.INNREISE_KARANTENE_GJENOMFORING_TYPE_TEXT_ID = 'IWhH4IfCOX9';
-	var INNREISE_KARANTENE_GJENOMFORING_TYPE_CODE_ID = exports.INNREISE_KARANTENE_GJENOMFORING_TYPE_CODE_ID = 'fJcTMI7RD9u';
-	var INNREISE_OPPHOLDSSTED_ID = exports.INNREISE_OPPHOLDSSTED_ID = 'LYrjfgwVNVn';
-	var INNREISE_ARBEIDSGIVER_NAVN_ID = exports.INNREISE_ARBEIDSGIVER_NAVN_ID = 'uncjwHvpOWP';
-	
-	var PROFIL_NASJONALT_FELLES_HJELPENUMMER = exports.PROFIL_NASJONALT_FELLES_HJELPENUMMER = 'WBjHgYajTsb';
-	var PROFIL_FNR = exports.PROFIL_FNR = 'fkUN6jLp7K4';
-	var PROFIL_FNR_AS_WELL = exports.PROFIL_FNR_AS_WELL = 'ZSt07qyq6Pt';
-	// Lookup IDs
-	
-	var COUNTRY_LOOKUP_ID = exports.COUNTRY_LOOKUP_ID = 'ynHtyLDVeJO';
-	var STATUS_OPPFOLGNING_LOOKUP_ID = exports.STATUS_OPPFOLGNING_LOOKUP_ID = 'IDHxRNOGuSS';
-	
-	// Attributes
-	var INNREISE_OPPFOLGINGSTATUS_ATTRIBUTE_ID = exports.INNREISE_OPPFOLGINGSTATUS_ATTRIBUTE_ID = 'fYNNIxUOddv';
-	var INNREISE_KARANTENEKODE_2_ATTRIBUTE_ID = exports.INNREISE_KARANTENEKODE_2_ATTRIBUTE_ID = 'bjujLWjT1Eq';
-	var INNREISE_KARANTENEKODE_4_ATTRIBUTE_ID = exports.INNREISE_KARANTENEKODE_4_ATTRIBUTE_ID = 'bJvyD0inEh0';
-	var INNREISE_KARANTENETYPE_ATTRIBUTE_ID = exports.INNREISE_KARANTENETYPE_ATTRIBUTE_ID = 'XamASy7t0Jv';
-	var INNREISE_INNREISE_DATO_ATTRIBUTE_ID = exports.INNREISE_INNREISE_DATO_ATTRIBUTE_ID = 'VpUtJW18CiY';
-	var INNREISE_SISTE_PROVESVAR_DATO_ATTRIBUTE_ID = exports.INNREISE_SISTE_PROVESVAR_DATO_ATTRIBUTE_ID = 'M3FtWmK8YEP';
-	var INNREISE_SISTE_PROVESVAR_ATTRIBUTE_ID = exports.INNREISE_SISTE_PROVESVAR_ATTRIBUTE_ID = 'CMF6k9jvOuU';
-	var INNREISE_OPPHOLDSADRESSE_ATTRIBUTE_ID = exports.INNREISE_OPPHOLDSADRESSE_ATTRIBUTE_ID = 'DeHufwWNjmh';
-	var INNREISE_ARBEIDSGIVER_ATTRIBUTE_ID = exports.INNREISE_ARBEIDSGIVER_ATTRIBUTE_ID = 'rGDv6a0AvWF';
-	var INNREISE_AVREISELAND_ATTRIBUTE_ID = exports.INNREISE_AVREISELAND_ATTRIBUTE_ID = 'nv5gV7eM3u6';
-	var PROFIL_FORETRUKKET_SPRAAK_ATTRIBUTE_ID = exports.PROFIL_FORETRUKKET_SPRAAK_ATTRIBUTE_ID = 'xTdN78uRiJm';
-	var PROFIL_EPOST_ATTRIBUTE_ID = exports.PROFIL_EPOST_ATTRIBUTE_ID = 'Ym6yIceP4RO';
-	var PROFIL_MOBIL_TLF_ATTRIBUTE_ID = exports.PROFIL_MOBIL_TLF_ATTRIBUTE_ID = 'h1PoxEMqi9t';
-	var PROFIL_FNR_ATTRIBUTE_ID = exports.PROFIL_FNR_ATTRIBUTE_ID = 'NI0QRzJvQ0k';
 
 /***/ }),
 /* 19 */
@@ -17931,7 +17979,7 @@
 	
 	var _custom_override_flags = __webpack_require__(30);
 	
-	var _constants = __webpack_require__(18);
+	var _constants = __webpack_require__(16);
 	
 	var _provesvar_utils = __webpack_require__(31);
 	
@@ -19701,7 +19749,7 @@
 	});
 	exports.conditionalAutofillBirthdateOnDnumberChange = conditionalAutofillBirthdateOnDnumberChange;
 	
-	var _constants = __webpack_require__(18);
+	var _constants = __webpack_require__(16);
 	
 	var _converters = __webpack_require__(6);
 	
@@ -19750,7 +19798,7 @@
 	exports.mergeTransferedEventsAndAutogeneratedEvents = mergeTransferedEventsAndAutogeneratedEvents;
 	exports.closeNaerkontaktEnrollment = closeNaerkontaktEnrollment;
 	
-	var _constants = __webpack_require__(18);
+	var _constants = __webpack_require__(16);
 	
 	function duplicateEventsFromNaerkontaktToIndeksering(enrollmentResponse, tei, program) {
 	    // Transfer only to indeksregistrering og oppfølging
@@ -19902,7 +19950,7 @@
 	exports.setCustomShowOnAttributes = setCustomShowOnAttributes;
 	exports.setCustomShowOnAttributesInList = setCustomShowOnAttributesInList;
 	
-	var _constants = __webpack_require__(18);
+	var _constants = __webpack_require__(16);
 	
 	function setCustomShowOnAttributes(attributes, programId) {
 	    if (programId === _constants.INNREISE_PROGRAM_ID || programId === _constants.DUPLIKAT_PROGRAM_ID) {
@@ -20518,7 +20566,7 @@
 	
 	var _custom_override_flags = __webpack_require__(30);
 	
-	var _constants = __webpack_require__(18);
+	var _constants = __webpack_require__(16);
 	
 	/* global angular, trackerCapture */
 	
@@ -25569,7 +25617,7 @@
 	
 	var _converters = __webpack_require__(6);
 	
-	var _constants = __webpack_require__(18);
+	var _constants = __webpack_require__(16);
 	
 	var _innreise_duplicates = __webpack_require__(46);
 	
@@ -26160,7 +26208,7 @@
 	exports.registerInnreiseDuplicateToExisting = registerInnreiseDuplicateToExisting;
 	exports.registerNewInnreiseProfil = registerNewInnreiseProfil;
 	
-	var _constants = __webpack_require__(18);
+	var _constants = __webpack_require__(16);
 	
 	function registerInnreiseDuplicateToExisting(selectedTei, existingTeiId, selectedEnrollment, optionSets, attributesById, orgId, teiService, enrollmentService, eventFactory) {
 	    return updateAndAddInnreise(selectedTei, existingTeiId, true, optionSets, attributesById, orgId, teiService, enrollmentService, eventFactory).then(function () {
@@ -37514,7 +37562,7 @@
 
 	'use strict';
 	
-	var _constants = __webpack_require__(18);
+	var _constants = __webpack_require__(16);
 	
 	var trackerCapture = angular.module('trackerCapture');
 	
@@ -37803,7 +37851,7 @@
 	
 	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 	
-	var _constants = __webpack_require__(18);
+	var _constants = __webpack_require__(16);
 	
 	var _converters = __webpack_require__(6);
 	
@@ -38411,7 +38459,7 @@
 	});
 	exports.addEventDataToInnreiseList = addEventDataToInnreiseList;
 	
-	var _constants = __webpack_require__(18);
+	var _constants = __webpack_require__(16);
 	
 	var _import_event_to_list = __webpack_require__(304);
 	
@@ -38641,7 +38689,7 @@
 	});
 	exports.addTildeltToTildeltList = addTildeltToTildeltList;
 	
-	var _constants = __webpack_require__(18);
+	var _constants = __webpack_require__(16);
 	
 	function addTildeltToTildeltList(scope, serverResponse, teiAccessApiService, metaDataFactory, q) {
 	    var teis = [];
@@ -38729,7 +38777,7 @@
 	
 	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 	
-	var _constants = __webpack_require__(18);
+	var _constants = __webpack_require__(16);
 	
 	var trackerCapture = angular.module('trackerCapture');
 	
@@ -55581,4 +55629,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-ee19f0a78c2a05acec4b.js.map
+//# sourceMappingURL=app-178bd98caa684902e2be.js.map
