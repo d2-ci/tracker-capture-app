@@ -15228,7 +15228,6 @@
 	  };
 	
 	  var getVaksinestatuskode = function getVaksinestatuskode(vaksine) {
-	    console.log(vaksine);
 	    var vaksinestatus;
 	    if (vaksine === 'Ikke Vaksinert') {
 	      vaksinestatus = 'Nei';
@@ -15639,12 +15638,12 @@
 	        var errorMsgHdr, errorMsgBody;
 	        errorMsgHdr = $translate.instant('error');
 	
-	        errorMsgBody = 'Feil ved henting av vaksinedata:' + fNr;
+	        errorMsgBody = 'Feil ved henting av vaksinestatus:' + fNr;
 	
 	        if (error.status == 403) {
-	          errorMsgBody = 'Tjenesten Fiks vaksine er ikke tilgjengelig for deg.\n                        Det kan v\xE6re to \xE5rsaker til dette\n                        <ol>\n                        <li>Din kommune har ikke aktivert tjenesten Fiks vaksine. Les mer om aktivering av Fiks vaksine her: <a target="_blank" href="https://portal.fiks.ks.no/fiks/fiks-vaksine/">https://portal.fiks.ks.no/fiks/fiks-vaksine/</a></li>\n                        <li>Tjenesten er aktivert, men du har ikke f\xE5tt rettigheter til \xE5 gj\xF8re oppslag. Ta kontakt med Fiks administrator i din kommune.</li>\n                        </ol>';
+	          errorMsgBody = 'Tjenesten Fiks vaksinestatus er ikke tilgjengelig for deg.\n                        Det kan v\xE6re to \xE5rsaker til dette\n                        <ol>\n                        <li>Din kommune har ikke aktivert tjenesten Fiks vaksinestatus. Les mer om aktivering av Fiks vaksinestatus her: <a target="_blank" href="https://portal.fiks.ks.no/fiks/fiks-vaksinestatus/">https://portal.fiks.ks.no/fiks/fiks-vaksinestatus/</a></li>\n                        <li>Tjenesten er aktivert, men du har ikke f\xE5tt rettigheter til \xE5 gj\xF8re oppslag. Ta kontakt med Fiks administrator i din kommune.</li>\n                        </ol>';
 	        } else if (error.status == 401) {
-	          errorMsgBody = "Kunne ikke nå tjeneste for vaksinedata, prøv å logge inn på nytt.";
+	          errorMsgBody = "Kunne ikke nå tjeneste for vaksinestatus, prøv å logge inn på nytt.";
 	        }
 	
 	        NotificationService.showNotifcationDialog(errorMsgHdr, errorMsgBody);
@@ -19399,7 +19398,12 @@
 	                        $scope.gridData = orderByFilter(modalData, '-vaccinationDate');
 	
 	                        $scope.dateFromItem = function (item) {
-	                            return DateUtils.getDateFromUTCString(item.vaccinationDate);
+	                            var vaccinationDate = Object.assign([], item.vaccinationDate);
+	                            // Backend returns an array with months starting with index 1 (for January), we assume it starts with index 0 (for January)
+	                            if (vaccinationDate[1]) {
+	                                vaccinationDate[1] = vaccinationDate[1] - 1;
+	                            }
+	                            return DateUtils.getDateFromUTCString(vaccinationDate);
 	                        };
 	
 	                        $scope.noVaccinesMessage = response.kanLeverUtData ? "Det er ingen registrerte vaksineringer på dette fødselsnummeret." : "Du har ikke de nødvendige rettighetene for å hente ut vaksineinformasjon på denne personen.";
@@ -55629,4 +55633,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-178bd98caa684902e2be.js.map
+//# sourceMappingURL=app-cee2abafcaf7ee728edd.js.map
