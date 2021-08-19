@@ -19891,8 +19891,8 @@
 	}
 	
 	function closeNaerkontaktEnrollment(tei, enrollmentService) {
-	    var naekontaktEnrollment = tei.enrollments.find(function (enrollment) {
-	        return enrollment.program === _constants.NEARKONTAKT_PROGRAM_ID && enrollment.status !== 'COMPLETED';
+	    var naekontaktEnrollment = tei && tei.enrollments && tei.enrollments.find(function (enrollment) {
+	        return enrollment && enrollment.program === _constants.NEARKONTAKT_PROGRAM_ID && enrollment.status !== 'COMPLETED';
 	    });
 	    if (naekontaktEnrollment) {
 	        naekontaktEnrollment.status = 'COMPLETED';
@@ -55633,4 +55633,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-cee2abafcaf7ee728edd.js.map
+//# sourceMappingURL=app-afba937451cec11e15ab.js.map
