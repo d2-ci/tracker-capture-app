@@ -19406,7 +19406,7 @@
 	                            return DateUtils.getDateFromUTCString(vaccinationDate);
 	                        };
 	
-	                        $scope.noVaccinesMessage = response.kanLeverUtData ? "Det er ingen registrerte vaksineringer på dette fødselsnummeret." : "Du har ikke de nødvendige rettighetene for å hente ut vaksineinformasjon på denne personen.";
+	                        $scope.noVaccinesMessage = response.kanLevereUtData ? "Det er ingen registrerte vaksineringer på dette fødselsnummeret." : "Du har ikke de nødvendige rettighetene for å hente ut vaksineinformasjon på denne personen.";
 	
 	                        $scope.cancel = function () {
 	                            $modalInstance.close({ action: "OK" });
@@ -55633,4 +55633,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-afba937451cec11e15ab.js.map
+//# sourceMappingURL=app-c6dae05e22caf8058907.js.map
