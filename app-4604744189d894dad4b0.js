@@ -19395,7 +19395,7 @@
 	                return $modal.open({
 	                    templateUrl: 'components/registration/vaccination-modal.html',
 	                    controller: ["$scope", "$modalInstance", "modalData", "orderByFilter", function controller($scope, $modalInstance, modalData, orderByFilter) {
-	                        $scope.gridData = orderByFilter(modalData, '-vaccinationDate');
+	                        $scope.gridData = modalData;
 	
 	                        $scope.dateFromItem = function (item) {
 	                            var vaccinationDate = Object.assign([], item.vaccinationDate);
@@ -55633,4 +55633,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-c6dae05e22caf8058907.js.map
+//# sourceMappingURL=app-4604744189d894dad4b0.js.map
