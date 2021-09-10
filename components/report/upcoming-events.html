@@ -174,9 +174,6 @@
                 <div class="alert alert-warning vertical-spacing">
                     {{'no_data_found'| translate}}
                 </div>
-                <div class="hideInPrint">
-                    <serverside-paginator-performant/>
-                </div>
             </div>    
             <div ng-switch-default>
                 <!-- report begins -->
@@ -281,9 +278,7 @@
                             </tr>
                         </tbody>        
                     </table>
-                    <div class="hideInPrint" ng-if="pager">
-                        <serverside-paginator-performant/>
-                    </div>
+                    <!--<serverside-paginator></serverside-paginator>-->
                 </div>
                 <!-- report ends -->
             </div>

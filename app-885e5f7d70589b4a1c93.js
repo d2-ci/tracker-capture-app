@@ -19852,8 +19852,15 @@
 	
 	            EventReportService.getEventReport($scope.selectedOrgUnit.id, $scope.selectedOuMode, $scope.model.selectedProgram.id, null, null, 'ACTIVE', 'OVERDUE', $scope.pager).then(function (data) {
 	                if (data) {
-	                    $scope.pager.toolBarDisplay = 5;
-	                    $scope.pager.recordsCount = data.eventRows.length;
+	                    if (data.pager) {
+	                        $scope.pager = data.pager;
+	                        $scope.pager.toolBarDisplay = 5;
+	
+	                        Paginator.setPage($scope.pager.page);
+	                        Paginator.setPageCount($scope.pager.pageCount);
+	                        Paginator.setPageSize($scope.pager.pageSize);
+	                        Paginator.setItemCount($scope.pager.total);
+	                    }
 	
 	                    angular.forEach(data.eventRows, function (row) {
 	                        var overdueEvent = {};
@@ -20006,19 +20013,17 @@
 	        return TEIGridService.getHeader($scope.gridColumns);
 	    };
 	
-	    $scope.onGetPage = function (page) {
-	        $scope.pager.page = page;
+	    $scope.jumpToPage = function () {
 	        $scope.generateReport();
 	    };
 	
-	    $scope.onChangePageSize = function (newPageSize) {
+	    $scope.resetPageSize = function () {
 	        $scope.pager.page = 1;
-	        $scope.pager.pageSize = newPageSize;
 	        $scope.generateReport();
 	    };
 	
-	    $scope.onChangePage = function (newPage) {
-	        $scope.pager.page = newPage;
+	    $scope.getPage = function (page) {
+	        $scope.pager.page = page;
 	        $scope.generateReport();
 	    };
 	}]);
@@ -20108,8 +20113,15 @@
 	        $scope.upcomingEvents = [];
 	        EventReportService.getEventReport($scope.selectedOrgUnit.id, $scope.selectedOuMode, $scope.model.selectedProgram.id, DateUtils.formatFromUserToApi($scope.report.startDate), DateUtils.formatFromUserToApi($scope.report.endDate), 'ACTIVE', 'SCHEDULE', $scope.pager).then(function (data) {
 	            if (data) {
-	                $scope.pager.toolBarDisplay = 5;
-	                $scope.pager.recordsCount = data.eventRows.length;
+	                if (data.pager) {
+	                    $scope.pager = data.pager;
+	                    $scope.pager.toolBarDisplay = 5;
+	
+	                    Paginator.setPage($scope.pager.page);
+	                    Paginator.setPageCount($scope.pager.pageCount);
+	                    Paginator.setPageSize($scope.pager.pageSize);
+	                    Paginator.setItemCount($scope.pager.total);
+	                }
 	
 	                angular.forEach(data.eventRows, function (row) {
 	                    var upcomingEvent = {};
@@ -20291,19 +20303,17 @@
 	        return TEIGridService.getHeader($scope.gridColumns);
 	    };
 	
-	    $scope.onGetPage = function (page) {
-	        $scope.pager.page = page;
+	    $scope.jumpToPage = function () {
 	        $scope.generateReport();
 	    };
 	
-	    $scope.onChangePageSize = function (newPageSize) {
+	    $scope.resetPageSize = function () {
 	        $scope.pager.page = 1;
-	        $scope.pager.pageSize = newPageSize;
 	        $scope.generateReport();
 	    };
 	
-	    $scope.onChangePage = function (newPage) {
-	        $scope.pager.page = newPage;
+	    $scope.getPage = function (page) {
+	        $scope.pager.page = page;
 	        $scope.generateReport();
 	    };
 	
@@ -39408,4 +39418,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-cb4c81d0ccdecc5155cb.js.map
+//# sourceMappingURL=app-885e5f7d70589b4a1c93.js.map
