@@ -9092,7 +9092,7 @@
 	        },
 	        getListWithProgramData: function getListWithProgramData(entityUidList, programUid, dataElementId, programStageId, orgUnitId, transferStageId) {
 	            if (entityUidList && entityUidList.length > 0) {
-	                return TeiAccessApiService.get(null, programUid, DHIS2URL + '/trackedEntityInstances.json?trackedEntityInstance=' + entityUidList.join(';') + '&program=' + programUid + '&ou=' + orgUnitId + '&fields=trackedEntityInstance,orgUnit,enrollments[enrollment,program,enrollmentDate,events[status,dataValues,programStage,eventDate]]').then(function (response) {
+	                return TeiAccessApiService.get(null, programUid, DHIS2URL + '/trackedEntityInstances.json?trackedEntityInstance=' + entityUidList.join(';') + '&paging=false&program=' + programUid + '&ou=' + orgUnitId + '&fields=trackedEntityInstance,orgUnit,enrollments[enrollment,program,enrollmentDate,events[status,dataValues,programStage,eventDate]]').then(function (response) {
 	                    var teiDictionary = {};
 	                    if (response.data && response.data.trackedEntityInstances && response.data.trackedEntityInstances.length > 0) {
 	                        response.data.trackedEntityInstances.forEach(function (tei) {
@@ -9140,7 +9140,7 @@
 	        },
 	        getActiveEnrollments: function getActiveEnrollments(entityUidList, programUid, orgUnitId) {
 	            if (entityUidList && entityUidList.length > 0) {
-	                return TeiAccessApiService.get(null, programUid, DHIS2URL + '/trackedEntityInstances.json?trackedEntityInstance=' + entityUidList.join(';') + '&program=' + programUid + '&ou=' + orgUnitId + '&programStatus=ACTIVE&fields=trackedEntityInstance,enrollments[enrollment]').then(function (response) {
+	                return TeiAccessApiService.get(null, programUid, DHIS2URL + '/trackedEntityInstances.json?trackedEntityInstance=' + entityUidList.join(';') + '&paging=false&program=' + programUid + '&ou=' + orgUnitId + '&programStatus=ACTIVE&fields=trackedEntityInstance,enrollments[enrollment]').then(function (response) {
 	                    var data = { enrollments: [] };
 	                    var enrollments = data.enrollments;
 	                    if (response.data && response.data.trackedEntityInstances && response.data.trackedEntityInstances.length > 0) {
@@ -38622,7 +38622,7 @@
 	}
 	
 	function getTeisWithEnrollmentsAsync(teiIds, programId, orgUnitId, teiAccessApiService) {
-	    return teiAccessApiService.get(null, programId, DHIS2URL + '/trackedEntityInstances.json?trackedEntityInstance=' + teiIds.join(';') + '&program=' + programId + '&ou=' + orgUnitId + '&fields=trackedEntityInstance,orgUnit,enrollments[enrollment,program,enrollmentDate,events[status,dataValues,programStage,eventDate]]');
+	    return teiAccessApiService.get(null, programId, DHIS2URL + '/trackedEntityInstances.json?trackedEntityInstance=' + teiIds.join(';') + '&paging=false&program=' + programId + '&ou=' + orgUnitId + '&fields=trackedEntityInstance,orgUnit,enrollments[enrollment,program,enrollmentDate,events[status,dataValues,programStage,eventDate]]');
 	}
 	
 	function getValuesFromEvent(teis, elementIds, programStageId) {
@@ -55666,4 +55666,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-b589856c2b60ba0c5412.js.map
+//# sourceMappingURL=app-990bfa2a377c69bcc9f2.js.map
