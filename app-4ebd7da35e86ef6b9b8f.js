@@ -9193,6 +9193,29 @@
 	            });
 	            return promise;
 	        },
+	        getTeiWithAllAvailableFields: function getTeiWithAllAvailableFields(entityUid, optionSets, attributesById) {
+	            var promise = $http.get(DHIS2URL + '/trackedEntityInstances/' + entityUid + '.json?fields=*').then(function (response) {
+	                var tei = response.data;
+	                setTeiAttributeValues(tei.attributes, optionSets, attributesById);
+	                return tei;
+	            }, function (error) {
+	                if (error) {
+	                    var headerText = errorHeader;
+	                    var bodyText = $translate.instant('access_denied');
+	
+	                    if (error.statusText) {
+	                        headerText = error.statusText;
+	                    }
+	                    if (error.data && error.data.message) {
+	                        bodyText = error.data.message;
+	                    }
+	                    NotificationService.showNotifcationDialog(headerText, bodyText);
+	                }
+	            });
+	
+	            return promise;
+	        },
+	
 	        saveRelationship: function saveRelationship(relationship) {
 	            var promise = $http.post(DHIS2URL + '/relationships', relationship).then(function (response) {
 	                return response.data;
@@ -15724,6 +15747,9 @@
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
+	// Config variables
+	var DAYS_BEFORE_KLYNGE_START_TO_INCLUDE = exports.DAYS_BEFORE_KLYNGE_START_TO_INCLUDE = 5;
+	
 	// Fields
 	var DNUMBER_FIELD_ID = exports.DNUMBER_FIELD_ID = 'ZSt07qyq6Pt';
 	var BIRTH_DATE_FIELD_ID = exports.BIRTH_DATE_FIELD_ID = 'NI0QRzJvQ0k';
@@ -17530,7 +17556,7 @@
 	            }
 	            selectedLayout = !selectedLayout ? defaultLayout : selectedLayout;
 	
-	            if ($scope.selectedProgram && $scope.lockedList[$scope.selectedProgram.id]) {
+	            if ($scope.selectedProgram && $scope.lockedList && $scope.lockedList[$scope.selectedProgram.id]) {
 	                selectedLayout = $scope.dashboardLayouts.defaultLayout[$scope.selectedProgram.id] ? $scope.dashboardLayouts.defaultLayout[$scope.selectedProgram.id] : defaultLayout;
 	            }
 	
@@ -25619,6 +25645,8 @@
 
 	"use strict";
 	
+	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; /* global trackerCapture, angular */
+	
 	var _converters = __webpack_require__(6);
 	
 	var _constants = __webpack_require__(16);
@@ -25626,10 +25654,10 @@
 	var _innreise_duplicates = __webpack_require__(46);
 	
 	var _require = __webpack_require__(47),
-	    program = _require.program; /* global trackerCapture, angular */
+	    program = _require.program;
 	
 	var trackerCapture = angular.module('trackerCapture');
-	trackerCapture.controller('RelationshipController', ["$scope", "$rootScope", "$modal", "$location", "TEIService", "AttributesFactory", "CurrentSelection", "RelationshipFactory", "OrgUnitFactory", "ProgramFactory", "EnrollmentService", "ModalService", "CommonUtils", "TEService", "$timeout", "$q", "DHIS2EventFactory", "DateUtils", function ($scope, $rootScope, $modal, $location, TEIService, AttributesFactory, CurrentSelection, RelationshipFactory, OrgUnitFactory, ProgramFactory, EnrollmentService, ModalService, CommonUtils, TEService, $timeout, $q, DHIS2EventFactory, DateUtils) {
+	trackerCapture.controller('RelationshipController', ["$scope", "$rootScope", "$modal", "$location", "TEIService", "AttributesFactory", "CurrentSelection", "RelationshipFactory", "OrgUnitFactory", "ProgramFactory", "EnrollmentService", "ModalService", "CommonUtils", "TEService", "$timeout", "$q", "DHIS2EventFactory", "TCStorageService", "DateUtils", function ($scope, $rootScope, $modal, $location, TEIService, AttributesFactory, CurrentSelection, RelationshipFactory, OrgUnitFactory, ProgramFactory, EnrollmentService, ModalService, CommonUtils, TEService, $timeout, $q, DHIS2EventFactory, TCStorageService, DateUtils) {
 	    $rootScope.showAddRelationshipDiv = false;
 	    $scope.relatedProgramRelationship = false;
 	    var ENTITYNAME = "TRACKED_ENTITY_INSTANCE";
@@ -25641,7 +25669,7 @@
 	        _allPrograms = result.programs;
 	    });
 	
-	    //listen for the selected entity       
+	    //listen for the selected entity
 	    $scope.$on('dashboardWidgets', function (event, args) {
 	        $scope.relationshipTypes = [];
 	        $scope.relationships = [];
@@ -25801,166 +25829,212 @@
 	        location.href = '../dhis-web-capture/index.html#/viewEvent/' + eventId;
 	    };
 	
+	    $scope.shouldShowRelationshipBox = function (relationshipsWidget, relatedTeis) {
+	        if (!relationshipsWidget || !relationshipsWidget.customRelationship) {
+	            return true;
+	        }
+	        if (relationshipsWidget.customRelationship === 'other_org_owner' && !(relatedTeis && relatedTeis.length > 0)) {
+	            return false;
+	        }
+	        if (relationshipsWidget.customRelationship === 'other' && !(relatedTeis && relatedTeis.length > 0)) {
+	            return false;
+	        }
+	        return true;
+	    };
+	
+	    $scope.shouldShowAddRelationshipLink = function (relationshipsWidget) {
+	        if (relationshipsWidget && (relationshipsWidget.customRelationship === 'other_org_owner' || relationshipsWidget.customRelationship === 'other')) {
+	            return false;
+	        }
+	        return true;
+	    };
+	
+	    $scope.startDate;
+	    $scope.endDate;
+	    $scope.DAYS_BEFORE_KLYNGE_START_TO_INCLUDE = _constants.DAYS_BEFORE_KLYNGE_START_TO_INCLUDE;
+	
 	    var pushRelative = function pushRelative(relative) {
-	
-	        var promise = $q.defer();
-	
-	        var startDate = moment(DateUtils.formatFromUserToApi($scope.selectedEnrollment.enrollmentDate));
-	        var endDate;
+	        $scope.startDate = moment(DateUtils.formatFromUserToApi($scope.selectedEnrollment.enrollmentDate));
+	        if (_constants.DAYS_BEFORE_KLYNGE_START_TO_INCLUDE) {
+	            $scope.startDate = $scope.startDate.subtract(_constants.DAYS_BEFORE_KLYNGE_START_TO_INCLUDE, "d"); // Add grace period for including index and contacts
+	        }
 	        angular.forEach($scope.selectedTei.attributes, function (attribute) {
 	            if (attribute.attribute == 'hD3CRC6rdv1') {
-	                endDate = moment(DateUtils.formatFromUserToApi(attribute.value));
+	                $scope.endDate = moment(DateUtils.formatFromUserToApi(attribute.value));
 	            }
 	        });
 	
 	        if ($scope.relationshipsWidget.customRelationship == 'index') {
-	            relative.relationshipProgramConstraint.id = 'uYjxkTbwRNf';
-	            TEIService.getWithProgramData(relative.trackedEntityInstance, 'uYjxkTbwRNf', $scope.optionSets, $scope.attributesById).then(function (teiIndex) {
-	                angular.forEach(teiIndex.enrollments, function (enrollment) {
-	                    if (enrollment.program == 'uYjxkTbwRNf') {
-	                        var symptomsOnsetMoment = moment(DateUtils.formatFromUserToApi(enrollment.incidentDate));
-	                        if ((symptomsOnsetMoment.isSame(startDate) || symptomsOnsetMoment.isAfter(startDate)) && (!endDate || symptomsOnsetMoment.isBefore(endDate))) {
-	                            relative.symptomsOnsetMoment = symptomsOnsetMoment;
-	                            relative.symptomsOnset = enrollment.incidentDate;
-	                            relative.created = enrollment.incidentDate;
-	                        }
-	                    };
-	                });
-	
-	                if (relative.symptomsOnset) {
-	                    $scope.relatedTeis.push(relative);
-	                }
-	                promise.resolve();
-	            });
+	            if ($scope.checkIsValidIndexRelationAndUpdateRelative(relative, $scope.startDate, $scope.endDate)) {
+	                $scope.relatedTeis.push(relative);
+	            }
 	        } else if ($scope.relationshipsWidget.customRelationship == 'contact') {
-	            relative.relationshipProgramConstraint.id = 'DM9n1bUw8W8';
-	            TEIService.getWithProgramData(relative.trackedEntityInstance, 'DM9n1bUw8W8', $scope.optionSets, $scope.attributesById).then(function (teiIndex) {
-	                angular.forEach(teiIndex.enrollments, function (enrollment) {
-	                    if (enrollment.program == 'DM9n1bUw8W8') {
-	                        var contactDateMoment;
+	            var isInIndex = $scope.checkIsValidIndexRelationAndUpdateRelative(relative, $scope.startDate, $scope.endDate);
+	            if (!isInIndex && $scope.checkIsValidNaerkontaktRelationAndUpdateRelative(relative, $scope.startDate, $scope.endDate)) {
+	                $scope.relatedTeis.push(relative);
+	            }
 	
-	                        angular.forEach(enrollment.events, function (event) {
-	                            if ((!endDate || moment(event.eventDate).isBefore(endDate)) && (moment(event.eventDate).isAfter(startDate) || moment(event.eventDate).isSame(startDate)) && event.programStage == 'sAV9jAajr8x') {
-	                                //this is the followup event in the contact program: event date is contact time.
-	                                if (!contactDateMoment || moment(event.eventDate).isBefore(contactDateMoment)) {
-	                                    //only update the contact date if it is older than the previous one, we want the first contact date that is relevant
-	                                    contactDateMoment = moment(event.eventDate);
-	                                }
-	                            }
-	                        });
+	            $scope.updateIndicators(relative, $scope.startDate, $scope.endDate);
+	        } else if ($scope.relationshipsWidget.customRelationship == 'other_org_owner') {
+	            if (!$scope.hasAccessToRelativeProgram(relative, _constants.NAERKONTAKT_PROGRAM_ID) && !$scope.hasAccessToRelativeProgram(relative, _constants.INDEKSERING_PROGRAM_ID)) {
+	                $scope.addOrgNameToProgramOwners(relative);
+	                $scope.relatedTeis.push(relative);
+	            }
+	        } else if ($scope.relationshipsWidget.customRelationship == 'other') {
+	            var isInNotAccess = !$scope.hasAccessToRelativeProgram(relative, _constants.NAERKONTAKT_PROGRAM_ID) && !$scope.hasAccessToRelativeProgram(relative, _constants.INDEKSERING_PROGRAM_ID);
+	            var isInIndex = $scope.checkIsValidIndexRelationAndUpdateRelative(relative, $scope.startDate, $scope.endDate);
+	            var isInNaerkontakt = $scope.checkIsValidNaerkontaktRelationAndUpdateRelative(relative, $scope.startDate, $scope.endDate);
 	
-	                        if (contactDateMoment && (!endDate || contactDateMoment.isBefore(endDate))) {
-	                            relative.contactDateMoment = contactDateMoment;
-	                            relative.contactDate = DateUtils.formatFromApiToUser(contactDateMoment);;
-	                            relative.created = DateUtils.formatFromApiToUser(contactDateMoment);;
-	                        }
-	                    };
-	                    //TODO: Check wether we keep the API behavior of returning other programs the user has access to as well as the requested program:
-	                    if (enrollment.program == 'uYjxkTbwRNf') {
-	                        var symptomsOnsetMoment = moment(DateUtils.formatFromUserToApi(enrollment.incidentDate));
-	                        if ((symptomsOnsetMoment.isSame(startDate) || symptomsOnsetMoment.isAfter(startDate)) && (!endDate || symptomsOnsetMoment.isBefore(endDate))) {
-	                            angular.forEach(enrollment.events, function (event) {
-	                                if ((!endDate || moment(event.eventDate).isBefore(endDate)) && moment(event.eventDate).isAfter(startDate)) {
-	                                    //Health condition:
-	                                    if (event.programStage == 'oqsk2Jv4k3s') {
-	                                        angular.forEach(event.dataValues, function (dataValue) {
-	                                            if (dataValue.dataElement == 'bOYWVEBaWy6') {
-	                                                relative.status = dataValue.value;
-	                                            }
-	                                        });
-	                                    }
+	            if (!isInNotAccess && !isInIndex && !isInNaerkontakt) {
+	                $scope.relatedTeis.push(relative);
+	            }
+	        } else {
+	            $scope.relatedTeis.push(relative);
+	        }
+	    };
 	
-	                                    //Virus Mutation
-	                                    if (event.programStage == 'dDHkBd3X8Ce') {
-	                                        angular.forEach(event.dataValues, function (dataValue) {
-	                                            if (dataValue.dataElement == 'NupAfWpNXMw') {
-	                                                relative.mutation = dataValue.value;
-	                                            }
-	                                        });
-	                                    }
+	    $scope.hasAccessToRelativeProgram = function (relative, programId) {
+	        var hasAccess = false;
+	        if (relative && relative.programOwners) {
+	            angular.forEach(relative.programOwners, function (programOwner) {
+	                if (programOwner.program === programId && programOwner.ownerOrgUnit === 'ScyeDxgMbBm') {
+	                    hasAccess = true;
+	                }
+	            });
+	        }
+	        return hasAccess;
+	    };
 	
-	                                    //Serious condition
-	                                    if (event.programStage == 'LpWNjNGvCO5') {
-	                                        angular.forEach(event.dataValues, function (dataValue) {
-	                                            if (dataValue.dataElement == 'uUIPBIznDZT') {
-	                                                relative.condition = dataValue.value;
-	                                            }
-	                                        });
-	                                    }
-	                                }
-	                            });
-	                            relative.symptomsOnset = enrollment.incidentDate;
-	                            relative.symptomsOnsetMoment = symptomsOnsetMoment;
+	    $scope.checkIsValidIndexRelationAndUpdateRelative = function (relative, startDate, endDate) {
+	        relative.relationshipProgramConstraint.id = _constants.INDEKSERING_PROGRAM_ID;
+	        if (!$scope.hasAccessToRelativeProgram(relative, _constants.INDEKSERING_PROGRAM_ID)) {
+	            return false;
+	        }
+	        angular.forEach(relative.enrollments, function (enrollment) {
+	            if (enrollment.program == _constants.INDEKSERING_PROGRAM_ID) {
+	                enrollment.incidentDate = DateUtils.formatFromApiToUser(enrollment.incidentDate);
+	                var symptomsOnsetMoment = moment(DateUtils.formatFromUserToApi(enrollment.incidentDate));
+	                if ((symptomsOnsetMoment.isSame(startDate) || symptomsOnsetMoment.isAfter(startDate)) && (!endDate || symptomsOnsetMoment.isBefore(endDate))) {
+	                    relative.symptomsOnsetMoment = symptomsOnsetMoment;
+	                    relative.symptomsOnset = enrollment.incidentDate;
+	                    relative.created = enrollment.incidentDate;
+	                }
+	            }
+	        });
+	        if (relative.symptomsOnset) {
+	            return true;
+	        }
+	        return false;
+	    };
+	
+	    $scope.checkIsValidNaerkontaktRelationAndUpdateRelative = function (relative, startDate, endDate) {
+	        relative.relationshipProgramConstraint.id = _constants.NAERKONTAKT_PROGRAM_ID;
+	        if (!$scope.hasAccessToRelativeProgram(relative, _constants.NAERKONTAKT_PROGRAM_ID)) {
+	            return false;
+	        }
+	        angular.forEach(relative.enrollments, function (enrollment) {
+	            if (enrollment.program == _constants.NAERKONTAKT_PROGRAM_ID) {
+	                var contactDateMoment;
+	
+	                angular.forEach(enrollment.events, function (event) {
+	                    if ((!endDate || moment(event.eventDate).isBefore(endDate)) && (moment(event.eventDate).isAfter(startDate) || moment(event.eventDate).isSame(startDate)) && event.programStage == _constants.NAERKONTAKT_OPPFOLGING_PROGRAM_STAGE_ID) {
+	                        //this is the followup event in the contact program: event date is contact time.
+	                        if (!contactDateMoment || moment(event.eventDate).isBefore(contactDateMoment)) {
+	                            //only update the contact date if it is older than the previous one, we want the first contact date that is relevant
+	                            contactDateMoment = moment(event.eventDate);
 	                        }
 	                    }
 	                });
 	
-	                if (relative.status == 'Death') {
-	                    $scope.indicators.death++;
-	                }
-	                if (relative.status == 'HOSPITAL') {
-	                    $scope.indicators.hospital++;
-	                }
+	                if (contactDateMoment && (!endDate || contactDateMoment.isBefore(endDate))) {
+	                    relative.contactDateMoment = contactDateMoment;
+	                    relative.contactDate = DateUtils.formatFromApiToUser(contactDateMoment);
 	
-	                if (relative.mutation == 'true') {
-	                    $scope.indicators.mutation++;
+	                    relative.created = DateUtils.formatFromApiToUser(contactDateMoment);
 	                }
+	            }
+	        });
+	        return true;
+	    };
 	
-	                if (relative.condition == 'true') {
-	                    $scope.indicators.underlyingCondition++;
-	                }
-	
-	                if (relative.symptomsOnsetMoment && relative.symptomsOnsetMoment.isAfter(startDate.add(9, 'days'))) {
-	                    $scope.indicators.positiveContact10++;
-	                }
-	
-	                //Now indicators.
-	                if (relative.symptomsOnsetMoment && (!endDate || relative.symptomsOnsetMoment.isBefore(endDate))) {
-	                    $scope.indicators.indexNow++;
-	                } else if (relative.contactDateMoment && (!endDate || relative.contactDateMoment.isBefore(endDate))) {
-	                    $scope.indicators.contactNow++;
-	                }
-	
-	                //D01 indicators.
-	                if (relative.symptomsOnsetMoment && relative.symptomsOnsetMoment.isBefore(startDate.add(1, 'days'))) {
-	                    $scope.indicators.index1++;
-	                } else if (relative.contactDateMoment && (!endDate || relative.contactDateMoment.isBefore(endDate))) {
-	                    $scope.indicators.contact1++;
-	                }
-	
-	                //D10 indicators.
-	                if (relative.symptomsOnsetMoment && relative.symptomsOnsetMoment.isBefore(startDate.add(10, 'days'))) {
-	                    $scope.indicators.index10++;
-	                } else if (relative.contactDateMoment && (!endDate || relative.contactDateMoment.isBefore(endDate))) {
-	                    $scope.indicators.contact10++;
-	                }
-	
-	                //D21 indicators.
-	                if (relative.symptomsOnsetMoment && relative.symptomsOnsetMoment.isBefore(startDate.add(21, 'days'))) {
-	                    $scope.indicators.index21++;
-	                } else if (relative.contactDateMoment && (!endDate || relative.contactDateMoment.isBefore(endDate))) {
-	                    $scope.indicators.contact21++;
-	                }
-	
-	                //D30 indicators.
-	                if (relative.symptomsOnsetMoment && relative.symptomsOnsetMoment.isBefore(startDate.add(30, 'days'))) {
-	                    $scope.indicators.index30++;
-	                } else if (relative.contactDateMoment && (!endDate || relative.contactDateMoment.isBefore(endDate))) {
-	                    $scope.indicators.contact30++;
-	                }
-	
-	                if (!relative.symptomsOnset) {
-	                    $scope.relatedTeis.push(relative);
-	                }
-	
-	                promise.resolve();
+	    $scope.addOrgNameToProgramOwners = function (relative) {
+	        angular.forEach(relative.programOwners, function (programOwner) {
+	            TCStorageService.currentStore.get('organisationUnits', programOwner.ownerOrgUnit).done(function (orgUnit) {
+	                programOwner.ownerOrgUnitName = orgUnit.displayName;
 	            });
-	        } else {
-	            $scope.relatedTeis.push(relative);
-	            promise.resolve();
+	        });
+	    };
+	
+	    $scope.getOwnerOrgUnitName = function (relative) {
+	        var indeksOwner = relative.programOwners && relative.programOwners.filter(function (owner) {
+	            return owner.program === _constants.INDEKSERING_PROGRAM_ID;
+	        });
+	        var naerkontaktOwner = relative.programOwners && relative.programOwners.filter(function (owner) {
+	            return owner.program === _constants.NAERKONTAKT_PROGRAM_ID;
+	        });
+	        if (indeksOwner.length > 0) {
+	            return indeksOwner[0].ownerOrgUnitName;
+	        }
+	        if (naerkontaktOwner.length > 0) {
+	            return naerkontaktOwner[0].ownerOrgUnitName;
+	        }
+	        return 'Ukjent';
+	    };
+	
+	    $scope.updateIndicators = function (relative, startDate, endDate) {
+	        if (relative.status == 'Death') {
+	            $scope.indicators.death++;
+	        }
+	        if (relative.status == 'HOSPITAL') {
+	            $scope.indicators.hospital++;
 	        }
 	
-	        return promise.promise;
+	        if (relative.mutation == 'true') {
+	            $scope.indicators.mutation++;
+	        }
+	
+	        if (relative.condition == 'true') {
+	            $scope.indicators.underlyingCondition++;
+	        }
+	
+	        if (relative.symptomsOnsetMoment && relative.symptomsOnsetMoment.isAfter(startDate.add(9, 'days'))) {
+	            $scope.indicators.positiveContact10++;
+	        }
+	
+	        //Now indicators.
+	        if (relative.symptomsOnsetMoment && (!endDate || relative.symptomsOnsetMoment.isBefore(endDate))) {
+	            $scope.indicators.indexNow++;
+	        } else if (relative.contactDateMoment && (!endDate || relative.contactDateMoment.isBefore(endDate))) {
+	            $scope.indicators.contactNow++;
+	        }
+	
+	        //D01 indicators.
+	        if (relative.symptomsOnsetMoment && relative.symptomsOnsetMoment.isBefore(startDate.add(1, 'days'))) {
+	            $scope.indicators.index1++;
+	        } else if (relative.contactDateMoment && (!endDate || relative.contactDateMoment.isBefore(endDate))) {
+	            $scope.indicators.contact1++;
+	        }
+	
+	        //D10 indicators.
+	        if (relative.symptomsOnsetMoment && relative.symptomsOnsetMoment.isBefore(startDate.add(10, 'days'))) {
+	            $scope.indicators.index10++;
+	        } else if (relative.contactDateMoment && (!endDate || relative.contactDateMoment.isBefore(endDate))) {
+	            $scope.indicators.contact10++;
+	        }
+	
+	        //D21 indicators.
+	        if (relative.symptomsOnsetMoment && relative.symptomsOnsetMoment.isBefore(startDate.add(21, 'days'))) {
+	            $scope.indicators.index21++;
+	        } else if (relative.contactDateMoment && (!endDate || relative.contactDateMoment.isBefore(endDate))) {
+	            $scope.indicators.contact21++;
+	        }
+	
+	        //D30 indicators.
+	        if (relative.symptomsOnsetMoment && relative.symptomsOnsetMoment.isBefore(startDate.add(30, 'days'))) {
+	            $scope.indicators.index30++;
+	        } else if (relative.contactDateMoment && (!endDate || relative.contactDateMoment.isBefore(endDate))) {
+	            $scope.indicators.contact30++;
+	        }
 	    };
 	
 	    var setRelationships = function setRelationships() {
@@ -25989,17 +26063,38 @@
 	        var relationshipType = {};
 	
 	        var teServicePromise = TEService.getAll().then(function (teiTypes) {
-	            //Loop through all relationships.      
+	            //Loop through all relationships.
 	            var queries = [];
 	
 	            angular.forEach($scope.selectedTei.relationships, function (rel) {
-	                if (rel.to && rel.to.trackedEntityInstance && rel.to.trackedEntityInstance.trackedEntityInstance !== $scope.selectedTei.trackedEntityInstance) {
-	                    var teiId = rel.to.trackedEntityInstance.trackedEntityInstance;
-	                    queries.push(TEIService.get(teiId, $scope.optionSets, $scope.attributesById).then(function (tei) {
+	
+	                var isValidToRelationship = rel.to && rel.to.trackedEntityInstance && rel.to.trackedEntityInstance.trackedEntityInstance !== $scope.selectedTei.trackedEntityInstance;
+	                var isValidFromRelationship = rel.from && rel.bidirectional && rel.from.trackedEntityInstance && rel.from.trackedEntityInstance.trackedEntityInstance !== $scope.selectedTei.trackedEntityInstance;
+	                var isValidBidirectionalRelationship = rel.from && rel.bidirectional && rel.from.event && rel.from.event.event;
+	
+	                var teiId = isValidToRelationship ? rel.to.trackedEntityInstance.trackedEntityInstance : rel.from.trackedEntityInstance.trackedEntityInstance;
+	
+	                if (isValidToRelationship || isValidFromRelationship) {
+	                    queries.push(TEIService.getTeiWithAllAvailableFields(teiId, $scope.optionSets, $scope.attributesById).then(function (tei) {
 	                        relationshipType = $scope.relationshipTypes.find(function (relType) {
 	                            return relType.id === rel.relationshipType;
 	                        });
-	                        var relName = relationshipType.fromToName;
+	                        relationshipProgram = isValidToRelationship ? relationshipType.toConstraint.program : relationshipType.fromConstraint.program;
+	                        var relName = isValidToRelationship ? relationshipType.fromToName : relationshipType.toFromName;
+	                        if (!relationshipProgram && $scope.selectedProgram) {
+	                            relationshipProgram = { id: $scope.selectedProgram.id };
+	                        }
+	
+	                        var relative = _extends({}, tei, { // copy the whole tei to omit extra calls to backend
+	                            trackedEntityInstance: teiId,
+	                            relName: relName,
+	                            relId: rel.relationship,
+	                            attributes: getRelativeAttributes(tei.attributes),
+	                            relationshipProgramConstraint: relationshipProgram,
+	                            relationshipType: relationshipType,
+	                            created: rel.created,
+	                            programOwners: tei.programOwners
+	                        });
 	
 	                        if (relationshipType && teiTypes.filter(function (teiType) {
 	                            return teiType.id === tei.trackedEntityType;
@@ -26017,51 +26112,9 @@
 	                                }
 	                            });
 	                        }
-	
-	                        relationshipProgram = relationshipType.toConstraint.program;
-	
-	                        if (!relationshipProgram && $scope.selectedProgram) {
-	                            relationshipProgram = { id: $scope.selectedProgram.id };
-	                        }
-	
-	                        var relative = { trackedEntityInstance: teiId, relName: relName, relId: rel.relationship, attributes: getRelativeAttributes(tei.attributes), relationshipProgramConstraint: relationshipProgram, relationshipType: relationshipType, created: rel.created };
-	                        return pushRelative(relative);
+	                        pushRelative(relative);
 	                    }));
-	                } else if (rel.from && rel.bidirectional && rel.from.trackedEntityInstance && rel.from.trackedEntityInstance.trackedEntityInstance !== $scope.selectedTei.trackedEntityInstance) {
-	                    var teiId = rel.from.trackedEntityInstance.trackedEntityInstance;
-	                    queries.push(TEIService.get(teiId, $scope.optionSets, $scope.attributesById).then(function (tei) {
-	                        relationshipType = $scope.relationshipTypes.find(function (relType) {
-	                            return relType.id === rel.relationshipType;
-	                        });
-	                        var relName = relationshipType.toFromName;
-	
-	                        if (relationshipType && teiTypes.filter(function (teiType) {
-	                            return teiType.id === tei.trackedEntityType;
-	                        }).length > 0) {
-	                            var teiType = teiTypes.find(function (teiType) {
-	                                return teiType.id === tei.trackedEntityType;
-	                            });
-	                            angular.forEach(teiType.trackedEntityTypeAttributes, function (attribute) {
-	                                if ($scope.relationshipAttributes.length > 0 && $scope.relationshipAttributes.filter(function (att) {
-	                                    return att.id === attribute.id;
-	                                }).length === 0) {
-	                                    $scope.relationshipAttributes.push(attribute);
-	                                } else if ($scope.relationshipAttributes.length === 0) {
-	                                    $scope.relationshipAttributes.push(attribute);
-	                                }
-	                            });
-	                        }
-	
-	                        relationshipProgram = relationshipType.fromConstraint.program;
-	
-	                        if (!relationshipProgram && $scope.selectedProgram) {
-	                            relationshipProgram = { id: $scope.selectedProgram.id };
-	                        }
-	
-	                        var relative = { trackedEntityInstance: teiId, relName: relName, relId: rel.relationship, attributes: getRelativeAttributes(tei.attributes), relationshipProgramConstraint: relationshipProgram, relationshipType: relationshipType, created: rel.created };
-	                        return pushRelative(relative);
-	                    }));
-	                } else if (rel.from && rel.bidirectional && rel.from.event && rel.from.event.event) {
+	                } else if (isValidBidirectionalRelationship) {
 	                    var event = null;
 	                    DHIS2EventFactory.getEventWithoutRegistration(rel.from.event.event).then(function (e) {
 	                        event = e;
@@ -26100,40 +26153,91 @@
 	        });
 	
 	        var selections = CurrentSelection.get();
-	        CurrentSelection.set({ tei: $scope.selectedTei, te: $scope.trackedEntityType, prs: selections.prs, pr: $scope.selectedProgram, prNames: selections.prNames, prStNames: selections.prStNames, enrollments: selections.enrollments, selectedEnrollment: $scope.selectedEnrollment, optionSets: selections.optionSets, orgUnit: selections.orgUnit });
+	        CurrentSelection.set({
+	            tei: $scope.selectedTei,
+	            te: $scope.trackedEntityType,
+	            prs: selections.prs,
+	            pr: $scope.selectedProgram,
+	            prNames: selections.prNames,
+	            prStNames: selections.prStNames,
+	            enrollments: selections.enrollments,
+	            selectedEnrollment: $scope.selectedEnrollment,
+	            optionSets: selections.optionSets,
+	            orgUnit: selections.orgUnit
+	        });
 	
 	        //todo, collect promises and broadcase once done.
 	        teServicePromise.then(function () {
 	            if ($scope.relationshipsWidget.customRelationship == 'contact') {
 	                $rootScope.customConstants = [];
 	
-	                $rootScope.customConstants.push({ id: 'NAantalldNA', type: 'TEXT', value: 'Ind:' + $scope.indicators.indexNow + " Nær:" + $scope.indicators.contactNow });
+	                $rootScope.customConstants.push({
+	                    id: 'NAantalldNA',
+	                    type: 'TEXT',
+	                    value: 'Ind:' + $scope.indicators.indexNow + " Nær:" + $scope.indicators.contactNow
+	                });
 	
 	                if ($scope.indicators.index1 || $scope.indicators.contact1) {
-	                    $rootScope.customConstants.push({ id: '01antalld01', type: 'TEXT', value: 'Ind:' + $scope.indicators.index1 + " Nær:" + $scope.indicators.contact1 });
+	                    $rootScope.customConstants.push({
+	                        id: '01antalld01',
+	                        type: 'TEXT',
+	                        value: 'Ind:' + $scope.indicators.index1 + " Nær:" + $scope.indicators.contact1
+	                    });
 	                }
 	
 	                if ($scope.indicators.index10 || $scope.indicators.contact10) {
-	                    $rootScope.customConstants.push({ id: '10antalld10', type: 'TEXT', value: 'Ind:' + $scope.indicators.index10 + " Nær:" + $scope.indicators.contact10 });
+	                    $rootScope.customConstants.push({
+	                        id: '10antalld10',
+	                        type: 'TEXT',
+	                        value: 'Ind:' + $scope.indicators.index10 + " Nær:" + $scope.indicators.contact10
+	                    });
 	                }
 	
 	                if ($scope.indicators.index21 || $scope.indicators.contact21) {
-	                    $rootScope.customConstants.push({ id: '21antalld21', type: 'TEXT', value: 'Ind:' + $scope.indicators.index21 + " Nær:" + $scope.indicators.contact21 });
+	                    $rootScope.customConstants.push({
+	                        id: '21antalld21',
+	                        type: 'TEXT',
+	                        value: 'Ind:' + $scope.indicators.index21 + " Nær:" + $scope.indicators.contact21
+	                    });
 	                }
 	
 	                if ($scope.indicators.index30 || $scope.indicators.contact30) {
-	                    $rootScope.customConstants.push({ id: '30antalld30', type: 'TEXT', value: 'Ind:' + $scope.indicators.index30 + " Nær:" + $scope.indicators.contact30 });
+	                    $rootScope.customConstants.push({
+	                        id: '30antalld30',
+	                        type: 'TEXT',
+	                        value: 'Ind:' + $scope.indicators.index30 + " Nær:" + $scope.indicators.contact30
+	                    });
 	                }
 	
-	                $rootScope.customConstants.push({ id: 'antDodsfall', type: 'TEXT', value: $scope.indicators.death ? $scope.indicators.death : '0' });
+	                $rootScope.customConstants.push({
+	                    id: 'antDodsfall',
+	                    type: 'TEXT',
+	                    value: $scope.indicators.death ? $scope.indicators.death : '0'
+	                });
 	
-	                $rootScope.customConstants.push({ id: 'antinnsykhu', type: 'TEXT', value: $scope.indicators.hospital ? $scope.indicators.hospital : '0' });
+	                $rootScope.customConstants.push({
+	                    id: 'antinnsykhu',
+	                    type: 'TEXT',
+	                    value: $scope.indicators.hospital ? $scope.indicators.hospital : '0'
+	                });
 	
-	                $rootScope.customConstants.push({ id: 'alvorHelset', type: 'TEXT', value: $scope.indicators.underlyingCondition ? $scope.indicators.underlyingCondition : '0' });
+	                $rootScope.customConstants.push({
+	                    id: 'alvorHelset',
+	                    type: 'TEXT',
+	                    value: $scope.indicators.underlyingCondition ? $scope.indicators.underlyingCondition : '0'
+	                });
 	
-	                $rootScope.customConstants.push({ id: 'mutasjon123', type: 'TEXT', value: $scope.indicators.mutation });
+	                $rootScope.customConstants.push({
+	                    id: 'mutasjon123',
+	                    type: 'TEXT',
+	                    value: $scope.indicators.mutation
+	                });
 	
-	                $rootScope.customConstants.push({ id: 'naerPos10dg', type: 'TEXT', value: $scope.indicators.positiveContact10 ? $scope.indicators.positiveContact10 : '0' });
+	                $rootScope.customConstants.push({
+	                    id: 'naerPos10dg',
+	                    type: 'TEXT',
+	                    value: $scope.indicators.positiveContact10 ? $scope.indicators.positiveContact10 : '0'
+	                });
 	
 	                $rootScope.$broadcast('relationshipIndicatorsUpdated', $scope.indicators);
 	            }
@@ -26199,6 +26303,8 @@
 	
 	// WEBPACK FOOTER //
 	// ./components/relationship/relationship-controller.js
+	
+	// https://covid19.fiks.test.ks.no/api/trackedEntityInstances/XEPHJ7USLfN.json?fields=trackedEntityInstance,programOwners,attributes
 
 /***/ }),
 /* 46 */
@@ -55666,4 +55772,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-990bfa2a377c69bcc9f2.js.map
+//# sourceMappingURL=app-4ebd7da35e86ef6b9b8f.js.map
