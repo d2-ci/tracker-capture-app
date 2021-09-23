@@ -25984,7 +25984,7 @@
 	        var hasAccess = false;
 	        if (relative && relative.programOwners) {
 	            angular.forEach(relative.programOwners, function (programOwner) {
-	                if (programOwner.program === programId && programOwner.ownerOrgUnit === 'ScyeDxgMbBm') {
+	                if (programOwner.program === programId && programOwner.ownerOrgUnit === $scope.selectedOrgUnit.id) {
 	                    hasAccess = true;
 	                }
 	            });
@@ -39746,6 +39746,11 @@
 	    $scope.stage = 'start';
 	    $scope.errorCode = undefined;
 	    $scope.errorMsg = undefined;
+	    $scope.peopleDuplikat = [];
+	    $scope.peopleInputError = [];
+	    $scope.peopleImportExisting = [];
+	    $scope.peopleImportNew = [];
+	    $scope.peopleAllreadyInGroup = [];
 	
 	    $scope.getCurrentKommuneNr = function () {
 	        return CurrentSelection.currentSelection.orgUnit.code;
@@ -39756,6 +39761,7 @@
 	
 	        $scope.uploadFile('validerFil').then(function (response) {
 	            $scope.uploadResult = response.data;
+	            $scope.savePeopleInCategories(response.data);
 	            $scope.stage = 'importTestSuccess';
 	        }, function (error) {
 	            $scope.stage = 'importFailed';
@@ -39768,6 +39774,7 @@
 	
 	        $scope.uploadFile('lagreFil').then(function (response) {
 	            $scope.uploadResult = response.data;
+	            $scope.savePeopleInCategories(response.data);
 	            $scope.stage = 'importSuccess';
 	            TEIService.getRelationships(selectedTei.trackedEntityInstance).then(function (response) {
 	                RelationshipCallbackService.runCallbackFunctions(response);
@@ -39795,12 +39802,50 @@
 	        $scope.stage = 'start';
 	    };
 	
+	    $scope.getImportResultCategory = function (person) {
+	        switch (person.status.operasjon) {
+	            case "MANUELL":
+	                return "DUPLIKAT";
+	            case "FEIL":
+	                return "INPUT_ERROR";
+	            case "NY_RELASJON":
+	            case "NY_RELASJON_KOMMUNEINFO":
+	            case "NY_ENROLLMENT":
+	                return "IMPORT_EXISTING";
+	            case "NY_TEI":
+	                return "IMPORT_NEW";
+	            case "INFOMELDING":
+	                return "ALLREADY_IN_GROUP";
+	            default:
+	                return "INPUT_ERROR";
+	        }
+	    };
+	
+	    $scope.getPeopleInCategory = function (category, people) {
+	        return people && people.filter(function (person) {
+	            return $scope.getImportResultCategory(person) === category;
+	        });
+	    };
+	
+	    $scope.savePeopleInCategories = function (people) {
+	        $scope.peopleDuplikat = $scope.getPeopleInCategory('DUPLIKAT', people.importNotPossible);
+	        $scope.peopleInputError = $scope.getPeopleInCategory('INPUT_ERROR', people.importNotPossible);
+	        $scope.peopleImportExisting = $scope.getPeopleInCategory('IMPORT_EXISTING', people.importOk);
+	        $scope.peopleImportNew = $scope.getPeopleInCategory('IMPORT_NEW', people.importOk);
+	        $scope.peopleAllreadyInGroup = $scope.getPeopleInCategory('ALLREADY_IN_GROUP', people.importOk);
+	    };
+	
 	    $scope.uploadFile = function (uploadType) {
 	        var url = '/api/import/' + uploadType + '/' + selectedTei.trackedEntityInstance + '/' + $scope.getCurrentKommuneNr();
 	
 	        var formData = new FormData();
 	        formData.append('file', $scope.file);
-	        return $http({ url: url, data: formData, method: "POST", headers: { "Content-Type": undefined, "ingress-csrf": $cookies['ingress-csrf'] } });
+	        return $http({
+	            url: url,
+	            data: formData,
+	            method: "POST",
+	            headers: { "Content-Type": undefined, "ingress-csrf": $cookies['ingress-csrf'] }
+	        });
 	    };
 	}]);
 
@@ -55934,4 +55979,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-cb521579e60722005e34.js.map
+//# sourceMappingURL=app-b6f5fca9188140384c52.js.map
