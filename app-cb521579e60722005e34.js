@@ -25796,7 +25796,7 @@
 	
 	    $scope.showNaerkontaktImport = function () {
 	        $modal.open({
-	            templateUrl: 'ks_patches/naerkontakt_import/naerkontakt-import.html',
+	            templateUrl: 'components/naerkontakt_import/naerkontakt-import.html',
 	            controller: 'NaerkontaktImportController',
 	            windowClass: 'modal-full-window',
 	            resolve: {
@@ -39740,7 +39740,7 @@
 	'use strict';
 	
 	var trackerCapture = angular.module('trackerCapture');
-	trackerCapture.controller('NaerkontaktImportController', ["$scope", "$rootScope", "$translate", "$modal", "$modalInstance", "$http", "$location", "DateUtils", "CurrentSelection", "OperatorFactory", "AttributesFactory", "EntityQueryFactory", "RelationshipCallbackService", "OrgUnitFactory", "ProgramFactory", "MetaDataFactory", "TEIService", "selectedTei", function ($scope, $rootScope, $translate, $modal, $modalInstance, $http, $location, DateUtils, CurrentSelection, OperatorFactory, AttributesFactory, EntityQueryFactory, RelationshipCallbackService, OrgUnitFactory, ProgramFactory, MetaDataFactory, TEIService, selectedTei) {
+	trackerCapture.controller('NaerkontaktImportController', ["$scope", "$rootScope", "$translate", "$modal", "$modalInstance", "$http", "$location", "DateUtils", "CurrentSelection", "OperatorFactory", "AttributesFactory", "EntityQueryFactory", "RelationshipCallbackService", "OrgUnitFactory", "ProgramFactory", "MetaDataFactory", "TEIService", "selectedTei", "$cookies", function ($scope, $rootScope, $translate, $modal, $modalInstance, $http, $location, DateUtils, CurrentSelection, OperatorFactory, AttributesFactory, EntityQueryFactory, RelationshipCallbackService, OrgUnitFactory, ProgramFactory, MetaDataFactory, TEIService, selectedTei, $cookies) {
 	    $scope.uploadResult = undefined;
 	    $scope.file = undefined;
 	    $scope.stage = 'start';
@@ -39796,12 +39796,11 @@
 	    };
 	
 	    $scope.uploadFile = function (uploadType) {
-	        var url = '/api/v1/import/' + uploadType + '/' + selectedTei.trackedEntityInstance + '/' + $scope.getCurrentKommuneNr();
+	        var url = '/api/import/' + uploadType + '/' + selectedTei.trackedEntityInstance + '/' + $scope.getCurrentKommuneNr();
 	
 	        var formData = new FormData();
 	        formData.append('file', $scope.file);
-	
-	        return $http({ url: url, data: formData, method: "POST", headers: { "Content-Type": undefined } });
+	        return $http({ url: url, data: formData, method: "POST", headers: { "Content-Type": undefined, "ingress-csrf": $cookies['ingress-csrf'] } });
 	    };
 	}]);
 
@@ -55935,4 +55934,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-979fbe775be5971fdeeb.js.map
+//# sourceMappingURL=app-cb521579e60722005e34.js.map
