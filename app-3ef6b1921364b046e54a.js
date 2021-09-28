@@ -235,6 +235,12 @@
 	    $http.get('components/dataentry/section-inner-form.html').then(function (page) {
 	        $templateCache.put('components/dataentry/section-inner-form.html', page.data);
 	    });
+	    $http.get('views/dialog.html').then(function (page) {
+	        $templateCache.put('views/dialog.html', page.data);
+	    });
+	    $http.get('views/modal-body.html').then(function (page) {
+	        $templateCache.put('views/modal-body.html', page.data);
+	    });
 	
 	    $rootScope.maxGridColumnSize = 1;
 	    $rootScope.maxOptionSize = 100;
@@ -55983,4 +55989,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-08247ebdc7bce763c03c.js.map
+//# sourceMappingURL=app-3ef6b1921364b046e54a.js.map
