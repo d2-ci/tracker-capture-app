@@ -39757,6 +39757,7 @@
 	    $scope.errorCode = undefined;
 	    $scope.errorMsg = undefined;
 	    $scope.peopleDuplikat = [];
+	    $scope.peopleOtherError = [];
 	    $scope.peopleInputError = [];
 	    $scope.peopleImportExisting = [];
 	    $scope.peopleImportNew = [];
@@ -39821,13 +39822,15 @@
 	            case "NY_RELASJON":
 	            case "NY_RELASJON_KOMMUNEINFO":
 	            case "NY_ENROLLMENT":
+	            case "OPPDATER_ENROLLMENT":
 	                return "IMPORT_EXISTING";
 	            case "NY_TEI":
 	                return "IMPORT_NEW";
 	            case "INFOMELDING":
 	                return "ALLREADY_IN_GROUP";
+	            case "SERVER_ERROR":
 	            default:
-	                return "INPUT_ERROR";
+	                return "OTHER_ERROR";
 	        }
 	    };
 	
@@ -39838,6 +39841,7 @@
 	    };
 	
 	    $scope.savePeopleInCategories = function (people) {
+	        $scope.peopleOtherError = $scope.getPeopleInCategory('OTHER_ERROR', people.importNotPossible);
 	        $scope.peopleDuplikat = $scope.getPeopleInCategory('DUPLIKAT', people.importNotPossible);
 	        $scope.peopleInputError = $scope.getPeopleInCategory('INPUT_ERROR', people.importNotPossible);
 	        $scope.peopleImportExisting = $scope.getPeopleInCategory('IMPORT_EXISTING', people.importOk);
@@ -55989,4 +55993,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-3ef6b1921364b046e54a.js.map
+//# sourceMappingURL=app-805bfbe23ec28b8b14e9.js.map
