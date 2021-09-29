@@ -9937,7 +9937,7 @@
 	                    entity.orgUnit = row[3];
 	                    entity.orgUnitName = row[4];
 	                    entity.type = row[5];
-	                    entity.inactive = row[6] !== "" ? row[6] : false;
+	                    entity.inactive = row[6] === "" ? "" : row[6];
 	                    entity.potentialDuplicate = row[7] === "true";
 	                    entity.followUp = isFollowUp;
 	
@@ -39349,4 +39349,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-dfc269d895c5d7c2fed2.js.map
+//# sourceMappingURL=app-2890539a62cf26856fe6.js.map
