@@ -8696,24 +8696,14 @@
 	        templateUrl: 'components/teiAudit/tei-audit.html',
 	        controller: 'TeiAuditController'
 	    };
-	    var getModalSettings = function getModalSettings(tei, _program) {
+	    var getModalSettings = function getModalSettings(_tei, _program) {
 	        return {
 	            templateUrl: 'components/teiAudit/tei-audit.html',
 	            controller: 'TeiAuditController',
 	            resolve: {
-	                tei: function (_tei) {
-	                    function tei() {
-	                        return _tei.apply(this, arguments);
-	                    }
-	
-	                    tei.toString = function () {
-	                        return _tei.toString();
-	                    };
-	
-	                    return tei;
-	                }(function () {
-	                    return tei;
-	                }),
+	                tei: function tei() {
+	                    return _tei;
+	                },
 	                program: function program() {
 	                    return _program;
 	                },
@@ -8975,37 +8965,15 @@
 	            });
 	            return promise;
 	        },
-	        getPotentialDuplicates: function getPotentialDuplicates(uidList) {
-	            var uidUrl = "";
-	            if (uidList.length > 0) {
-	                uidUrl += "?teis=";
-	                for (var i = 0; i < uidList.length; i++) {
-	                    if (i > 0) uidUrl += ",";
-	                    uidUrl += uidList[i];
-	                }
-	            }
-	            var promise = $http.get(DHIS2URL + '/potentialDuplicates' + uidUrl).then(function (response) {
-	                return response.data;
-	            });
-	            return promise;
-	        },
 	        getPotentialDuplicatesForTei: function getPotentialDuplicatesForTei(uid) {
 	            var promise = $http.get(DHIS2URL + '/potentialDuplicates?teis=' + uid).then(function (response) {
 	                return response.data;
 	            });
 	            return promise;
 	        },
-	        markPotentialDuplicate: function markPotentialDuplicate(tei) {
+	        markPotentialDuplicate: function markPotentialDuplicate(tei, isDuplicate) {
+	            tei.potentialDuplicate = isDuplicate;
 	            var formattedTei = convertFromUserToApi(angular.copy(tei));
-	            formattedTei.potentialDuplicate = true;
-	            var promise = $http.put(DHIS2URL + '/trackedEntityInstances/' + tei.id, formattedTei).then(function (response) {
-	                return response.data;
-	            });
-	            return promise;
-	        },
-	        clearPotentialDuplicate: function clearPotentialDuplicate(duplicate) {
-	            var formattedTei = convertFromUserToApi(angular.copy(tei));
-	            formattedTei.potentialDuplicate = false;
 	            var promise = $http.put(DHIS2URL + '/trackedEntityInstances/' + tei.id, formattedTei).then(function (response) {
 	                return response.data;
 	            });
@@ -9943,10 +9911,10 @@
 	                return;
 	            }
 	
-	            //grid.headers[0-6] = Instance, Created, Last updated, OU ID, Ou Name, Tracked entity, Inactive
-	            //grid.headers[7..] = Attribute, Attribute,....
+	            //grid.headers[0-7] = Instance, Created, Last updated, OU ID, Ou Name, Tracked entity, Inactive, Potential duplicate
+	            //grid.headers[8..] = Attribute, Attribute,....
 	            var attributes = [];
-	            for (var i = 6; i < grid.headers.length; i++) {
+	            for (var i = 8; i < grid.headers.length; i++) {
 	                attributes.push({
 	                    id: grid.headers[i].name,
 	                    displayName: grid.headers[i].column,
@@ -9970,9 +9938,10 @@
 	                    entity.orgUnitName = row[4];
 	                    entity.type = row[5];
 	                    entity.inactive = row[6] !== "" ? row[6] : false;
+	                    entity.potentialDuplicate = row[7] === "true";
 	                    entity.followUp = isFollowUp;
 	
-	                    for (var i = 7; i < row.length; i++) {
+	                    for (var i = 8; i < row.length; i++) {
 	                        if (row[i] && row[i] !== '') {
 	                            var val = row[i];
 	
@@ -10077,7 +10046,7 @@
 	            var columns = [];
 	
 	            var returnAttributes = [];
-	            i;
+	
 	            if (attributes) {
 	                if (nonConfidential) {
 	                    //Filter out attributes that is confidential, so they will not be part of any grid:
@@ -11842,12 +11811,7 @@
 	            };
 	
 	            $scope.onGetDuplicateInternal = function (tei) {
-	                var dupe = $scope.onGetDuplicate({ tei: tei });
-	                if (dupe) {
-	                    return true;
-	                } else {
-	                    return false;
-	                }
+	                return $scope.onGetDuplicate({ tei: tei });
 	            };
 	
 	            $scope.getPage = function (page) {
@@ -11957,12 +11921,7 @@
 	            };
 	
 	            $scope.onGetDuplicateInternal = function (tei) {
-	                var dupe = $scope.onGetDuplicate({ tei: tei });
-	                if (dupe) {
-	                    return true;
-	                } else {
-	                    return false;
-	                }
+	                return $scope.onGetDuplicate({ tei: tei });
 	            };
 	
 	            $scope.onGetPage = function (page) {
@@ -22751,18 +22710,6 @@
 	                        openTei(gridData.rows.own[0]);
 	                        return;
 	                    }
-	                } else if (rowsCnt > 0) {
-	                    var teiList = [];
-	
-	                    angular.forEach(res.data.rows.own, function (ownTei) {
-	                        teiList.push(ownTei.id);
-	                    });
-	
-	                    var potentialDuplicatesPromise = TEIService.getPotentialDuplicates(teiList);
-	                    return potentialDuplicatesPromise.then(function (duplicates) {
-	                        $scope.searching = null;
-	                        return showResultModal(res, searchGroup, duplicates.identifiableObjects ? duplicates.identifiableObjects : []);
-	                    });
 	                }
 	                $scope.searching = null;
 	                return showResultModal(res, searchGroup);
@@ -22844,19 +22791,16 @@
 	        return false;
 	    };
 	
-	    var showResultModal = function showResultModal(_res, searchGroup, existingDuplicates) {
+	    var showResultModal = function showResultModal(_res, searchGroup) {
 	        var _internalService = {
 	            translateWithOULevelName: translateWithOULevelName,
 	            translateWithTETName: translateWithTETName,
 	            base: $scope.base
 	        };
 	
-	        _res.existingDuplicates = existingDuplicates;
-	
 	        return $modal.open({
 	            templateUrl: 'components/home/search/result-modal.html',
 	            controller: ["$scope", "$modalInstance", "TEIGridService", "OrgUnitFactory", "orgUnit", "res", "refetchDataFn", "internalService", "canOpenRegistration", "TEIService", "NotificationService", function controller($scope, $modalInstance, TEIGridService, OrgUnitFactory, orgUnit, res, refetchDataFn, internalService, canOpenRegistration, TEIService, NotificationService) {
-	                $scope.existingDuplicates = res.existingDuplicates;
 	                $scope.gridData = null;
 	                $scope.isUnique = false;
 	                $scope.canOpenRegistration = canOpenRegistration;
@@ -22893,35 +22837,15 @@
 	                };
 	
 	                $scope.markPotentialDuplicate = function (tei) {
-	                    TEIService.markPotentialDuplicate(tei).then(function (duplicate) {
-	                        $scope.existingDuplicates.push(duplicate);
-	                    });
+	                    TEIService.markPotentialDuplicate(tei, true);
 	                };
 	
 	                $scope.unMarkPotentialDuplicate = function (tei) {
-	                    var newExistingDuplicatesList = [];
-	                    var duplicateToClear = {};
-	                    angular.forEach($scope.existingDuplicates, function (duplicate) {
-	                        if (duplicate.teiA != tei.id && duplicate.teiB != tei.id) {
-	                            newExistingDuplicatesList.push(duplicate);
-	                        } else {
-	                            duplicateToClear = duplicate;
-	                        }
-	                    });
-	                    if (duplicateToClear) {
-	                        TEIService.clearPotentialDuplicate(duplicateToClear);
-	                    }
-	                    $scope.existingDuplicates = newExistingDuplicatesList;
+	                    TEIService.markPotentialDuplicate(tei, false);
 	                };
 	
 	                $scope.getPotentialDuplicate = function (tei) {
-	                    var returnDuplicate = null;
-	                    angular.forEach($scope.existingDuplicates, function (duplicate) {
-	                        if (duplicate.teiA == tei.id || duplicate.teiB == tei.id) {
-	                            returnDuplicate = duplicate;
-	                        }
-	                    });
-	                    return returnDuplicate;
+	                    return tei.potentialDuplicate;
 	                };
 	
 	                $scope.openTei = function (tei) {
@@ -39425,4 +39349,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-8fa37c7fb11c0050f044.js.map
+//# sourceMappingURL=app-dfc269d895c5d7c2fed2.js.map
