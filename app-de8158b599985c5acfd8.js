@@ -26039,7 +26039,6 @@
 	                    }
 	                });
 	
-	                console.log(contactDateMoment);
 	                if (contactDateMoment && (!endDate || contactDateMoment.isBefore(endDate))) {
 	                    relative.contactDateMoment = contactDateMoment;
 	                    relative.contactDate = DateUtils.formatFromApiToUser(contactDateMoment);
@@ -39756,12 +39755,13 @@
 	    $scope.stage = 'start';
 	    $scope.errorCode = undefined;
 	    $scope.errorMsg = undefined;
-	    $scope.peopleDuplikat = [];
-	    $scope.peopleOtherError = [];
-	    $scope.peopleInputError = [];
-	    $scope.peopleImportExisting = [];
-	    $scope.peopleImportNew = [];
-	    $scope.peopleAllreadyInGroup = [];
+	
+	    $scope.getImportResultAsArray = function () {
+	        if (!$scope.uploadResult) {
+	            return [];
+	        };
+	        return [{ statusType: 'peopleDuplikat', titleValidator: 'Kan ikke importeres: Duplikater', titleImport: 'Ikke importert: Duplikater', type: 'error', people: $scope.getPeopleInCategory('DUPLIKAT', $scope.uploadResult.importNotPossible) }, { statusType: 'peopleInputError', titleValidator: 'Kan ikke importeres: Inputfeil', titleImport: 'Ikke importert: Inputfeil', type: 'error', people: $scope.getPeopleInCategory('INPUT_ERROR', $scope.uploadResult.importNotPossible) }, { statusType: 'peopleOtherError', titleValidator: 'Kan ikke importeres: Annet', type: 'error', titleImport: 'Ikke importert: Annet', people: $scope.getPeopleInCategory('OTHER_ERROR', $scope.uploadResult.importNotPossible) }, { statusType: 'peopleImportExisting', titleValidator: 'Legges til klyngen: Eksisterende personer', titleImport: 'Lagt til klyngen: Eksisterende personer', type: 'ok', people: $scope.getPeopleInCategory('IMPORT_EXISTING', $scope.uploadResult.importOk) }, { statusType: 'peopleImportNew', titleValidator: 'Legges til klyngen: Nye personer', type: 'ok', titleImport: 'Lagt til klyngen: Nye personer', people: $scope.getPeopleInCategory('IMPORT_NEW', $scope.uploadResult.importOk) }, { statusType: 'peopleAllreadyInGroup', titleValidator: 'Legges ikke til: Allerede i klyngen', titleImport: 'Ikke lagt til: Allerede i klyngen', type: 'ok', people: $scope.getPeopleInCategory('ALLREADY_IN_GROUP', $scope.uploadResult.importOk) }];
+	    };
 	
 	    $scope.getCurrentKommuneNr = function () {
 	        return CurrentSelection.currentSelection.orgUnit.code;
@@ -39772,7 +39772,6 @@
 	
 	        $scope.uploadFile('validerFil').then(function (response) {
 	            $scope.uploadResult = response.data;
-	            $scope.savePeopleInCategories(response.data);
 	            $scope.stage = 'importTestSuccess';
 	        }, function (error) {
 	            $scope.stage = 'importFailed';
@@ -39785,7 +39784,6 @@
 	
 	        $scope.uploadFile('lagreFil').then(function (response) {
 	            $scope.uploadResult = response.data;
-	            $scope.savePeopleInCategories(response.data);
 	            $scope.stage = 'importSuccess';
 	            TEIService.getRelationships(selectedTei.trackedEntityInstance).then(function (response) {
 	                RelationshipCallbackService.runCallbackFunctions(response);
@@ -39838,15 +39836,6 @@
 	        return people && people.filter(function (person) {
 	            return $scope.getImportResultCategory(person) === category;
 	        });
-	    };
-	
-	    $scope.savePeopleInCategories = function (people) {
-	        $scope.peopleOtherError = $scope.getPeopleInCategory('OTHER_ERROR', people.importNotPossible);
-	        $scope.peopleDuplikat = $scope.getPeopleInCategory('DUPLIKAT', people.importNotPossible);
-	        $scope.peopleInputError = $scope.getPeopleInCategory('INPUT_ERROR', people.importNotPossible);
-	        $scope.peopleImportExisting = $scope.getPeopleInCategory('IMPORT_EXISTING', people.importOk);
-	        $scope.peopleImportNew = $scope.getPeopleInCategory('IMPORT_NEW', people.importOk);
-	        $scope.peopleAllreadyInGroup = $scope.getPeopleInCategory('ALLREADY_IN_GROUP', people.importOk);
 	    };
 	
 	    $scope.uploadFile = function (uploadType) {
@@ -55993,4 +55982,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-805bfbe23ec28b8b14e9.js.map
+//# sourceMappingURL=app-de8158b599985c5acfd8.js.map
