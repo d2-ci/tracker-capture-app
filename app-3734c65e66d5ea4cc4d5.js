@@ -9534,7 +9534,7 @@
 	                var pg = pager ? pager.page : 1;
 	                pgSize = pgSize > 1 ? pgSize : 1;
 	                pg = pg > 1 ? pg : 1;
-	                url = url + '&pageSize=' + pgSize + '&page=' + pg + '&totalPages=true';
+	                url = url + '&pageSize=' + pgSize + '&page=' + pg;
 	            }
 	
 	            var promise = $http.get(url).then(function (response) {
@@ -39351,4 +39351,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-3a566651651605fefd92.js.map
+//# sourceMappingURL=app-3734c65e66d5ea4cc4d5.js.map
