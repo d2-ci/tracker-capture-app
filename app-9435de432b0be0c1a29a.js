@@ -8625,8 +8625,9 @@
 	                return null;
 	            });
 	        },
-	        getByStartAndEndDate: function getByStartAndEndDate(program, orgUnit, ouMode, startDate, endDate) {
-	            var promise = $http.get(DHIS2URL + '/enrollments.json?program=' + program + '&ou=' + orgUnit + '&ouMode=' + ouMode + '&programStartDate=' + startDate + '&programEndDate=' + endDate + '&fields=:all&paging=false').then(function (response) {
+	        getByStartAndEndDate: function getByStartAndEndDate(program, orgUnit, ouMode, startDate, endDate, pageSize) {
+	            var paging = pageSize ? '&pageSize=' + pageSize : '&paging=false';
+	            var promise = $http.get(DHIS2URL + '/enrollments.json?program=' + program + '&ou=' + orgUnit + '&ouMode=' + ouMode + '&programStartDate=' + startDate + '&programEndDate=' + endDate + '&fields=:all' + paging).then(function (response) {
 	                return convertFromApiToUser(response.data);
 	            }, function (response) {
 	                var errorBody = $translate.instant('failed_to_fetch_enrollment');
@@ -9414,12 +9415,13 @@
 	            });
 	            return promise;
 	        },
-	        getByOrgUnitAndProgram: function getByOrgUnitAndProgram(orgUnit, ouMode, program, startDate, endDate) {
+	        getByOrgUnitAndProgram: function getByOrgUnitAndProgram(orgUnit, ouMode, program, startDate, endDate, pageSize) {
 	            var url;
+	            var paging = pageSize ? '&pageSize=' + pageSize : skipPaging;
 	            if (startDate && endDate) {
-	                url = DHIS2URL + '/events.json?' + 'orgUnit=' + orgUnit + '&ouMode=' + ouMode + '&program=' + program + '&startDate=' + startDate + '&endDate=' + endDate + skipPaging;
+	                url = DHIS2URL + '/events.json?' + 'orgUnit=' + orgUnit + '&ouMode=' + ouMode + '&program=' + program + '&startDate=' + startDate + '&endDate=' + endDate + paging;
 	            } else {
-	                url = DHIS2URL + '/events.json?' + 'orgUnit=' + orgUnit + '&ouMode=' + ouMode + '&program=' + program + skipPaging;
+	                url = DHIS2URL + '/events.json?' + 'orgUnit=' + orgUnit + '&ouMode=' + ouMode + '&program=' + program + paging;
 	            }
 	            var promise = $http.get(url).then(function (response) {
 	                return response.data.events;
@@ -9550,7 +9552,7 @@
 	                var pg = pager ? pager.page : 1;
 	                pgSize = pgSize > 1 ? pgSize : 1;
 	                pg = pg > 1 ? pg : 1;
-	                url = url + '&pageSize=' + pgSize + '&page=' + pg + '&totalPages=true';
+	                url = url + '&pageSize=' + pgSize + '&page=' + pg;
 	            }
 	
 	            var promise = $http.get(url).then(function (response) {
@@ -19479,6 +19481,7 @@
 	
 	    $scope.ouModes = [{ name: 'SELECTED' }, { name: 'CHILDREN' }, { name: 'DESCENDANTS' }, { name: 'ACCESSIBLE' }];
 	    $scope.selectedOuMode = $scope.ouModes[0];
+	    $scope.pager = { pageSize: reportEntriesLimit + 1, page: 1 };
 	    $scope.report = {};
 	    $scope.model = {};
 	
@@ -19540,6 +19543,10 @@
 	        }
 	    });
 	
+	    $scope.ngSwitchParameter = function () {
+	        return $scope.eventRows.length > reportEntriesLimit ? -1 : $scope.teiList.length;
+	    };
+	
 	    $scope.generateReport = function (program, report, ouMode) {
 	
 	        $scope.model.selectedProgram = program;
@@ -19554,6 +19561,7 @@
 	
 	        $scope.reportStarted = true;
 	        $scope.dataReady = false;
+	        $scope.eventRows = [];
 	
 	        AttributesFactory.getByProgram($scope.model.selectedProgram).then(function (atts) {
 	            $scope.model.selectedProgram.attributesById = {};
@@ -19569,6 +19577,7 @@
 	            $scope.teiList = [];
 	
 	            if (data && data.eventRows) {
+	                $scope.eventRows = data.eventRows;
 	                angular.forEach(data.eventRows, function (ev) {
 	                    if (ev.trackedEntityInstance) {
 	                        var stage = $scope.stagesById[ev.programStage];
@@ -19689,11 +19698,17 @@
 	        };
 	    };
 	
+	    $scope.limitExceeded = function (entries) {
+	        return entries > reportEntriesLimit;
+	    };
+	
 	    $scope.generateReport = function (program, report, ouMode) {
 	
 	        $scope.model.selectedProgram = program;
 	        $scope.report = report;
 	        $scope.selectedOuMode = ouMode;
+	        $scope.enrollmentsReceived = 0;
+	        $scope.eventsReceived = 0;
 	
 	        //check for form validity
 	        $scope.outerForm.submitted = true;
@@ -19706,10 +19721,11 @@
 	
 	        $scope.enrollments = { active: 0, completed: 0, cancelled: 0 };
 	        $scope.enrollmentList = [];
-	        EnrollmentService.getByStartAndEndDate($scope.model.selectedProgram.id, $scope.selectedOrgUnit.id, $scope.selectedOuMode.name, DateUtils.formatFromUserToApi($scope.report.startDate), DateUtils.formatFromUserToApi($scope.report.endDate)).then(function (data) {
+	        EnrollmentService.getByStartAndEndDate($scope.model.selectedProgram.id, $scope.selectedOrgUnit.id, $scope.selectedOuMode.name, DateUtils.formatFromUserToApi($scope.report.startDate), DateUtils.formatFromUserToApi($scope.report.endDate), reportEntriesLimit + 1).then(function (data) {
 	
 	            if (data) {
-	                $scope.totalEnrollment = data.enrollments.length;
+	                $scope.enrollmentsReceived = data.enrollments.length;
+	                $scope.totalEnrollment = $scope.enrollmentsReceived;
 	                angular.forEach(data.enrollments, function (en) {
 	                    $scope.enrollmentList[en.enrollment] = en;
 	                    if (en.status === 'ACTIVE') {
@@ -19723,9 +19739,10 @@
 	
 	                $scope.enrollmentStat = [{ key: 'Completed', y: $scope.enrollments.completed }, { key: 'Active', y: $scope.enrollments.active }, { key: 'Cancelled', y: $scope.enrollments.cancelled }];
 	
-	                DHIS2EventFactory.getByOrgUnitAndProgram($scope.selectedOrgUnit.id, $scope.selectedOuMode.name, $scope.model.selectedProgram.id, null, null).then(function (data) {
+	                DHIS2EventFactory.getByOrgUnitAndProgram($scope.selectedOrgUnit.id, $scope.selectedOuMode.name, $scope.model.selectedProgram.id, DateUtils.formatFromUserToApi($scope.report.startDate), DateUtils.formatFromUserToApi($scope.report.endDate), reportEntriesLimit + 1).then(function (data) {
 	
 	                    if (data) {
+	                        $scope.eventsReceived = data.length;
 	                        $scope.dhis2Events = { completed: 0, active: 0, skipped: 0, overdue: 0, ontime: 0 };
 	                        $scope.totalEvents = 0;
 	                        angular.forEach(data, function (ev) {
@@ -39396,4 +39413,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-287e18e7c97bbdf3b862.js.map
+//# sourceMappingURL=app-9435de432b0be0c1a29a.js.map
