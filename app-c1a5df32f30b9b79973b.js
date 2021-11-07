@@ -11613,22 +11613,12 @@
 	                                }
 	                            }
 	                        } else {
+	                            numberOfSetAttributes++;
+	                            filteredAttributes[attr.id] = true;
 	                            if (query.url) {
-	                                numberOfSetAttributes++;
-	                                filteredAttributes[attr.id] = true;
-	                                if (attr.operator === textOperators[0]) {
-	                                    query.url = query.url + '&attribute=' + attr.id + ':EQ:' + value;
-	                                } else {
-	                                    query.url = query.url + '&attribute=' + attr.id + ':LIKE:' + value;
-	                                }
+	                                query.url = query.url + '&attribute=' + attr.id + ':EQ:' + value;
 	                            } else {
-	                                numberOfSetAttributes++;
-	                                filteredAttributes[attr.id] = true;
-	                                if (attr.operator === textOperators[0]) {
-	                                    query.url = 'attribute=' + attr.id + ':EQ:' + value;
-	                                } else {
-	                                    query.url = 'attribute=' + attr.id + ':LIKE:' + value;
-	                                }
+	                                query.url = 'attribute=' + attr.id + ':EQ:' + value;
 	                            }
 	                        }
 	                    }
@@ -40163,4 +40153,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-f16b9a6d26d6eb408ee4.js.map
+//# sourceMappingURL=app-c1a5df32f30b9b79973b.js.map
