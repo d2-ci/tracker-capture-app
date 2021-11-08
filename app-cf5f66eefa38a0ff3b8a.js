@@ -8462,7 +8462,7 @@
 	}])
 	
 	/* Factory to fetch relationships */
-	.factory('RelationshipFactory', ["$q", "$http", "$rootScope", "$translate", "TCStorageService", "NotificationService", function ($q, $http, $rootScope, $translate, TCStorageService, NotificationService) {
+	.factory('RelationshipFactory', ["$q", "$http", "$rootScope", "$translate", "TCStorageService", "NotificationService", "$cookies", function ($q, $http, $rootScope, $translate, TCStorageService, NotificationService, $cookies) {
 	    var errorHeader = $translate.instant("error");
 	    return {
 	        getAll: function getAll() {
@@ -8493,7 +8493,7 @@
 	            return def.promise;
 	        },
 	        delete: function _delete(uid) {
-	            var promise = $http.delete(DHIS2URL + '/relationships/' + uid).then(function (response) {
+	            var promise = $http({ method: 'DELETE', url: DHIS2URL + '/relationships/' + uid, headers: { 'ingress-csrf': $cookies['ingress-csrf'] } }).then(function (response) {
 	                if (!response || !response.data || response.data.status !== 'OK') {
 	                    var errorBody = $translate.instant('failed_to_delete_relationship');
 	                    NotificationService.showNotifcationDialog(errorHeader, errorBody);
@@ -8747,7 +8747,7 @@
 	}])
 	
 	/* Service to deal with enrollment */
-	.service('EnrollmentService', ["$http", "DHIS2URL", "DateUtils", "NotificationService", "$translate", "TeiAccessApiService", function ($http, DHIS2URL, DateUtils, NotificationService, $translate, TeiAccessApiService) {
+	.service('EnrollmentService', ["$http", "DHIS2URL", "DateUtils", "NotificationService", "$translate", "TeiAccessApiService", "$cookies", function ($http, DHIS2URL, DateUtils, NotificationService, $translate, TeiAccessApiService, $cookies) {
 	
 	    var convertFromApiToUser = function convertFromApiToUser(enrollment) {
 	        if (enrollment.enrollments) {
@@ -8787,7 +8787,7 @@
 	            });
 	        },
 	        getByEntity: function getByEntity(entity) {
-	            var promise = $http.get(DHIS2URL + '/enrollments.json?ouMode=ACCESSIBLE&trackedEntityInstance=' + entity + '&fields=:all&paging=false').then(function (response) {
+	            var promise = $http({ method: 'GET', url: DHIS2URL + '/enrollments.json?ouMode=ACCESSIBLE&trackedEntityInstance=' + entity + '&fields=:all&paging=false', headers: { 'ingress-csrf': $cookies['ingress-csrf'] } }).then(function (response) {
 	                return convertFromApiToUser(response.data);
 	            }, function (response) {
 	                var errorBody = $translate.instant('failed_to_fetch_enrollment');
@@ -8808,7 +8808,7 @@
 	            return promise;
 	        },
 	        getByStartAndEndDate: function getByStartAndEndDate(program, orgUnit, ouMode, startDate, endDate) {
-	            var promise = $http.get(DHIS2URL + '/enrollments.json?ouMode=ACCESSIBLE&program=' + program + '&orgUnit=' + orgUnit + '&ouMode=' + ouMode + '&startDate=' + startDate + '&endDate=' + endDate + '&fields=:all&paging=false').then(function (response) {
+	            var promise = $http({ method: 'GET', url: DHIS2URL + '/enrollments.json?ouMode=ACCESSIBLE&program=' + program + '&orgUnit=' + orgUnit + '&ouMode=' + ouMode + '&startDate=' + startDate + '&endDate=' + endDate + '&fields=:all&paging=false', headers: { 'ingress-csrf': $cookies['ingress-csrf'] } }).then(function (response) {
 	                return convertFromApiToUser(response.data);
 	            }, function (response) {
 	                var errorBody = $translate.instant('failed_to_fetch_enrollment');
@@ -8868,7 +8868,7 @@
 	    return {
 	        isExpired: function isExpired(program, enrollment) {}
 	    };
-	}).factory('TeiAccessApiService', ["$http", "$q", "$modal", function ($http, $q, $modal) {
+	}).factory('TeiAccessApiService', ["$http", "$q", "$modal", "$cookies", function ($http, $q, $modal, $cookies) {
 	    var _auditCancelledSettings = {};
 	    var needAuditError = {
 	        code: 401,
@@ -8915,7 +8915,12 @@
 	                      program: program,
 	                      reason: auditMessage
 	                      }*/
-	        return $http.post(DHIS2URL + '/tracker/ownership/override?trackedEntityInstance=' + tei + '&program=' + program + '&reason=' + auditMessage, obj);
+	        return $http({
+	            method: 'POST',
+	            url: DHIS2URL + '/tracker/ownership/override?trackedEntityInstance=' + tei + '&program=' + program + '&reason=' + auditMessage,
+	            data: obj,
+	            headers: { 'ingress-csrf': $cookies['ingress-csrf'] }
+	        });
 	    };
 	
 	    var handleAudit = function handleAudit(tei, program, postAuditApiFn) {
@@ -8949,25 +8954,25 @@
 	    };
 	    service.get = function (tei, program, url) {
 	        return callApi(function () {
-	            return $http.get(url);
+	            return $http({ method: 'GET', url: url, headers: { 'ingress-csrf': $cookies['ingress-csrf'] } });
 	        }, tei, program);
 	    };
 	
 	    service.post = function (tei, program, url, data) {
 	        return callApi(function () {
-	            return $http.post(url, data);
+	            return $http({ method: 'POST', url: url, data: data, headers: { 'ingress-csrf': $cookies['ingress-csrf'] } });
 	        }, tei, program);
 	    };
 	
 	    service.put = function (tei, program, url, data) {
 	        return callApi(function () {
-	            return $http.put(url, data);
+	            return $http({ method: 'PUT', url: url, data: data, headers: { 'ingress-csrf': $cookies['ingress-csrf'] } });
 	        }, tei, program);
 	    };
 	
 	    service.delete = function (tei, program, url, data) {
 	        return callApi(function () {
-	            return $http.delete(url, data);
+	            return $http({ method: 'DELETE', url: url, data: data, headers: { 'ingress-csrf': $cookies['ingress-csrf'] } });
 	        }, tei, program);
 	    };
 	    return service;
@@ -9021,7 +9026,7 @@
 	}])
 	
 	/* Service for getting tracked entity instances */
-	.factory('TEIService', ["$http", "orderByFilter", "$translate", "DHIS2URL", "$q", "AttributesFactory", "CommonUtils", "CurrentSelection", "DateUtils", "NotificationService", "TeiAccessApiService", function ($http, orderByFilter, $translate, DHIS2URL, $q, AttributesFactory, CommonUtils, CurrentSelection, DateUtils, NotificationService, TeiAccessApiService) {
+	.factory('TEIService', ["$http", "orderByFilter", "$translate", "DHIS2URL", "$q", "AttributesFactory", "CommonUtils", "CurrentSelection", "DateUtils", "NotificationService", "TeiAccessApiService", "$cookies", function ($http, orderByFilter, $translate, DHIS2URL, $q, AttributesFactory, CommonUtils, CurrentSelection, DateUtils, NotificationService, TeiAccessApiService, $cookies) {
 	    var cachedTeiWithProgramData = null;
 	    var errorHeader = $translate.instant("error");
 	    var getSearchUrl = function getSearchUrl(type, ouId, ouMode, queryUrl, programOrTETUrl, attributeUrl, pager, paging, format) {
@@ -9188,7 +9193,7 @@
 	            }
 	        },
 	        get: function get(entityUid, optionSets, attributesById) {
-	            var promise = $http.get(DHIS2URL + '/trackedEntityInstances/' + entityUid + '.json').then(function (response) {
+	            var promise = $http({ method: 'GET', url: DHIS2URL + '/trackedEntityInstances/' + entityUid + '.json', headers: { 'ingress-csrf': $cookies['ingress-csrf'] } }).then(function (response) {
 	                var tei = response.data;
 	                setTeiAttributeValues(tei.attributes, optionSets, attributesById);
 	                return tei;
@@ -9210,14 +9215,14 @@
 	            return promise;
 	        },
 	        getRelationships: function getRelationships(uid) {
-	            var promise = $http.get(DHIS2URL + '/trackedEntityInstances/' + uid + '.json?fields=relationships').then(function (response) {
+	            var promise = $http({ method: 'GET', url: DHIS2URL + '/trackedEntityInstances/' + uid + '.json?fields=relationships', headers: { 'ingress-csrf': $cookies['ingress-csrf'] } }).then(function (response) {
 	                var tei = response.data;
 	                return tei.relationships;
 	            });
 	            return promise;
 	        },
 	        getTeiWithAllAvailableFields: function getTeiWithAllAvailableFields(entityUid, optionSets, attributesById) {
-	            var promise = $http.get(DHIS2URL + '/trackedEntityInstances/' + entityUid + '.json?fields=*').then(function (response) {
+	            var promise = $http({ method: 'GET', url: DHIS2URL + '/trackedEntityInstances/' + entityUid + '.json?fields=*', headers: { 'ingress-csrf': $cookies['ingress-csrf'] } }).then(function (response) {
 	                var tei = response.data;
 	                setTeiAttributeValues(tei.attributes, optionSets, attributesById);
 	                return tei;
@@ -9240,7 +9245,7 @@
 	        },
 	
 	        saveRelationship: function saveRelationship(relationship) {
-	            var promise = $http.post(DHIS2URL + '/relationships', relationship).then(function (response) {
+	            var promise = $http({ method: 'POST', url: DHIS2URL + '/relationships', data: relationship, headers: { 'ingress-csrf': $cookies['ingress-csrf'] } }).then(function (response) {
 	                return response.data;
 	            });
 	            return promise;
@@ -9254,31 +9259,31 @@
 	                    uidUrl += uidList[i];
 	                }
 	            }
-	            var promise = $http.get(DHIS2URL + '/potentialDuplicates' + uidUrl).then(function (response) {
+	            var promise = $http({ method: 'GET', url: DHIS2URL + '/potentialDuplicates' + uidUrl, headers: { 'ingress-csrf': $cookies['ingress-csrf'] } }).then(function (response) {
 	                return response.data;
 	            });
 	            return promise;
 	        },
 	        getPotentialDuplicatesForTei: function getPotentialDuplicatesForTei(uid) {
-	            var promise = $http.get(DHIS2URL + '/potentialDuplicates?teis=' + uid).then(function (response) {
+	            var promise = $http({ method: 'GET', url: DHIS2URL + '/potentialDuplicates?teis=' + uid, headers: { 'ingress-csrf': $cookies['ingress-csrf'] } }).then(function (response) {
 	                return response.data;
 	            });
 	            return promise;
 	        },
 	        markPotentialDuplicate: function markPotentialDuplicate(tei) {
-	            var promise = $http.post(DHIS2URL + '/potentialDuplicates/', { teiA: tei.id }).then(function (response) {
+	            var promise = $http({ method: 'POST', url: DHIS2URL + '/potentialDuplicates/', data: { teiA: tei.id }, headers: { 'ingress-csrf': $cookies['ingress-csrf'] } }).then(function (response) {
 	                return response.data;
 	            });
 	            return promise;
 	        },
 	        deletePotentialDuplicate: function deletePotentialDuplicate(duplicate) {
-	            var promise = $http.delete(DHIS2URL + '/potentialDuplicates/' + duplicate.id).then(function (response) {
+	            var promise = $http({ method: 'DELETE', url: DHIS2URL + '/potentialDuplicates/' + duplicate.id, headers: { 'ingress-csrf': $cookies['ingress-csrf'] } }).then(function (response) {
 	                return response.data;
 	            });
 	            return promise;
 	        },
 	        delete: function _delete(entityUid) {
-	            var promise = $http.delete(DHIS2URL + '/trackedEntityInstances/' + entityUid).then(function (response) {
+	            var promise = $http({ method: 'DELETE', url: DHIS2URL + '/trackedEntityInstances/' + entityUid, headers: { 'ingress-csrf': $cookies['ingress-csrf'] } }).then(function (response) {
 	                return response.data;
 	            }, function (response) {
 	                var errorBody;
@@ -9293,7 +9298,7 @@
 	        },
 	        searchCount: function searchCount(ouId, ouMode, queryUrl, programOrTETUrl, attributeUrl, pager, paging, format) {
 	            var url = getSearchUrl("count", ouId, ouMode, queryUrl, programOrTETUrl, attributeUrl, pager, paging, format);
-	            return $http.get(url).then(function (response) {
+	            return $http({ method: 'GET', url: url, headers: { 'ingress-csrf': $cookies['ingress-csrf'] } }).then(function (response) {
 	                if (response && response.data) return response.data;
 	                return 0;
 	            });
@@ -9301,7 +9306,7 @@
 	        search: function search(ouId, ouMode, queryUrl, programOrTETUrl, attributeUrl, pager, paging, format, attributesList, attrNamesIdMap, optionSets) {
 	            var deferred = $q.defer();
 	            var url = getSearchUrl("query", ouId, ouMode, queryUrl, programOrTETUrl, attributeUrl, pager, paging, format);
-	            $http.get(url).then(function (response) {
+	            $http({ method: 'GET', url: url, headers: { 'ingress-csrf': $cookies['ingress-csrf'] } }).then(function (response) {
 	                var xmlData, rows, headers, index, itemName, value, jsonData;
 	                var trackedEntityInstance, attributesById;
 	                if (format) {
@@ -9395,7 +9400,7 @@
 	            });
 	            formattedTei.attributes = attributes;
 	            var programFilter = programId ? "?program=" + programId : "";
-	            var promise = $http.put(DHIS2URL + '/trackedEntityInstances/' + formattedTei.trackedEntityInstance + programFilter, formattedTei).then(function (response) {
+	            var promise = $http({ method: 'PUT', url: DHIS2URL + '/trackedEntityInstances/' + formattedTei.trackedEntityInstance + programFilter, data: formattedTei, headers: { 'ingress-csrf': $cookies['ingress-csrf'] } }).then(function (response) {
 	                return response.data;
 	            }, function (response) {
 	                NotificationService.showNotifcationDialog($translate.instant('update_error'), $translate.instant('failed_to_update_tei'), response);
@@ -9411,7 +9416,7 @@
 	            });
 	
 	            formattedTei.attributes = attributes;
-	            var promise = $http.post(DHIS2URL + '/trackedEntityInstances', formattedTei).then(function (response) {
+	            var promise = $http({ method: 'POST', url: DHIS2URL + '/trackedEntityInstances', data: formattedTei, headers: { 'ingress-csrf': $cookies['ingress-csrf'] } }).then(function (response) {
 	                return response.data;
 	            }, function (response) {
 	                return response.data;
@@ -9448,7 +9453,7 @@
 	        changeTeiProgramOwner: function changeTeiProgramOwner(tei, program, ou) {
 	            CurrentSelection.currentSelection.tei.programOwnersById[program] = ou;
 	            var url = DHIS2URL + '/tracker/ownership/transfer?trackedEntityInstance=' + tei + '&program=' + program + '&ou=' + ou;
-	            return $http.put(url, {});
+	            return $http({ method: 'PUT', url: url, data: {}, headers: { 'ingress-csrf': $cookies['ingress-csrf'] } });
 	        }
 	    };
 	}])
@@ -9636,7 +9641,7 @@
 	}])
 	
 	/* factory for handling events */
-	.factory('DHIS2EventFactory', ["$http", "DHIS2URL", "NotificationService", "$translate", "TeiAccessApiService", function ($http, DHIS2URL, NotificationService, $translate, TeiAccessApiService) {
+	.factory('DHIS2EventFactory', ["$http", "DHIS2URL", "NotificationService", "$translate", "TeiAccessApiService", "$cookies", function ($http, DHIS2URL, NotificationService, $translate, TeiAccessApiService, $cookies) {
 	
 	    var skipPaging = "&skipPaging=true";
 	    var errorHeader = $translate.instant("error");
@@ -9700,7 +9705,7 @@
 	            } else {
 	                url = DHIS2URL + '/events.json?' + 'orgUnit=' + orgUnit + '&ouMode=' + ouMode + '&program=' + program + skipPaging;
 	            }
-	            var promise = $http.get(url).then(function (response) {
+	            var promise = $http({ method: 'GET', url: url, headers: { 'ingress-csrf': $cookies['ingress-csrf'] } }).then(function (response) {
 	                return response.data.events;
 	            }, function (response) {
 	                if (response && response.data && response.data.status === 'ERROR') {
@@ -9724,7 +9729,7 @@
 	        getEventWithoutRegistration: function getEventWithoutRegistration(eventId) {
 	            var url = DHIS2URL + '/events/' + eventId;
 	
-	            var promise = $http.get(url).then(function (response) {
+	            var promise = $http({ method: 'GET', url: url, headers: { 'ingress-csrf': $cookies['ingress-csrf'] } }).then(function (response) {
 	                return response.data;
 	            }, function (response) {
 	                var errorBody = $translate.instant('failed_to_update_event');
@@ -9804,7 +9809,7 @@
 	}])
 	
 	/* factory for handling event reports */
-	.factory('EventReportService', ["$http", "DHIS2URL", "$translate", "NotificationService", function ($http, DHIS2URL, $translate, NotificationService) {
+	.factory('EventReportService', ["$http", "DHIS2URL", "$translate", "NotificationService", "$cookies", function ($http, DHIS2URL, $translate, NotificationService, $cookies) {
 	    var errorHeader = $translate.instant("error");
 	    return {
 	
@@ -9832,7 +9837,7 @@
 	                url = url + '&pageSize=' + pgSize + '&page=' + pg + '&totalPages=true';
 	            }
 	
-	            var promise = $http.get(url).then(function (response) {
+	            var promise = $http({ method: 'GET', url: url, headers: { 'ingress-csrf': $cookies['ingress-csrf'] } }).then(function (response) {
 	                return response.data;
 	            }, function (response) {
 	                var errorBody = $translate.instant('failed_to_update_event');
@@ -10773,10 +10778,10 @@
 	        return modalInstance;
 	    };
 	    this.eventCreationActions = { add: 'ADD', schedule: 'SCHEDULE', referral: 'REFERRAL' };
-	}]).service('MessagingService', ["$http", "$translate", "NotificationService", "DHIS2URL", function ($http, $translate, NotificationService, DHIS2URL) {
+	}]).service('MessagingService', ["$http", "$translate", "NotificationService", "DHIS2URL", "$cookies", function ($http, $translate, NotificationService, DHIS2URL, $cookies) {
 	    return {
 	        sendMessage: function sendMessage(message) {
-	            var promise = $http.post(DHIS2URL + '/messages', message).then(function (response) {
+	            var promise = $http({ method: 'POST', url: DHIS2URL + '/messages', data: message, headers: { 'ingress-csrf': $cookies['ingress-csrf'] } }).then(function (response) {
 	                var headerText, bodyText;
 	                if (response && response.data && response.data.summaries) {
 	                    var summary = response.data.summaries[0];
@@ -10805,7 +10810,7 @@
 	            return promise;
 	        }
 	    };
-	}]).service('ProgramWorkingListService', ["$http", "$q", "$filter", "orderByFilter", "orderByKeyFilter", "TEIService", function ($http, $q, $filter, orderByFilter, orderByKeyFilter, TEIService) {
+	}]).service('ProgramWorkingListService', ["$http", "$q", "$filter", "orderByFilter", "orderByKeyFilter", "TEIService", "$cookies", function ($http, $q, $filter, orderByFilter, orderByKeyFilter, TEIService, $cookies) {
 	    var workingListsByProgram = null;
 	    var cachedMultipleEventFiltersData = {};
 	    var getDefaultWorkingLists = function getDefaultWorkingLists(program) {
@@ -10943,7 +10948,7 @@
 	            return $q.when([]);
 	        }
 	
-	        var fetchPromise = workingListsByProgram ? $q.when() : $http.get(DHIS2URL + "/trackedEntityInstanceFilters?fields=*&paging=false").then(function (response) {
+	        var fetchPromise = workingListsByProgram ? $q.when() : $http({ method: 'GET', url: DHIS2URL + "/trackedEntityInstanceFilters?fields=*&paging=false", headers: { 'ingress-csrf': $cookies['ingress-csrf'] } }).then(function (response) {
 	            workingListsByProgram = {};
 	            if (response && response.data && response.data.trackedEntityInstanceFilters && response.data.trackedEntityInstanceFilters.length > 0) {
 	                angular.forEach(response.data.trackedEntityInstanceFilters, function (workingList) {
@@ -55982,4 +55987,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-de8158b599985c5acfd8.js.map
+//# sourceMappingURL=app-cf5f66eefa38a0ff3b8a.js.map
