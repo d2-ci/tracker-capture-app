@@ -11353,7 +11353,7 @@
 	        }
 	        return eventUrl;
 	    };
-	    var getCachedMultipleEventFiltersData = function getCachedMultipleEventFiltersData(workingList, pager, sortColumn) {
+	    var getCachedMultipleEventFiltersData = function getCachedMultipleEventFiltersData(workingList, pager) {
 	        var cachedData = cachedMultipleEventFiltersData[workingList.name];
 	        if (!pager) pager = { page: 1, pageSize: 50, pageCount: Math.ceil(cachedData.rows.length / 50) };
 	        var pageEnd = pager.pageSize * pager.page;
@@ -11400,15 +11400,17 @@
 	                    existing[d[0]] = true;
 	                    return true;
 	                });
-	                var sortColumnIndex = data.headers.findIndex(function (h) {
-	                    return h.name === sortColumn.id;
-	                });
-	                if (sortColumnIndex) data.rows = orderByKeyFilter(data.rows, sortColumnIndex, sortColumn.direction);
+	                if (sortColumn) {
+	                    var sortColumnIndex = data.headers.findIndex(function (h) {
+	                        return h.name === sortColumn.id;
+	                    });
+	                    if (sortColumnIndex) data.rows = orderByKeyFilter(data.rows, sortColumnIndex, sortColumn.direction);
+	                }
 	                //order list
 	                cachedMultipleEventFiltersData[workingList.name] = data;
 	                workingList.cachedSorting = searchParams.sortUrl;
 	                workingList.cachedOrgUnit = searchParams.orgUnitId;
-	                var data = getCachedMultipleEventFiltersData(workingList, pager, sortColumn);
+	                var data = getCachedMultipleEventFiltersData(workingList, pager);
 	                def.resolve(data);
 	            });
 	        }
@@ -23069,12 +23071,6 @@
 	        }
 	        $scope.showCustomWorkingListInline = false;
 	        $scope.currentTrackedEntityList = { type: type, config: config, data: data };
-	        if (!$scope.currentTrackedEntityList.sortColumn) {
-	            $scope.currentTrackedEntityList.sortColumn = {
-	                id: 'created',
-	                direction: 'desc'
-	            };
-	        }
 	    };
 	
 	    var setCurrentTrackedEntityListData = function setCurrentTrackedEntityListData(serverResponse) {
@@ -23083,7 +23079,7 @@
 	        //updateCurrentSelection();
 	    };
 	
-	    $scope.fetchTeis = function (pager, sortColumn) {
+	    $scope.fetchTeis = function (pager) {
 	        var s = 1;
 	        if ($scope.currentTrackedEntityList) {
 	            if ($scope.currentTrackedEntityList.type === $scope.trackedEntityListTypes.CUSTOM) {
@@ -23123,16 +23119,6 @@
 	
 	        setCurrentTrackedEntityList($scope.trackedEntityListTypes.CUSTOM, customConfig, null);
 	        $scope.fetchCustomWorkingList(customConfig);
-	    };
-	
-	    var getOrderUrl = function getOrderUrl(urlToExtend) {
-	        if ($scope.currentTrackedEntityList.sortColumn) {
-	            var sortColumn = $scope.currentTrackedEntityList.sortColumn;
-	            if (urlToExtend) {
-	                return urlToExtend += "&order=" + sortColumn.id + ':' + sortColumn.direction;
-	            }
-	            return "order=" + sortColumn.id + ":" + sortColumn.direction;
-	        }
 	    };
 	
 	    $scope.fetchCustomWorkingList = function () {
@@ -23278,11 +23264,12 @@
 	                sortedTei = sortedTei.concat(data.rows.other);
 	            }
 	            sortedTei = $filter('orderBy')(sortedTei, function (tei) {
+	                var id = $scope.currentTrackedEntityList.sortColumn ? $scope.currentTrackedEntityList.sortColumn.id : 'created';
 	                if ($scope.currentTrackedEntityList.sortColumn && $scope.currentTrackedEntityList.sortColumn.valueType === 'date') {
-	                    var d = tei[$scope.currentTrackedEntityList.sortColumn.id];
+	                    var d = tei[id];
 	                    return DateUtils.getDate(d);
 	                }
-	                return tei[$scope.currentTrackedEntityList.sortColumn.id];
+	                return tei[id];
 	            }, $scope.currentTrackedEntityList.direction == 'desc');
 	
 	            angular.forEach(sortedTei, function (tei) {
@@ -40153,4 +40140,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-c1a5df32f30b9b79973b.js.map
+//# sourceMappingURL=app-71a23bef93d4f39c128c.js.map
