@@ -850,7 +850,7 @@
 	            return moment(utcDateTimeString).format(calendarSetting.momentFormat);
 	        }
 	    };
-	}]).service('UsersService', ["$http", "$translate", function ($http, $translate) {
+	}]).service('UsersService', ["$http", "$translate", "$cookies", function ($http, $translate, $cookies) {
 	
 	    var mapUserLookupResponse = function mapUserLookupResponse(userLookup) {
 	        return { userid: userLookup.id, username: userLookup.username, firstName: userLookup.firstName, lastName: userLookup.surname };
@@ -858,7 +858,7 @@
 	
 	    return {
 	        getByQuery: function getByQuery(queryString) {
-	            var promise = $http.get("../api/userLookup?paging=true&page=1&pageSize=10&query=" + queryString).then(function (response) {
+	            var promise = $http({ method: 'GET', url: "../api/userLookup?paging=true&page=1&pageSize=10&query=" + queryString, headers: { 'ingress-csrf': $cookies['ingress-csrf'] } }).then(function (response) {
 	                var users = [];
 	                angular.forEach(response.data.users, function (user) {
 	                    var userObj = mapUserLookupResponse(user);
@@ -869,7 +869,7 @@
 	            return promise;
 	        },
 	        getByUid: function getByUid(uid) {
-	            var promise = $http.get("../api/userLookup/" + uid).then(function (response) {
+	            var promise = $http({ method: 'GET', url: "../api/userLookup/" + uid, headers: { 'ingress-csrf': $cookies['ingress-csrf'] } }).then(function (response) {
 	                var userObj = mapUserLookupResponse(response.data);
 	                return userObj;
 	            });
@@ -38082,7 +38082,7 @@
 	
 	var trackerCapture = angular.module('trackerCapture');
 	
-	trackerCapture.controller('ListsController', ["$rootScope", "$scope", "$modal", "$location", "$filter", "$timeout", "$q", "Paginator", "MetaDataFactory", "DateUtils", "OrgUnitFactory", "ProgramFactory", "AttributesFactory", "EntityQueryFactory", "CurrentSelection", "TEIGridService", "TEIService", "TeiAccessApiService", "UserDataStoreService", "ProgramWorkingListService", "FNrLookupService", "OperatorFactory", "ModalService", "$http", function ($rootScope, $scope, $modal, $location, $filter, $timeout, $q, Paginator, MetaDataFactory, DateUtils, OrgUnitFactory, ProgramFactory, AttributesFactory, EntityQueryFactory, CurrentSelection, TEIGridService, TEIService, TeiAccessApiService, UserDataStoreService, ProgramWorkingListService, FNrLookupService, OperatorFactory, ModalService, $http) {
+	trackerCapture.controller('ListsController', ["$rootScope", "$scope", "$modal", "$location", "$filter", "$timeout", "$q", "Paginator", "MetaDataFactory", "DateUtils", "OrgUnitFactory", "ProgramFactory", "AttributesFactory", "EntityQueryFactory", "CurrentSelection", "TEIGridService", "TEIService", "TeiAccessApiService", "UserDataStoreService", "ProgramWorkingListService", "FNrLookupService", "OperatorFactory", "ModalService", "$http", "$cookies", function ($rootScope, $scope, $modal, $location, $filter, $timeout, $q, Paginator, MetaDataFactory, DateUtils, OrgUnitFactory, ProgramFactory, AttributesFactory, EntityQueryFactory, CurrentSelection, TEIGridService, TEIService, TeiAccessApiService, UserDataStoreService, ProgramWorkingListService, FNrLookupService, OperatorFactory, ModalService, $http, $cookies) {
 	    var ouModes = [{ name: 'SELECTED' }, { name: 'CHILDREN' }, { name: 'DESCENDANTS' }, { name: 'ACCESSIBLE' }];
 	    var userGridColumns = null;
 	    var defaultCustomWorkingListValues = { ouMode: ouModes[0], programStatus: "" };
@@ -38665,7 +38665,7 @@
 	                enrollments.enrollments.forEach(function (enrollment) {
 	                    return enrollment.status = 'COMPLETED';
 	                });
-	                $http.post(DHIS2URL + '/enrollments', enrollments).then(function () {
+	                $http({ method: 'POST', url: DHIS2URL + '/enrollments', data: enrollments, headers: { 'ingress-csrf': $cookies['ingress-csrf'] } }).then(function () {
 	                    $scope.setWorkingList($scope.currentTrackedEntityList.config);
 	                });
 	            });
@@ -55987,4 +55987,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-cf5f66eefa38a0ff3b8a.js.map
+//# sourceMappingURL=app-9fe062d9afae7c8a999e.js.map
