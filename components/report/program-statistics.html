@@ -33,36 +33,34 @@
         <div class="row col-sm-12">
             <div class="col-sm-6 align-center">
                 <h2>{{'enrollment_stats' | translate}}</h2>
-                <div ng-if="!limitExceeded(enrollmentsReceived)">
-                    <nvd3-pie-chart
-                        data="enrollmentStat"
-                        id="enrollmentChart"
-                        width="350"
-                        height="250"
-                        x="xFunction()"
-                        y="yFunction()"
-                        showLabels="true"
-                        tooltips="true">
-                            <svg height="200"></svg>
-                    </nvd3-pie-chart>
-                </div>
+                <div ng-if="enrollmentsReceived===0"> {{'mo_matching_data' | translate}} </div>
+                <nvd3-pie-chart ng-if="!limitExceeded(enrollmentsReceived)" class="empty-event-container"
+                    data="enrollmentStat"
+                    id="enrollmentChart"
+                    width="350"
+                    height="250"
+                    x="xFunction()"
+                    y="yFunction()"
+                    showLabels="true"
+                    tooltips="true">
+                        <svg height="200"></svg>
+                </nvd3-pie-chart>
                 <div ng-if="limitExceeded(enrollmentsReceived)" class="alert alert-warning">{{'too_many_items_report' | translate}}</div>
             </div>
             <div class="col-sm-6 align-center">
                 <h2>{{'event_stats' | translate}}</h2>
-                    <div  ng-if="!limitExceeded(eventsReceived)">
-                    <nvd3-pie-chart
-                        data="eventStat"
-                        id="eventChart"
-                        width="350"
-                        height="250"
-                        x="xFunction()"
-                        y="yFunction()"
-                        showLabels="true"
-                        tooltips="true">
-                            <svg height="200"></svg>
-                    </nvd3-pie-chart>
-                </div>
+                <div ng-if="totalEvents===0"> {{'mo_matching_data' | translate}} </div>
+                <nvd3-pie-chart ng-if="!limitExceeded(eventsReceived)" class="empty-event-container"
+                    data="eventStat"
+                    id="eventChart"
+                    width="350"
+                    height="250"
+                    x="xFunction()"
+                    y="yFunction()"
+                    showLabels="true"
+                    tooltips="true">
+                        <svg height="200"></svg>
+                </nvd3-pie-chart>
                 <div ng-if="limitExceeded(eventsReceived)" class="alert alert-warning">{{'too_many_items_report' | translate}}</div>
             </div>
         </div>
