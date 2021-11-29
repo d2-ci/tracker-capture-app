@@ -8548,9 +8548,6 @@
 	            tei.attributes = [];
 	            var formEmpty = true;
 	            for (var k in attributesById) {
-	                if (originalTei && formTei[k] !== originalTei[k] && !formTei[k] && !originalTei[k]) {
-	                    formChanged = true;
-	                }
 	                if (k in formTei) {
 	                    var att = attributesById[k];
 	                    tei.attributes.push({ attribute: att.id, value: formTei[k], displayName: att.displayName, valueType: att.valueType });
@@ -8561,19 +8558,19 @@
 	            formTei.attributes = tei.attributes;
 	
 	            var formChanged = false;
-	            for (var k in attributesById) {
-	                if (originalTei && formTei[k] !== originalTei[k]) {
-	                    if (!formEmpty) {
-	                        formChanged = true;
-	                        break;
-	                    }
-	                    if (formEmpty && (formTei[k] || originalTei[k])) {
-	                        formChanged = true;
-	                        break;
+	            if (originalTei) {
+	                for (var k in attributesById) {
+	                    if (formTei[k] !== originalTei[k]) {
+	                        if (!formEmpty) {
+	                            formChanged = true;
+	                            break;
+	                        }
+	                        if (formEmpty && (formTei[k] || originalTei[k])) {
+	                            formChanged = true;
+	                            break;
+	                        }
 	                    }
 	                }
-	            }
-	            if (originalTei) {
 	                angular.forEach(originalTei.attributes, function (att) {
 	                    if (tei[att.attribute]) {
 	                        delete tei[att.attribute];
@@ -8930,6 +8927,9 @@
 	                def.reject(error);
 	                return def.promise;
 	            });
+	        },
+	        flushCachedTei: function flushCachedTei() {
+	            cachedTeiWithProgramData = {};
 	        },
 	        get: function get(entityUid, optionSets, attributesById) {
 	            var promise = $http.get(DHIS2URL + '/trackedEntityInstances/' + entityUid + '.json').then(function (response) {
@@ -13333,8 +13333,8 @@
 	    $scope.today = DateUtils.getToday();
 	    $scope.trackedEntityForm = null;
 	    $scope.customRegistrationForm = null;
-	    $scope.selectedTei = {};
-	    $scope.tei = {};
+	    $scope.selectedTei = {}; // Attribute values in the current form
+	    $scope.apiFormattedTei = {}; // API formatted version of $scope.selectedTei; see $scope.registerEntity(...) for details
 	    $scope.warningMessages = [];
 	    $scope.hiddenFields = [];
 	    $scope.assignedFields = [];
@@ -13536,13 +13536,13 @@
 	    //listen to modes of registration
 	    $scope.$on('registrationWidget', function (event, args) {
 	        $scope.selectedTei = {};
-	        $scope.tei = {};
+	        $scope.apiFormattedTei = {};
 	        $scope.registrationMode = args.registrationMode;
 	        $scope.orgUnitNames = CurrentSelection.getOrgUnitNames();
 	
 	        if ($scope.registrationMode !== 'REGISTRATION') {
 	            $scope.selectedTei = args.selectedTei || {};
-	            $scope.tei = angular.copy(args.selectedTei);
+	            $scope.apiFormattedTei = angular.copy(args.selectedTei);
 	        }
 	
 	        if ($scope.registrationMode === 'REGISTRATION') {
@@ -13557,7 +13557,7 @@
 	                }
 	                for (var key in $scope.registrationPrefill) {
 	                    if ($scope.attributesById[key]) {
-	                        $scope.tei[key] = $scope.selectedTei[key] = $scope.registrationPrefill[key];
+	                        $scope.apiFormattedTei[key] = $scope.selectedTei[key] = $scope.registrationPrefill[key];
 	                        if ($scope.searchConfig) {
 	                            var groups = $scope.searchConfig.searchGroupsByAttributeId[key];
 	                            if (groups) {
@@ -13580,8 +13580,8 @@
 	            });
 	        }
 	
-	        $scope.teiOriginal = angular.copy($scope.tei);
-	        $scope.teiPreviousValues = angular.copy($scope.tei);
+	        $scope.teiOriginal = angular.copy($scope.apiFormattedTei);
+	        $scope.teiPreviousValues = angular.copy($scope.apiFormattedTei);
 	
 	        if ($scope.registrationMode === 'PROFILE') {
 	            $scope.selectedEnrollment = args.enrollment ? args.enrollment : {};
@@ -13729,7 +13729,7 @@
 	            var bodyText = $translate.instant("registration_complete");
 	            NotificationService.showNotifcationDialog(headerText, bodyText);
 	            $scope.selectedTei = {};
-	            $scope.tei = {};
+	            $scope.apiFormattedTei = {};
 	            $scope.currentEvent = {};
 	            $timeout(function () {
 	                $rootScope.$broadcast('registrationWidget', { registrationMode: 'REGISTRATION' });
@@ -13737,7 +13737,7 @@
 	        }
 	    };
 	
-	    var setSelectedTei = function setSelectedTei() {
+	    var updateCurrentSelection = function updateCurrentSelection() {
 	        var selections = CurrentSelection.get();
 	        CurrentSelection.set({
 	            tei: $scope.selectedTei,
@@ -13746,7 +13746,7 @@
 	            pr: $scope.selectedProgram,
 	            prNames: selections.prNames,
 	            prStNames: selections.prStNames,
-	            enrollments: selections.enrollments,
+	            enrollments: $scope.selectedTei.enrollments,
 	            selectedEnrollment: $scope.selectedEnrollment,
 	            optionSets: selections.optionSets,
 	            orgUnit: selections.orgUnit
@@ -13754,7 +13754,7 @@
 	    };
 	
 	    var reloadProfileWidget = function reloadProfileWidget() {
-	        setSelectedTei();
+	        updateCurrentSelection();
 	        $timeout(function () {
 	            $rootScope.$broadcast('profileWidget', {});
 	        }, 200);
@@ -13769,7 +13769,7 @@
 	    };
 	
 	    $scope.$on('changeOrgUnit', function (event, args) {
-	        $scope.tei.orgUnit = args.orgUnit;
+	        $scope.apiFormattedTei.orgUnit = args.orgUnit;
 	    });
 	
 	    var performRegistration = function performRegistration(destination) {
@@ -13779,30 +13779,30 @@
 	
 	        //Temp fix for not being able to save images with attribute.value = "" or null.
 	        var tempAttributes = [];
-	        angular.forEach($scope.tei.attributes, function (attribute) {
+	        angular.forEach($scope.apiFormattedTei.attributes, function (attribute) {
 	            if (attribute.value !== '' && attribute.value != null) {
 	                tempAttributes.push(attribute);
 	            }
 	        });
 	
-	        $scope.tei.attributes = tempAttributes;
+	        $scope.apiFormattedTei.attributes = tempAttributes;
 	
 	        $scope.returnUrl;
 	        if ($location.search().returnUrl) {
 	            $scope.returnUrl = $location.search().returnUrl;
 	        }
 	
-	        RegistrationService.registerOrUpdate($scope.tei, $scope.optionSets, $scope.attributesById, $scope.selectedEnrollment.program).then(function (regResponse) {
+	        RegistrationService.registerOrUpdate($scope.apiFormattedTei, $scope.optionSets, $scope.attributesById, $scope.selectedEnrollment.program).then(function (regResponse) {
 	            var reg = regResponse.response.responseType === 'ImportSummaries' ? regResponse.response.importSummaries[0] : regResponse.response.responseType === 'ImportSummary' ? regResponse.response : {};
 	            if (reg.status === 'SUCCESS') {
-	                $scope.tei.trackedEntityInstance = reg.reference;
+	                $scope.apiFormattedTei.trackedEntityInstance = reg.reference;
 	
 	                if ($scope.registrationMode === 'PROFILE') {
 	                    reloadProfileWidget();
 	                    $rootScope.$broadcast('teiupdated', {});
 	                    $scope.model.savingRegistration = false;
 	                    if (destination === 'newOrgUnit') {
-	                        $scope.selectedEnrollment.orgUnit = $scope.tei.orgUnit;
+	                        $scope.selectedEnrollment.orgUnit = $scope.apiFormattedTei.orgUnit;
 	                        EnrollmentService.update($scope.selectedEnrollment);
 	                        selection.load();
 	                        if ($scope.returnUrl) {
@@ -13812,12 +13812,12 @@
 	                        }
 	                    }
 	                } else {
-	                    setSelectedTei();
+	                    updateCurrentSelection();
 	                    if ($scope.selectedProgram) {
 	
 	                        //enroll TEI
 	                        var enrollment = {};
-	                        enrollment.trackedEntityInstance = $scope.tei.trackedEntityInstance;
+	                        enrollment.trackedEntityInstance = $scope.apiFormattedTei.trackedEntityInstance;
 	                        enrollment.program = $scope.selectedProgram.id;
 	                        enrollment.status = 'ACTIVE';
 	                        enrollment.orgUnit = $scope.selectedOrgUnit.id;
@@ -13832,19 +13832,19 @@
 	                            if (enrollmentResponse) {
 	                                var en = enrollmentResponse.response;
 	                                if (en.status === 'SUCCESS') {
+	                                    TEIService.flushCachedTei();
 	                                    if ($scope.registrationMode !== 'ENROLLMENT') {
 	                                        $scope.model.savingRegistration = false;
 	                                    }
 	                                    enrollment.enrollment = en.importSummaries[0].reference;
-	                                    $scope.selectedEnrollment = enrollment;
-	                                    var avilableEvent = $scope.currentEvent && $scope.currentEvent.event ? $scope.currentEvent : null;
-	                                    var dhis2Events = EventUtils.autoGenerateEvents($scope.tei.trackedEntityInstance, $scope.selectedProgram, $scope.selectedOrgUnit, enrollment, avilableEvent);
+	                                    var availableEvent = $scope.currentEvent && $scope.currentEvent.event ? $scope.currentEvent : null;
+	                                    var dhis2Events = EventUtils.autoGenerateEvents($scope.apiFormattedTei.trackedEntityInstance, $scope.selectedProgram, $scope.selectedOrgUnit, enrollment, availableEvent);
 	                                    if (dhis2Events.events.length > 0) {
 	                                        DHIS2EventFactory.create(dhis2Events).then(function () {
-	                                            notifyRegistrtaionCompletion(destination, $scope.tei.trackedEntityInstance);
+	                                            notifyRegistrtaionCompletion(destination, $scope.apiFormattedTei.trackedEntityInstance);
 	                                        });
 	                                    } else {
-	                                        notifyRegistrtaionCompletion(destination, $scope.tei.trackedEntityInstance);
+	                                        notifyRegistrtaionCompletion(destination, $scope.apiFormattedTei.trackedEntityInstance);
 	                                    }
 	                                } else {
 	                                    //enrollment has failed
@@ -13855,13 +13855,13 @@
 	                            }
 	                        });
 	                    } else {
-	                        notifyRegistrtaionCompletion(destination, $scope.tei.trackedEntityInstance);
+	                        notifyRegistrtaionCompletion(destination, $scope.apiFormattedTei.trackedEntityInstance);
 	                        $scope.model.savingRegistration = false;
 	                    }
 	                }
 	            } else {
 	                //update/registration has failed
-	                var headerText = $scope.tei && $scope.tei.trackedEntityInstance ? $translate.instant('update_error') : $translate.instant('registration_error');
+	                var headerText = $scope.apiFormattedTei && $scope.apiFormattedTei.trackedEntityInstance ? $translate.instant('update_error') : $translate.instant('registration_error');
 	                var bodyText = regResponse.message;
 	                NotificationService.showNotifcationDialog(headerText, bodyText);
 	                $scope.model.savingRegistration = false;
@@ -13953,27 +13953,27 @@
 	        //form is valid, continue the registration
 	        //get selected entity
 	        if (!$scope.selectedTei.trackedEntityInstance) {
-	            $scope.selectedTei.trackedEntityType = $scope.tei.trackedEntityType = $scope.selectedProgram && $scope.selectedProgram.trackedEntityType && $scope.selectedProgram.trackedEntityType.id ? $scope.selectedProgram.trackedEntityType.id : $scope.trackedEntityTypes.selected.id;
-	            $scope.selectedTei.orgUnit = $scope.tei.orgUnit = $scope.selectedOrgUnit.id;
-	            $scope.selectedTei.attributes = $scope.tei.attributes = [];
+	            $scope.selectedTei.trackedEntityType = $scope.apiFormattedTei.trackedEntityType = $scope.selectedProgram && $scope.selectedProgram.trackedEntityType && $scope.selectedProgram.trackedEntityType.id ? $scope.selectedProgram.trackedEntityType.id : $scope.trackedEntityTypes.selected.id;
+	            $scope.selectedTei.orgUnit = $scope.apiFormattedTei.orgUnit = $scope.selectedOrgUnit.id;
+	            $scope.selectedTei.attributes = $scope.apiFormattedTei.attributes = [];
 	        }
-	        $scope.tei.featureType = $scope.selectedTei.featureType;
-	        $scope.tei.geometry = $scope.selectedTei.geometry;
+	        $scope.apiFormattedTei.featureType = $scope.selectedTei.featureType;
+	        $scope.apiFormattedTei.geometry = $scope.selectedTei.geometry;
 	        //get tei attributes and their values
 	        //but there could be a case where attributes are non-mandatory and
 	        //registration form comes empty, in this case enforce at least one value
-	        var result = RegistrationService.processForm($scope.tei, $scope.selectedTei, $scope.teiOriginal, $scope.attributesById);
+	        var result = RegistrationService.processForm($scope.apiFormattedTei, $scope.selectedTei, $scope.teiOriginal, $scope.attributesById);
 	        $scope.formEmpty = result.formEmpty;
-	        $scope.tei = result.tei;
+	        $scope.apiFormattedTei = result.tei;
 	
 	        if ($scope.formEmpty) {
 	            //registration form is empty
 	            NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("form_is_empty_fill_at_least_one"));
 	            return;
 	        }
-	        if (!destination && $scope.tei) {
-	            TEIService.getRelationships($scope.tei.trackedEntityInstance).then(function (result) {
-	                $scope.tei.relationships = result;
+	        if (!destination && $scope.apiFormattedTei) {
+	            TEIService.getRelationships($scope.apiFormattedTei.trackedEntityInstance).then(function (result) {
+	                $scope.apiFormattedTei.relationships = result;
 	                performRegistration(destination);
 	            });
 	        } else {
@@ -13998,14 +13998,16 @@
 	
 	        if ($scope.selectedProgram && $scope.selectedProgram.id) {
 	            var eventExists = $scope.currentEvent && $scope.currentEvent.event;
+	            var enrollment = $scope.selectedEnrollment && $scope.selectedEnrollment.orgUnit ? $scope.selectedEnrollment : null;
 	            var evs = null;
 	            if (eventExists) {
 	                evs = { all: [], byStage: {} };
 	                evs.all = [$scope.currentEvent];
 	                evs.byStage[$scope.currentStage.id] = [$scope.currentEvent];
 	            }
-	
-	            TrackerRulesExecutionService.executeRules($scope.allProgramRules, eventExists ? $scope.currentEvent : 'registration', evs, $scope.prStDes, $scope.attributesById, $scope.selectedTei, $scope.selectedEnrollment, $scope.optionSets, flag);
+	            if (eventExists || enrollment) {
+	                TrackerRulesExecutionService.executeRules($scope.allProgramRules, eventExists ? $scope.currentEvent : 'registration', evs, $scope.prStDes, $scope.attributesById, $scope.selectedTei, enrollment, $scope.optionSets, flag);
+	            }
 	        }
 	    };
 	
@@ -14138,7 +14140,7 @@
 	            $scope.errorMessages = {};
 	            $scope.hiddenSections = [];
 	
-	            var effectResult = TrackerRulesExecutionService.processRuleEffectAttribute(args.event, $scope.selectedTei, $scope.tei, $scope.currentEvent, {}, $scope.currentEvent, $scope.attributesById, $scope.prStDes, $scope.optionSets, $scope.optionGroupsById);
+	            var effectResult = TrackerRulesExecutionService.processRuleEffectAttribute(args.event, $scope.selectedTei, $scope.apiFormattedTei, $scope.currentEvent, {}, $scope.currentEvent, $scope.attributesById, $scope.prStDes, $scope.optionSets, $scope.optionGroupsById);
 	            $scope.selectedTei = effectResult.selectedTei;
 	            $scope.currentEvent = effectResult.currentEvent;
 	            $scope.hiddenFields = effectResult.hiddenFields;
@@ -14236,7 +14238,7 @@
 	    };
 	
 	    $scope.cancelRegistrationWarning = function (cancelFunction, inDashboard) {
-	        var result = RegistrationService.processForm($scope.tei, $scope.selectedTei, $scope.teiOriginal, $scope.attributesById);
+	        var result = RegistrationService.processForm($scope.apiFormattedTei, $scope.selectedTei, $scope.teiOriginal, $scope.attributesById);
 	        var prStDe;
 	        if (!result.formChanged) {
 	            if ($scope.currentStage && $scope.currentStage.programStageDataElements) {
@@ -39427,4 +39429,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-4ae6176b220ec00976ec.js.map
+//# sourceMappingURL=app-917ee7ff7f1fc1a3e9ad.js.map
