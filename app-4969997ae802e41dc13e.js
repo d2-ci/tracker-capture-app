@@ -20507,7 +20507,7 @@
 	    };
 	
 	    $scope.showEventInCaptureApp = function (eventId) {
-	        location.href = '../dhis-web-capture/index.html#/viewEvent/' + eventId;
+	        location.href = '../dhis-web-capture/index.html#/viewEvent?viewEventId=' + eventId;
 	    };
 	
 	    var setRelationships = function setRelationships() {
@@ -39382,4 +39382,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-e583dc42cd333af4d784.js.map
+//# sourceMappingURL=app-4969997ae802e41dc13e.js.map
