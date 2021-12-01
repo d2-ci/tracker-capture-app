@@ -9396,7 +9396,12 @@
 	            var formattedTei = convertFromUserToApi(angular.copy(tei));
 	            var attributes = [];
 	            angular.forEach(formattedTei.attributes, function (att) {
-	                attributes.push({ attribute: att.attribute, value: CommonUtils.formatDataValue(null, att.value, attributesById[att.attribute], optionSets, 'API') });
+	                if (att && att.attribute) {
+	                    attributes.push({
+	                        attribute: att.attribute,
+	                        value: CommonUtils.formatDataValue(null, att.value, attributesById[att.attribute], optionSets, 'API')
+	                    });
+	                }
 	            });
 	            formattedTei.attributes = attributes;
 	            var programFilter = programId ? "?program=" + programId : "";
@@ -15832,6 +15837,8 @@
 	var INNREISE_OPPHOLDSADRESSE_ATTRIBUTE_ID = exports.INNREISE_OPPHOLDSADRESSE_ATTRIBUTE_ID = 'DeHufwWNjmh';
 	var INNREISE_ARBEIDSGIVER_ATTRIBUTE_ID = exports.INNREISE_ARBEIDSGIVER_ATTRIBUTE_ID = 'rGDv6a0AvWF';
 	var INNREISE_AVREISELAND_ATTRIBUTE_ID = exports.INNREISE_AVREISELAND_ATTRIBUTE_ID = 'nv5gV7eM3u6';
+	var INNREISE_KORONA_SERTIFIKAT_ATTRIBUTE_ID = exports.INNREISE_KORONA_SERTIFIKAT_ATTRIBUTE_ID = 'edcSRtuvA9o';
+	
 	var PROFIL_FORETRUKKET_SPRAAK_ATTRIBUTE_ID = exports.PROFIL_FORETRUKKET_SPRAAK_ATTRIBUTE_ID = 'xTdN78uRiJm';
 	var PROFIL_EPOST_ATTRIBUTE_ID = exports.PROFIL_EPOST_ATTRIBUTE_ID = 'Ym6yIceP4RO';
 	var PROFIL_MOBIL_TLF_ATTRIBUTE_ID = exports.PROFIL_MOBIL_TLF_ATTRIBUTE_ID = 'h1PoxEMqi9t';
@@ -16646,16 +16653,25 @@
 	                if (attrId === _constants.INNREISE_OPPFOLGINGSTATUS_ATTRIBUTE_ID) {
 	                    var value = $scope.getBackupValueFromEvent(tei, attrId);
 	                    if (value === 'OK') {
-	                        return 'tei-status-ok';
+	                        return 'ks-tei-status-ok';
 	                    }
 	                    if (value === 'Ikke satt') {
-	                        return 'tei-status-not-satt';
+	                        return 'ks-tei-status-not-satt';
 	                    }
 	                    if (value === 'Ikke svar') {
-	                        return 'tei-status-not-svar';
+	                        return 'ks-tei-status-not-svar';
 	                    }
 	                    if (value === 'Ikke OK') {
-	                        return 'tei-status-not-ok';
+	                        return 'ks-tei-status-not-ok';
+	                    }
+	                }
+	                if (attrId === _constants.INNREISE_KORONA_SERTIFIKAT_ATTRIBUTE_ID) {
+	                    var value = $scope.getBackupValueFromEvent(tei, attrId);
+	                    if (value === true || value == "true") {
+	                        return 'ks-tei-has-koronasertifikat';
+	                    }
+	                    if (value === false || value == "false") {
+	                        return 'ks-tei-has-not-koronasertifikat';
 	                    }
 	                }
 	            };
@@ -20259,14 +20275,17 @@
 	}
 	
 	function getUpdatedVaccineAttributes(attributes, vaccines) {
-	    return [getUpdatedAttribute(attributes, vaccines[0].type, _constants.PROFIL_VAKSINE_1_TYPE_ID), getUpdatedAttribute(attributes, vaccines[0].date, _constants.PROFIL_VAKSINE_1_DATO_ID), getUpdatedAttribute(attributes, vaccines[1].type, _constants.PROFIL_VAKSINE_2_TYPE_ID), getUpdatedAttribute(attributes, vaccines[1].date, _constants.PROFIL_VAKSINE_2_DATO_ID), getUpdatedAttribute(attributes, vaccines[2].type, _constants.PROFIL_VAKSINE_3_TYPE_ID), getUpdatedAttribute(attributes, vaccines[2].date, _constants.PROFIL_VAKSINE_3_DATO_ID)];
+	    return [getUpdatedAttribute(attributes, vaccines[0] && vaccines[0].type, _constants.PROFIL_VAKSINE_1_TYPE_ID), getUpdatedAttribute(attributes, vaccines[0] && vaccines[0].date, _constants.PROFIL_VAKSINE_1_DATO_ID), getUpdatedAttribute(attributes, vaccines[1] && vaccines[1].type, _constants.PROFIL_VAKSINE_2_TYPE_ID), getUpdatedAttribute(attributes, vaccines[1] && vaccines[1].date, _constants.PROFIL_VAKSINE_2_DATO_ID), getUpdatedAttribute(attributes, vaccines[2] && vaccines[2].type, _constants.PROFIL_VAKSINE_3_TYPE_ID), getUpdatedAttribute(attributes, vaccines[2] && vaccines[2].date, _constants.PROFIL_VAKSINE_3_DATO_ID)];
 	}
 	
 	function getUpdatedAttribute(attributes, value, id) {
-	    var attribute = attributes.find(function (att) {
-	        return att.attribute === id;
-	    });
-	    return _extends({}, attribute, { value: value });
+	    if (value) {
+	        var attribute = attributes.find(function (att) {
+	            return att.attribute === id;
+	        });
+	        return _extends({}, attribute, { value: value });
+	    }
+	    return undefined;
 	}
 	
 	function updateAttributes(tei, attributesToUpdate) {
@@ -20277,17 +20296,17 @@
 	
 	function getUpdatedAttributeOrSelf(attribute, attributesToUpdate) {
 	    return attributesToUpdate.find(function (att) {
-	        return att.attribute === attribute.attribute;
+	        return att && attribute && att.attribute === attribute.attribute;
 	    }) || attribute;
 	}
 	
 	function hackToUpdateVaccineFieldsInProfile(selectedTei, sysvakVaccines) {
-	    selectedTei[_constants.PROFIL_VAKSINE_1_TYPE_ID] = sysvakVaccines[0].name;
-	    selectedTei[_constants.PROFIL_VAKSINE_1_DATO_ID] = sysvakVaccines[0].date;
-	    selectedTei[_constants.PROFIL_VAKSINE_2_TYPE_ID] = sysvakVaccines[1].name;
-	    selectedTei[_constants.PROFIL_VAKSINE_2_DATO_ID] = sysvakVaccines[1].date;
-	    selectedTei[_constants.PROFIL_VAKSINE_3_TYPE_ID] = sysvakVaccines[2].name;
-	    selectedTei[_constants.PROFIL_VAKSINE_3_DATO_ID] = sysvakVaccines[2].date;
+	    selectedTei[_constants.PROFIL_VAKSINE_1_TYPE_ID] = sysvakVaccines[0] && sysvakVaccines[0].name;
+	    selectedTei[_constants.PROFIL_VAKSINE_1_DATO_ID] = sysvakVaccines[0] && sysvakVaccines[0].date;
+	    selectedTei[_constants.PROFIL_VAKSINE_2_TYPE_ID] = sysvakVaccines[1] && sysvakVaccines[1].name;
+	    selectedTei[_constants.PROFIL_VAKSINE_2_DATO_ID] = sysvakVaccines[1] && sysvakVaccines[1].date;
+	    selectedTei[_constants.PROFIL_VAKSINE_3_TYPE_ID] = sysvakVaccines[2] && sysvakVaccines[2].name;
+	    selectedTei[_constants.PROFIL_VAKSINE_3_DATO_ID] = sysvakVaccines[2] && sysvakVaccines[2].date;
 	}
 
 /***/ }),
@@ -56213,4 +56232,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-67b8f56dd9d4a737039b.js.map
+//# sourceMappingURL=app-25973174f660f98c5a92.js.map
