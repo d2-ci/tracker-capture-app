@@ -957,7 +957,7 @@
 	                    val = DateUtils.formatFromUserToApi(val);
 	                }
 	            }
-	            if (obj.valueType === 'TRUE_ONLY') {
+	            if (val && obj.valueType === 'TRUE_ONLY') {
 	                if (destination === 'USER') {
 	                    val = val === 'true' ? true : '';
 	                } else {
@@ -15822,6 +15822,8 @@
 	var INNREISE_KARANTENE_GJENOMFORING_TYPE_CODE_ID = exports.INNREISE_KARANTENE_GJENOMFORING_TYPE_CODE_ID = 'fJcTMI7RD9u';
 	var INNREISE_OPPHOLDSSTED_ID = exports.INNREISE_OPPHOLDSSTED_ID = 'LYrjfgwVNVn';
 	var INNREISE_ARBEIDSGIVER_NAVN_ID = exports.INNREISE_ARBEIDSGIVER_NAVN_ID = 'uncjwHvpOWP';
+	var INDEKS_SISTE_ISOLASJONSDATO = exports.INDEKS_SISTE_ISOLASJONSDATO = 'ouppljsSJ3J';
+	var NAERKONTAKT_SISTE_KARANTENEDATO = exports.NAERKONTAKT_SISTE_KARANTENEDATO = 'nXIm2GscOIL';
 	
 	var PROFIL_NASJONALT_FELLES_HJELPENUMMER = exports.PROFIL_NASJONALT_FELLES_HJELPENUMMER = 'WBjHgYajTsb';
 	var PROFIL_FNR_INDEKS = exports.PROFIL_FNR_INDEKS = 'fkUN6jLp7K4';
@@ -15848,6 +15850,8 @@
 	var PROFIL_EPOST_ATTRIBUTE_ID = exports.PROFIL_EPOST_ATTRIBUTE_ID = 'Ym6yIceP4RO';
 	var PROFIL_MOBIL_TLF_ATTRIBUTE_ID = exports.PROFIL_MOBIL_TLF_ATTRIBUTE_ID = 'h1PoxEMqi9t';
 	var PROFIL_FNR_ATTRIBUTE_ID = exports.PROFIL_FNR_ATTRIBUTE_ID = 'NI0QRzJvQ0k';
+	var PROFIL_SISTE_ISOLASJONSDATO = exports.PROFIL_SISTE_ISOLASJONSDATO = 'FnBAg7wtJgM';
+	var PROFIL_SISTE_KARANTENEDATO = exports.PROFIL_SISTE_KARANTENEDATO = 'NSvxeFTfa0v';
 	var PROFIL_VAKSINE_1_TYPE_ID = exports.PROFIL_VAKSINE_1_TYPE_ID = 'cnSOCLFGmLz';
 	var PROFIL_VAKSINE_1_DATO_ID = exports.PROFIL_VAKSINE_1_DATO_ID = 'dvNLTk22BAG';
 	var PROFIL_VAKSINE_2_TYPE_ID = exports.PROFIL_VAKSINE_2_TYPE_ID = 'dO29Prg9siS';
@@ -19541,6 +19545,20 @@
 	        $scope.allEventsSorted = allEventsSorted.events;
 	    });
 	
+	    $scope.$on('last-isolation-date-updated', function (event, args) {
+	        $scope.tei[_constants.PROFIL_SISTE_ISOLASJONSDATO] = args.date;
+	        $scope.selectedTei[_constants.PROFIL_SISTE_ISOLASJONSDATO] = args.date;
+	
+	        $scope.registerEntity(null);
+	    });
+	
+	    $scope.$on('last-quarantine-date-updated', function (event, args) {
+	        $scope.tei[_constants.PROFIL_SISTE_KARANTENEDATO] = args.date;
+	        $scope.selectedTei[_constants.PROFIL_SISTE_KARANTENEDATO] = args.date;
+	
+	        $scope.registerEntity(null);
+	    });
+	
 	    $scope.sendNotification = function () {
 	
 	        var messageText = FNrLookupService.getNotificationMessageTextSummary(CurrentSelection.currentSelection.orgUnit.code, $scope.selectedTei, $scope.allEventsSorted);
@@ -20890,9 +20908,8 @@
 	
 	var _constants = __webpack_require__(16);
 	
-	/* global angular, trackerCapture */
+	var trackerCapture = angular.module('trackerCapture'); /* global angular, trackerCapture */
 	
-	var trackerCapture = angular.module('trackerCapture');
 	trackerCapture.controller('DataEntryController', ["$rootScope", "$scope", "$modal", "$filter", "$log", "$timeout", "$translate", "$window", "$q", "$parse", "$location", "CommonUtils", "DateUtils", "DashboardLayoutService", "EventUtils", "orderByFilter", "SessionStorageService", "EnrollmentService", "DHIS2EventFactory", "ModalService", "NotificationService", "CurrentSelection", "TrackerRulesExecutionService", "CustomFormService", "PeriodService", "OptionSetService", "AttributesFactory", "TrackerRulesFactory", "EventCreationService", "AuthorityService", "AccessUtils", "TCOrgUnitService", "UsersService", function ($rootScope, $scope, $modal, $filter, $log, $timeout, $translate, $window, $q, $parse, $location, CommonUtils, DateUtils, DashboardLayoutService, EventUtils, orderByFilter, SessionStorageService, EnrollmentService, DHIS2EventFactory, ModalService, NotificationService, CurrentSelection, TrackerRulesExecutionService, CustomFormService, PeriodService, OptionSetService, AttributesFactory, TrackerRulesFactory, EventCreationService, AuthorityService, AccessUtils, TCOrgUnitService, UsersService) {
 	
 	    //Unique instance id for the controller:
@@ -22544,6 +22561,13 @@
 	                if (!backgroundUpdate) {
 	                    //Run rules on updated data:
 	                    $scope.executeRules();
+	                }
+	
+	                //Handle updated last isolation date
+	                if (prStDe.id == _constants.INDEKS_SISTE_ISOLASJONSDATO) {
+	                    $rootScope.$broadcast('last-isolation-date-updated', { date: value });
+	                } else if (prStDe.id == _constants.NAERKONTAKT_SISTE_KARANTENEDATO) {
+	                    $rootScope.$broadcast('last-quarantine-date-updated', { date: value });
 	                }
 	            });
 	        }
@@ -56237,4 +56261,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-7683e07d1b039eea2857.js.map
+//# sourceMappingURL=app-384d7fd6e1c5919dd641.js.map
