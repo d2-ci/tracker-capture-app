@@ -19546,15 +19546,17 @@
 	    });
 	
 	    $scope.$on('last-isolation-date-updated', function (event, args) {
-	        $scope.tei[_constants.PROFIL_SISTE_ISOLASJONSDATO] = args.date;
-	        $scope.selectedTei[_constants.PROFIL_SISTE_ISOLASJONSDATO] = args.date;
+	        var dateFormatted = DateUtils.formatFromApiToUser(args.date);
+	        $scope.tei[_constants.PROFIL_SISTE_ISOLASJONSDATO] = dateFormatted;
+	        $scope.selectedTei[_constants.PROFIL_SISTE_ISOLASJONSDATO] = dateFormatted;
 	
 	        $scope.registerEntity(null);
 	    });
 	
 	    $scope.$on('last-quarantine-date-updated', function (event, args) {
-	        $scope.tei[_constants.PROFIL_SISTE_KARANTENEDATO] = args.date;
-	        $scope.selectedTei[_constants.PROFIL_SISTE_KARANTENEDATO] = args.date;
+	        var dateFormatted = DateUtils.formatFromApiToUser(args.date);
+	        $scope.tei[_constants.PROFIL_SISTE_KARANTENEDATO] = dateFormatted;
+	        $scope.selectedTei[_constants.PROFIL_SISTE_KARANTENEDATO] = dateFormatted;
 	
 	        $scope.registerEntity(null);
 	    });
@@ -56261,4 +56263,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-384d7fd6e1c5919dd641.js.map
+//# sourceMappingURL=app-4e18e794fa5c796bb38a.js.map
