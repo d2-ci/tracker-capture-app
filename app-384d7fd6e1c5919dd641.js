@@ -15823,7 +15823,7 @@
 	var INNREISE_OPPHOLDSSTED_ID = exports.INNREISE_OPPHOLDSSTED_ID = 'LYrjfgwVNVn';
 	var INNREISE_ARBEIDSGIVER_NAVN_ID = exports.INNREISE_ARBEIDSGIVER_NAVN_ID = 'uncjwHvpOWP';
 	var INDEKS_SISTE_ISOLASJONSDATO = exports.INDEKS_SISTE_ISOLASJONSDATO = 'ouppljsSJ3J';
-	var NÆRKONTAKT_SISTE_KARANTENEDATO = exports.NÆRKONTAKT_SISTE_KARANTENEDATO = 'nXIm2GscOIL';
+	var NAERKONTAKT_SISTE_KARANTENEDATO = exports.NAERKONTAKT_SISTE_KARANTENEDATO = 'nXIm2GscOIL';
 	
 	var PROFIL_NASJONALT_FELLES_HJELPENUMMER = exports.PROFIL_NASJONALT_FELLES_HJELPENUMMER = 'WBjHgYajTsb';
 	var PROFIL_FNR_INDEKS = exports.PROFIL_FNR_INDEKS = 'fkUN6jLp7K4';
@@ -22566,7 +22566,7 @@
 	                //Handle updated last isolation date
 	                if (prStDe.id == _constants.INDEKS_SISTE_ISOLASJONSDATO) {
 	                    $rootScope.$broadcast('last-isolation-date-updated', { date: value });
-	                } else if (prStDe.id == _constants.NÆRKONTAKT_SISTE_KARANTENEDATO) {
+	                } else if (prStDe.id == _constants.NAERKONTAKT_SISTE_KARANTENEDATO) {
 	                    $rootScope.$broadcast('last-quarantine-date-updated', { date: value });
 	                }
 	            });
@@ -56261,4 +56261,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-21d470a43cbf06776e3e.js.map
+//# sourceMappingURL=app-384d7fd6e1c5919dd641.js.map
