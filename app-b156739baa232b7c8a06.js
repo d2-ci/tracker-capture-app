@@ -10255,10 +10255,6 @@
 	                    entity.inactive = row[6] !== "" ? row[6] : false;
 	                    entity.followUp = isFollowUp;
 	
-	                    if (grid.headers[grid.headers.length - 2].name == 'lastdate') {
-	                        entity.lastdate = row[row.length - 2];
-	                    }
-	
 	                    if (grid.headers[grid.headers.length - 1].column == 'TransferStatus') {
 	                        //entity.followUp =  entity.followUp || row[row.length-1] == "ACTIVE";
 	                    }
@@ -10266,6 +10262,9 @@
 	                    for (var i = 7; i < row.length; i++) {
 	                        if (row[i] && row[i] !== '') {
 	                            var val = row[i];
+	                            if (!grid.headers[i]) {
+	                                debugger;
+	                            };
 	
 	                            if (attributesById[grid.headers[i].name] && attributesById[grid.headers[i].name].optionSetValue && optionSets && attributesById[grid.headers[i].name].optionSet && optionSets[attributesById[grid.headers[i].name].optionSet.id]) {
 	                                val = OptionSetService.getName(optionSets[attributesById[grid.headers[i].name].optionSet.id].options, val);
@@ -10341,7 +10340,7 @@
 	            });
 	            return { columns: columns, filterTypes: filterTypes, filterText: filterText };
 	        },
-	        makeGridColumns: function makeGridColumns(attributes, config, savedGridColumnsKeyMap, lastDateName) {
+	        makeGridColumns: function makeGridColumns(attributes, config, savedGridColumnsKeyMap) {
 	            var gridColumns = [{ id: 'orgUnitName', displayName: $translate.instant('registering_unit'), show: true, valueType: 'TEXT' }, { id: 'created', displayName: $translate.instant('registration_date'), show: true, valueType: 'DATE' }, { id: 'inactive', displayName: $translate.instant('inactive'), show: false, valueType: 'BOOLEAN' }];
 	            setShowGridColumn(gridColumns[0], 0, config, savedGridColumnsKeyMap);
 	            setShowGridColumn(gridColumns[1], 1, config, savedGridColumnsKeyMap);
@@ -10357,10 +10356,6 @@
 	                    gridColumns.push(gridColumn);
 	                }
 	            });
-	
-	            if (lastDateName) {
-	                gridColumns.push({ id: 'last_date', displayName: $translate.instant(lastDateName), show: true, valueType: 'DATE' });
-	            }
 	
 	            return gridColumns;
 	        },
@@ -38411,23 +38406,9 @@
 	        if ($scope.base.selectedProgram) {
 	            return UserDataStoreService.get(gridColumnsContainer, $scope.base.selectedProgram.id).then(function (savedGridColumns) {
 	                var gridColumnConfig = { defaultRange: { start: 3, end: 7 } };
-	                var lastDateName = $scope.base.selectedProgram.id == 'uYjxkTbwRNf' ? 'last_date_in_isolation' : $scope.base.selectedProgram.id == 'DM9n1bUw8W8' ? 'last_date_in_quarantine' : '';
 	
-	                $scope.gridColumns = TEIGridService.makeGridColumns($scope.programAttributes, gridColumnConfig, savedGridColumns, lastDateName);
+	                $scope.gridColumns = TEIGridService.makeGridColumns($scope.programAttributes, gridColumnConfig, savedGridColumns);
 	                $scope.gridColumns = (0, _hide_show_attributes.setCustomShowOnAttributesInList)($scope.gridColumns, $scope.base.selectedProgram.id);
-	                /*
-	                $scope.gridColumns = [];
-	                angular.forEach($scope.programAttributes, function(attr){
-	                    if(attr.displayInListNoProgram){
-	                        var gridColumn = {id: attr.id, displayName: attr.displayName, show: false, valueType: attr.valueType};
-	                        if(savedGridColumns[attr.id]){
-	                            gridColumn.show = savedGridColumns[attr.id].show;
-	                        }else if(attr.programTrackedEntityAttribute.displayInList){
-	                            gridColumn.show = true;
-	                        }
-	                        $scope.gridColumns.push(gridColumn);
-	                    }
-	                 });*/
 	            });
 	        }
 	        return resolvedEmptyPromise();
@@ -38560,17 +38541,6 @@
 	                            while (1) {
 	                                switch (_context.prev = _context.next) {
 	                                    case 0:
-	                                        if (dateDictionary[row[0]] && dateDictionary[row[0]].enrollmentDate) {
-	                                            //Set enrollment date instead of created date:
-	                                            row[1] = dateDictionary[row[0]].enrollmentDate;
-	                                        }
-	
-	                                        if (dateDictionary[row[0]] && dateDictionary[row[0]].dataValue) {
-	                                            row.push(dateDictionary[row[0]].dataValue);
-	                                        } else {
-	                                            row.push('');
-	                                        }
-	
 	                                        if (dateDictionary[row[0]] && dateDictionary[row[0]].transferStatus) {
 	                                            row[4] = "Overført";
 	                                            row.push(dateDictionary[row[0]].transferStatus);
@@ -38578,7 +38548,7 @@
 	                                            row.push('');
 	                                        }
 	
-	                                    case 3:
+	                                    case 1:
 	                                    case "end":
 	                                        return _context.stop();
 	                                }
@@ -38591,18 +38561,11 @@
 	                    };
 	                }());
 	
-	                serverResponse.headers.push({ column: "LastDate", hidden: false, meta: false, name: "last_date", type: "java.lang.String" });
 	                serverResponse.headers.push({ column: "TransferStatus", hidden: false, meta: false, name: "Overføringsstatus", type: "java.lang.String" });
 	
 	                if ($scope.currentTrackedEntityList.sortColumn.id == 'created') {
 	                    serverResponse.rows = $filter('orderBy')(serverResponse.rows, function (tei) {
 	                        return tei[1];
-	                    }, $scope.currentTrackedEntityList.sortColumn.direction != 'desc');
-	                }
-	
-	                if ($scope.currentTrackedEntityList.sortColumn.id == 'last_date') {
-	                    serverResponse.rows = $filter('orderBy')(serverResponse.rows, function (tei) {
-	                        return tei[tei.length - 2];
 	                    }, $scope.currentTrackedEntityList.sortColumn.direction != 'desc');
 	                }
 	
@@ -56263,4 +56226,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-4e18e794fa5c796bb38a.js.map
+//# sourceMappingURL=app-b156739baa232b7c8a06.js.map
