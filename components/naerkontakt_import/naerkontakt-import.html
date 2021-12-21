@@ -1,0 +1,102 @@
+<div class="modal-header page">
+    <h2>Last opp Excel-fil med nærkontakter</h2>
+</div>
+
+<div class="modal-body">
+
+    <!-- First page of modal -->
+    <div ng-if="stage === 'start'">
+        <p>Her kan du laste opp en liste med nærkontakter (klasseliste) fra regneark, og knytte de automatisk til
+            klyngen.</p>
+        <p>Bruk denne malen for å fylle ut listen: <a href="/api/import/excelmal">mal.xlsx</a></p>
+        <p>Vi vil først verifisere listen. Du vil få se hvilke personer som kan importeres, deretter bestemmer du om
+            disse skal importeres i klyngen eller ikke.</p>
+        <button class="btn btn-grp btn-file">
+            <span>
+                Last opp Excel-fil for verifisering
+                <i class="fa fa-upload"></i>
+                <form name="fileForm">
+                <input type="file" on-file-upload="uploadAndVerify">
+                </form>
+            </span>
+        </button>
+    </div>
+
+    <!-- Uploading for verification spinner page -->
+    <div ng-if="stage === 'uploadingImportTest'">
+        <p>
+            Husk: Du må se over hvilke nærkontakter som importeres og så trykke på "Legg nærkontakter til
+            klynge"-knappen.
+        </p>
+        <i class="fa fa-spinner fa-spin" style="font-size: 2em"></i>
+        Prøver å lese <em>{{file.name}}</em>
+    </div>
+
+    <!-- Uploading for verification success page -->
+    <div ng-if="stage === 'importTestSuccess'">
+        <h2>Importsammendrag</h2>
+        <tabset ng-init="peopleArr = getImportResultAsArray()">
+            <tab ng-repeat="peopleStruct in peopleArr" ng-if="peopleStruct.people && peopleStruct.people.length > 0">
+                <tab-heading ng-class="{true: 'ks-tab-heading--danger', false: 'ks-tab-heading--ok'}[peopleStruct.type=='error']">
+                    <i class="fa fa-exclamation-triangle" ng-if="peopleStruct.type=='error'"></i> {{peopleStruct.titleValidator}} ({{peopleStruct.people.length}})
+                </tab-heading>
+                <ng-include src="'components/naerkontakt_import/import-status-validate-message.html'" ng-init="statusType = peopleStruct.statusType"></ng-include>
+                <ng-include src="'components/naerkontakt_import/import-status.html'" ng-init="people = peopleStruct.people;"></ng-include>
+            </tab>
+        </tabset>
+        <hr/>
+        <p>
+            Se over hvilke nærkontakter som importeres. Dersom alt ser korrekt ut, trykk på "Legg nærkontakter til
+            klynge"-knappen. Eventuelt last opp en ny Excel-fil med endringer.
+        </p>
+        <button class="btn btn-grp btn-file btn-default">
+            <span>
+                Last opp en annen Excel-fil for verifisering
+                <i class="fa fa-upload"></i>
+                <form name="fileForm">
+                <input type="file" on-file-upload="uploadAndVerify">
+                </form>
+            </span>
+        </button>
+        <button class="btn btn-primary" ng-click="uploadAndImport()">Legg nærkontakter til klynge</button>
+    </div>
+
+    <!-- Import spinner page -->
+    <div ng-if="stage === 'uploadingImport'">
+        <i class="fa fa-spinner fa-spin" style="font-size: 2em"></i>
+        Importerer nærkontakter fra <em>{{file.name}}</em>
+    </div>
+
+    <!-- Import success page -->
+    <div ng-if="stage === 'importSuccess'">
+        <h2>Importsammendrag</h2>
+        <tabset ng-init="peopleArr = getImportResultAsArray()">
+            <tab ng-repeat="peopleStruct in peopleArr" ng-if="peopleStruct.people && peopleStruct.people.length > 0">
+                <tab-heading ng-class="{true: 'ks-tab-heading--danger', false: 'ks-tab-heading--ok'}[peopleStruct.type=='error']">
+                    <i class="fa fa-exclamation-triangle" ng-if="peopleStruct.type=='error'"></i> {{peopleStruct.titleImport}} ({{peopleStruct.people.length}})
+                </tab-heading>
+                <ng-include src="'components/naerkontakt_import/import-status-import-message.html'" ng-init="statusType = peopleStruct.statusType"></ng-include>
+                <ng-include src="'components/naerkontakt_import/import-status.html'" ng-init="people = peopleStruct.people;"></ng-include>
+            </tab>
+        </tabset>
+    </div>
+
+    <!-- Upload failed page -->
+    <div ng-if="stage === 'importFailed' && errorCode !== 401">
+        Lesing av <em>{{file.name}}</em> feilet.
+        <h2>Feilmelding:</h2>
+        <pre>
+            {{errorMsg}}
+        </pre>
+        <button class="btn btn-primary" ng-click="reset()">Prøv på nytt</button>
+    </div>
+
+    <div ng-if="stage === 'importFailed' && errorCode === 401">
+        Autentiseringsfeil. Vennligst logg ut og inn igjen, og prøv på nytt.
+    </div>
+
+</div>
+
+<div class="modal-footer">
+    <button type="button" class="btn btn-default" data-ng-click="close()">{{'close' | translate}}</button>
+</div>
