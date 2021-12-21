@@ -10262,10 +10262,6 @@
 	                    for (var i = 7; i < row.length; i++) {
 	                        if (row[i] && row[i] !== '') {
 	                            var val = row[i];
-	                            if (!grid.headers[i]) {
-	                                debugger;
-	                            };
-	
 	                            if (attributesById[grid.headers[i].name] && attributesById[grid.headers[i].name].optionSetValue && optionSets && attributesById[grid.headers[i].name].optionSet && optionSets[attributesById[grid.headers[i].name].optionSet.id]) {
 	                                val = OptionSetService.getName(optionSets[attributesById[grid.headers[i].name].optionSet.id].options, val);
 	                            }
@@ -56240,4 +56236,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-57891a40197f0423978f.js.map
+//# sourceMappingURL=app-50ca18c0a2165fa37796.js.map
