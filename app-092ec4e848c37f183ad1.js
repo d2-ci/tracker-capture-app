@@ -10983,7 +10983,7 @@
 	            searchParams.programUrl += "&followUp=true";
 	        }
 	        if (sortColumn) {
-	            searchParams.sortUrl = "&order=" + sortColumn.id + ':' + sortColumn.direction;
+	            searchParams.sortUrl = "&order=" + sortColumn.id + ':' + sortColumn.direction + ',created:desc';
 	        }
 	        if (workingList.id === 'vo6JLWsbyMj') {
 	            //ikke sendte klinikermeldinger
@@ -56230,4 +56230,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-604c2fb26165be308d2c.js.map
+//# sourceMappingURL=app-092ec4e848c37f183ad1.js.map
