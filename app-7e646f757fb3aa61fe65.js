@@ -8441,7 +8441,7 @@
 	                        var programs = [];
 	                        var teiFromURL = $location.search().tei;
 	                        angular.forEach(prs, function (pr) {
-	                            if (loadSelectedProgram && selectedProgram && pr.id == selectedProgram.id && teiFromURL || pr.organisationUnits.hasOwnProperty(ou.id) && accesses.programsById[pr.id] && accesses.programsById[pr.id].data.read) {
+	                            if (loadSelectedProgram && selectedProgram && pr.id == selectedProgram.id && teiFromURL || pr.organisationUnits && pr.organisationUnits.hasOwnProperty(ou.id) && accesses.programsById[pr.id] && accesses.programsById[pr.id].data.read) {
 	                                if (pr.programTrackedEntityAttributes) {
 	                                    pr.programTrackedEntityAttributes = pr.programTrackedEntityAttributes.filter(function (attr) {
 	                                        return attr.access && attr.access.read;
@@ -39382,4 +39382,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-4969997ae802e41dc13e.js.map
+//# sourceMappingURL=app-7e646f757fb3aa61fe65.js.map
