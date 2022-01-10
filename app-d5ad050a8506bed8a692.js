@@ -15436,7 +15436,7 @@
 	    $scope.attributesById = CurrentSelection.getAttributesById();
 	    $scope.optionGroupsById = CurrentSelection.getOptionGroupsById();
 	
-	    DashboardLayoutService.get().then(function (response) {
+	    var dashBoardLayoutPromise = DashboardLayoutService.get().then(function (response) {
 	        $scope.dashBoardLayout = response;
 	        if ($scope.dashBoardLayout.customLayout && $scope.dashBoardLayout.customLayout[$scope.selectedProgramId] && $scope.dashBoardLayout.customLayout[$scope.selectedProgramId].programStageTimeLineLayout) {
 	            DashboardLayoutService.setProgramStageLayout($scope.dashBoardLayout.customLayout[$scope.selectedProgramId].programStageTimeLineLayout);
@@ -16640,7 +16640,7 @@
 	        $scope.showAttributeCategoryOptions = false;
 	
 	        if ($scope.currentEvent) {
-	            $scope.getDataEntryForm();
+	            $scope.dashBoardLayout ? $scope.getDataEntryForm() : dashBoardLayoutPromise.then(getDataEntryForm);
 	        }
 	    };
 	
@@ -16651,7 +16651,7 @@
 	                $scope.deSelectCurrentEvent(resetStage);
 	            } else {
 	                $scope.showLoadingEventSpinner = true;
-	                $timeout(function () {
+	                dashBoardLayoutPromise.then(function () {
 	                    TCOrgUnitService.get(event.orgUnit).then(function (orgUnit) {
 	                        event.orgUnitPath = orgUnit.path;
 	                        $scope.currentElement = {};
@@ -39382,4 +39382,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-7e646f757fb3aa61fe65.js.map
+//# sourceMappingURL=app-d5ad050a8506bed8a692.js.map
