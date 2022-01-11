@@ -9968,13 +9968,8 @@
 	                                val = OptionSetService.getName(optionSets[attributesById[grid.headers[i].name].optionSet.id].options, val);
 	                            }
 	                            if (attributesById[grid.headers[i].name] && attributesById[grid.headers[i].name].valueType) {
-	                                switch (attributesById[grid.headers[i].name].valueType) {
-	                                    case "ORGANISATION_UNIT":
-	                                        CommonUtils.checkAndSetOrgUnitName(val);
-	                                        break;
-	                                    case "DATE":
-	                                        val = DateUtils.formatFromApiToUser(val);
-	                                        break;
+	                                if (attributesById[grid.headers[i].name].valueType === "DATE") {
+	                                    val = DateUtils.formatFromApiToUser(val);
 	                                }
 	                            }
 	
@@ -39429,4 +39424,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-51ffcd32fb10d8c6d2de.js.map
+//# sourceMappingURL=app-1e2a90f1803bed18b3ee.js.map
