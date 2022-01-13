@@ -10989,7 +10989,7 @@
 	            //ikke sendte klinikermeldinger
 	            searchParams.programUrl += '&filter=C225m3EOPRo:IN:false';
 	        }
-	        if (workingList.id === 'QtdRocAYCCU') {
+	        if (workingList.id === 'QtdRocAYCCU' || workingList.id === 'VZOuDZ7p7mz') {
 	            //selvregistrering
 	            searchParams.programUrl += '&filter=FKviB19WReU:IN:true';
 	        }
@@ -56230,4 +56230,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-092ec4e848c37f183ad1.js.map
+//# sourceMappingURL=app-84ebdc070231bc848b64.js.map
