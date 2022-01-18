@@ -9951,13 +9951,8 @@
 	                                val = OptionSetService.getName(optionSets[attributesById[grid.headers[i].name].optionSet.id].options, val);
 	                            }
 	                            if (attributesById[grid.headers[i].name] && attributesById[grid.headers[i].name].valueType) {
-	                                switch (attributesById[grid.headers[i].name].valueType) {
-	                                    case "ORGANISATION_UNIT":
-	                                        CommonUtils.checkAndSetOrgUnitName(val);
-	                                        break;
-	                                    case "DATE":
-	                                        val = DateUtils.formatFromApiToUser(val);
-	                                        break;
+	                                if (attributesById[grid.headers[i].name].valueType === "DATE") {
+	                                    val = DateUtils.formatFromApiToUser(val);
 	                                }
 	                            }
 	
@@ -13108,6 +13103,10 @@
 	        }, 500);
 	    };
 	
+	    $scope.$on('registrationControllerReady', function () {
+	        $rootScope.$broadcast('selectedItems', { programExists: $scope.programs.length > 0 });
+	    });
+	
 	    $scope.activiateTEI = function () {
 	        var st = !$scope.selectedTei.inactive || $scope.selectedTei.inactive === '' ? true : false;
 	
@@ -13323,6 +13322,11 @@
 	    $scope.optionGroupsById = CurrentSelection.getOptionGroupsById();
 	    $scope.fileNames = CurrentSelection.getFileNames();
 	    $scope.currentFileNames = $scope.fileNames;
+	
+	    // Slow connection fix: this signal is emitted after all listeners on the enrollment dashboard has been set up
+	    $timeout(function () {
+	        $scope.$emit('registrationControllerReady', {});
+	    });
 	
 	    //Placeholder till proper settings for time is implemented. Currently hard coded to 24h format.
 	    $scope.timeFormat = '24h';
@@ -21580,9 +21584,9 @@
 	    });
 	
 	    $scope.$watch('widget.useAsTopBar', function (newValue, oldValue) {
-	        if (newValue !== oldValue) {
-	            listenToBroadCast();
-	        }
+	        // Omit comparing newValue/oldValue to get an extra update with convenient timing:
+	        // see the difference in the profile widget when opening a tracked entity instance.
+	        listenToBroadCast();
 	    });
 	
 	    //listen to changes in enrollment editing
@@ -39382,4 +39386,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-d5ad050a8506bed8a692.js.map
+//# sourceMappingURL=app-f15e0b724a758d478240.js.map
