@@ -8441,7 +8441,7 @@
 	                        var programs = [];
 	                        var teiFromURL = $location.search().tei;
 	                        angular.forEach(prs, function (pr) {
-	                            if (loadSelectedProgram && selectedProgram && pr.id == selectedProgram.id && teiFromURL || pr.organisationUnits.hasOwnProperty(ou.id) && accesses.programsById[pr.id] && accesses.programsById[pr.id].data.read) {
+	                            if (loadSelectedProgram && selectedProgram && pr.id == selectedProgram.id && teiFromURL || pr.organisationUnits && pr.organisationUnits.hasOwnProperty(ou.id) && accesses.programsById[pr.id] && accesses.programsById[pr.id].data.read) {
 	                                if (pr.programTrackedEntityAttributes) {
 	                                    pr.programTrackedEntityAttributes = pr.programTrackedEntityAttributes.filter(function (attr) {
 	                                        return attr.access && attr.access.read;
@@ -9951,13 +9951,8 @@
 	                                val = OptionSetService.getName(optionSets[attributesById[grid.headers[i].name].optionSet.id].options, val);
 	                            }
 	                            if (attributesById[grid.headers[i].name] && attributesById[grid.headers[i].name].valueType) {
-	                                switch (attributesById[grid.headers[i].name].valueType) {
-	                                    case "ORGANISATION_UNIT":
-	                                        CommonUtils.checkAndSetOrgUnitName(val);
-	                                        break;
-	                                    case "DATE":
-	                                        val = DateUtils.formatFromApiToUser(val);
-	                                        break;
+	                                if (attributesById[grid.headers[i].name].valueType === "DATE") {
+	                                    val = DateUtils.formatFromApiToUser(val);
 	                                }
 	                            }
 	
@@ -13108,6 +13103,10 @@
 	        }, 500);
 	    };
 	
+	    $scope.$on('registrationControllerReady', function () {
+	        $rootScope.$broadcast('selectedItems', { programExists: $scope.programs.length > 0 });
+	    });
+	
 	    $scope.activiateTEI = function () {
 	        var st = !$scope.selectedTei.inactive || $scope.selectedTei.inactive === '' ? true : false;
 	
@@ -13323,6 +13322,11 @@
 	    $scope.optionGroupsById = CurrentSelection.getOptionGroupsById();
 	    $scope.fileNames = CurrentSelection.getFileNames();
 	    $scope.currentFileNames = $scope.fileNames;
+	
+	    // Slow connection fix: this signal is emitted after all listeners on the enrollment dashboard has been set up
+	    $timeout(function () {
+	        $scope.$emit('registrationControllerReady', {});
+	    });
 	
 	    //Placeholder till proper settings for time is implemented. Currently hard coded to 24h format.
 	    $scope.timeFormat = '24h';
@@ -20507,7 +20511,7 @@
 	    };
 	
 	    $scope.showEventInCaptureApp = function (eventId) {
-	        location.href = '../dhis-web-capture/index.html#/viewEvent/' + eventId;
+	        location.href = '../dhis-web-capture/index.html#/viewEvent?viewEventId=' + eventId;
 	    };
 	
 	    var setRelationships = function setRelationships() {
@@ -21580,9 +21584,9 @@
 	    });
 	
 	    $scope.$watch('widget.useAsTopBar', function (newValue, oldValue) {
-	        if (newValue !== oldValue) {
-	            listenToBroadCast();
-	        }
+	        // Omit comparing newValue/oldValue to get an extra update with convenient timing:
+	        // see the difference in the profile widget when opening a tracked entity instance.
+	        listenToBroadCast();
 	    });
 	
 	    //listen to changes in enrollment editing
@@ -39382,4 +39386,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-1caa14ba0feff1ea00e8.js.map
+//# sourceMappingURL=app-f15e0b724a758d478240.js.map
