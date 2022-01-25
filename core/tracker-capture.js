@@ -171,6 +171,7 @@ function downloadMetaData()
         $( "#orgUnitTree" ).removeClass( "disable-clicks" );
         dhis2.tc.metaDataCached = true;
         console.log( 'Finished loading meta-data' );        
+        dhis2.tc.store.getAll('programs').done(console.log);
         selection.responseReceived();
         def2.resolve();
     });
@@ -354,7 +355,7 @@ function getBatchPrograms( programs, batch )
         url: DHIS2URL + '/programs.json',
         type: 'GET',
         data: 'fields=id,displayFormName,version,displayEnrollmentDateLabel,enrollmentDateLabel,maxTeiCountToReturn,selectIncidentDatesInFuture,' +
-        'incidentDateLabel,selectEnrollmentDatesInFuture,registration,favorite,useFirstStageDuringRegistration,displayName,' +
+        'incidentDateLabel,selectEnrollmentDatesInFuture,registration,favorite,useFirstStageDuringRegistration,displayName,onlyEnrollOnce,' +
         'completeEventsExpiryDays,description,displayShortName,externalAccess,withoutRegistration,minAttributesRequiredToSearch,' + 
         'displayFrontPageList,programType,accessLevel,displayIncidentDate,expiryDays,style[*],' +
         'dataEntryForm[*],relatedProgram[id,displayName],relationshipType[id,displayName],featureType,trackedEntityType[id,displayName],categoryCombo[id,displayName,isDefault,categories[id,displayName,categoryOptions[id,displayName,organisationUnits[id]]]],userRoles[id,displayName],programStages[*,dataEntryForm[*],programStageSections[id,displayName,description,sortOrder,dataElements[id]],programStageDataElements[*,dataElement[*,optionSet[id]]]],programTrackedEntityAttributes[*,trackedEntityAttribute[id,unique,orgunitScope]],minAttributesRequiredToSearch,maxTeiCountToReturn&paging=false&filter=id:in:' + ids
