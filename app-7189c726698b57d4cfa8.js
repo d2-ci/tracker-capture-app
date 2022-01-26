@@ -12648,6 +12648,9 @@
 	        updateDashboard();
 	    }
 	
+	    var registrationWidgetReady = false;
+	    var selectedItemsBroadcasted = false;
+	
 	    $scope.returnUrl;
 	    if ($location.search().returnUrl) {
 	        $scope.returnUrl = $location.search().returnUrl;
@@ -13134,12 +13137,16 @@
 	            orgUnit: $scope.selectedOrgUnit
 	        });
 	        $timeout(function () {
+	            selectedItemsBroadcasted = true;
 	            $rootScope.$broadcast('selectedItems', { programExists: $scope.programs.length > 0 });
 	        }, 500);
 	    };
 	
 	    $scope.$on('registrationControllerReady', function () {
-	        $rootScope.$broadcast('selectedItems', { programExists: $scope.programs.length > 0 });
+	        if (!registrationWidgetReady && selectedItemsBroadcasted) {
+	            $rootScope.$broadcast('selectedItems', { programExists: $scope.programs.length > 0 });
+	        }
+	        registrationWidgetReady = true;
 	    });
 	
 	    $scope.activiateTEI = function () {
@@ -39433,4 +39440,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-680f8b7ce8fc5db1ae46.js.map
+//# sourceMappingURL=app-7189c726698b57d4cfa8.js.map
