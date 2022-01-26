@@ -13412,6 +13412,9 @@
 	        }
 	    });
 	
+	    var registrationWidgetReady = false;
+	    var selectedItemsBroadcasted = false;
+	
 	    $scope.duplicateExists = false;
 	    $rootScope.hasAccess = false;
 	    $scope.APIURL = DHIS2URL;
@@ -13908,12 +13911,16 @@
 	            orgUnit: $scope.selectedOrgUnit
 	        });
 	        $timeout(function () {
+	            selectedItemsBroadcasted = true;
 	            $rootScope.$broadcast('selectedItems', { programExists: $scope.programs.length > 0 });
 	        }, 500);
 	    };
 	
 	    $scope.$on('registrationControllerReady', function () {
-	        $rootScope.$broadcast('selectedItems', { programExists: $scope.programs.length > 0 });
+	        if (!registrationWidgetReady && selectedItemsBroadcasted) {
+	            $rootScope.$broadcast('selectedItems', { programExists: $scope.programs.length > 0 });
+	        }
+	        registrationWidgetReady = true;
 	    });
 	
 	    $scope.activiateTEI = function () {
@@ -40195,4 +40202,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-72b1ecd68f30fc65af28.js.map
+//# sourceMappingURL=app-420c83bfed882fa71265.js.map
