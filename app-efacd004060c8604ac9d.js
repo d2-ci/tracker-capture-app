@@ -8441,7 +8441,7 @@
 	                        var programs = [];
 	                        var teiFromURL = $location.search().tei;
 	                        angular.forEach(prs, function (pr) {
-	                            if (loadSelectedProgram && selectedProgram && pr.id == selectedProgram.id && teiFromURL || pr.organisationUnits.hasOwnProperty(ou.id) && accesses.programsById[pr.id] && accesses.programsById[pr.id].data.read) {
+	                            if (loadSelectedProgram && selectedProgram && pr.id == selectedProgram.id && teiFromURL || pr.organisationUnits && pr.organisationUnits.hasOwnProperty(ou.id) && accesses.programsById[pr.id] && accesses.programsById[pr.id].data.read) {
 	                                if (pr.programTrackedEntityAttributes) {
 	                                    pr.programTrackedEntityAttributes = pr.programTrackedEntityAttributes.filter(function (attr) {
 	                                        return attr.access && attr.access.read;
@@ -9951,13 +9951,8 @@
 	                                val = OptionSetService.getName(optionSets[attributesById[grid.headers[i].name].optionSet.id].options, val);
 	                            }
 	                            if (attributesById[grid.headers[i].name] && attributesById[grid.headers[i].name].valueType) {
-	                                switch (attributesById[grid.headers[i].name].valueType) {
-	                                    case "ORGANISATION_UNIT":
-	                                        CommonUtils.checkAndSetOrgUnitName(val);
-	                                        break;
-	                                    case "DATE":
-	                                        val = DateUtils.formatFromApiToUser(val);
-	                                        break;
+	                                if (attributesById[grid.headers[i].name].valueType === "DATE") {
+	                                    val = DateUtils.formatFromApiToUser(val);
 	                                }
 	                            }
 	
@@ -12626,6 +12621,9 @@
 	        updateDashboard();
 	    }
 	
+	    var registrationWidgetReady = false;
+	    var selectedItemsBroadcasted = false;
+	
 	    $scope.returnUrl;
 	    if ($location.search().returnUrl) {
 	        $scope.returnUrl = $location.search().returnUrl;
@@ -13104,9 +13102,17 @@
 	            orgUnit: $scope.selectedOrgUnit
 	        });
 	        $timeout(function () {
+	            selectedItemsBroadcasted = true;
 	            $rootScope.$broadcast('selectedItems', { programExists: $scope.programs.length > 0 });
 	        }, 500);
 	    };
+	
+	    $scope.$on('registrationControllerReady', function () {
+	        if (!registrationWidgetReady && selectedItemsBroadcasted) {
+	            $rootScope.$broadcast('selectedItems', { programExists: $scope.programs.length > 0 });
+	        }
+	        registrationWidgetReady = true;
+	    });
 	
 	    $scope.activiateTEI = function () {
 	        var st = !$scope.selectedTei.inactive || $scope.selectedTei.inactive === '' ? true : false;
@@ -13236,9 +13242,16 @@
 	
 	    $rootScope.getCurrentWidget = function (scope) {
 	        var widgetLoaderScope = scope.$parent.$parent;
-	        if (widgetLoaderScope.biggerWidget) return widgetLoaderScope.biggerWidget;
-	        if (widgetLoaderScope.smallerWidget) return widgetLoaderScope.smallerWidget;
-	        return null;
+	        var widget = function () {
+	            if (widgetLoaderScope.biggerWidget) return widgetLoaderScope.biggerWidget;
+	            if (widgetLoaderScope.smallerWidget) return widgetLoaderScope.smallerWidget;
+	            return null;
+	        }();
+	
+	        if (widget) {
+	            scope.widgetTitle = widget.title;
+	        }
+	        return widget;
 	    };
 	
 	    $scope.openTopBarSettings = function () {
@@ -13323,6 +13336,11 @@
 	    $scope.optionGroupsById = CurrentSelection.getOptionGroupsById();
 	    $scope.fileNames = CurrentSelection.getFileNames();
 	    $scope.currentFileNames = $scope.fileNames;
+	
+	    // Slow connection fix: this signal is emitted after all listeners on the enrollment dashboard has been set up
+	    $timeout(function () {
+	        $scope.$emit('registrationControllerReady', {});
+	    });
 	
 	    //Placeholder till proper settings for time is implemented. Currently hard coded to 24h format.
 	    $scope.timeFormat = '24h';
@@ -13478,7 +13496,7 @@
 	            getProgramRules();
 	
 	            if ($scope.registrationMode === 'REGISTRATION') {
-	                $scope.getAttributes($scope.registrationMode);
+	                $scope.getAttributes($scope.registrationMode, false);
 	            }
 	        }
 	        loadTrackedEntityTypes().then(function () {
@@ -13552,7 +13570,7 @@
 	            $scope.selectedEnrollment = args.enrollment ? args.enrollment : {};
 	        }
 	
-	        $scope.getAttributes($scope.registrationMode);
+	        $scope.getAttributes($scope.registrationMode, args.generateAttributes);
 	
 	        if ($scope.selectedProgram && $scope.selectedProgram.id) {
 	            getProgramRules().then(function (rules) {
@@ -13561,7 +13579,7 @@
 	        }
 	    });
 	
-	    $scope.getAttributes = function (_mode) {
+	    $scope.getAttributes = function (_mode, generateAttributes) {
 	        var mode = _mode ? _mode : 'ENROLLMENT';
 	        $scope.customRegistrationFormExists = false;
 	        $scope.customDataEntryForm = null;
@@ -13579,7 +13597,9 @@
 	            }
 	            AttributesFactory.getByProgram($scope.selectedProgram).then(function (atts) {
 	                $scope.attributes = TEIGridService.generateGridColumns(atts, null, false).columns;
-	                fetchGeneratedAttributes();
+	                if (generateAttributes) {
+	                    fetchGeneratedAttributes();
+	                }
 	                if ($scope.selectedProgram && $scope.selectedProgram.id) {
 	                    if ($scope.selectedProgram.dataEntryForm && $scope.selectedProgram.dataEntryForm.htmlCode) {
 	                        $scope.customRegistrationFormExists = true;
@@ -13632,7 +13652,9 @@
 	
 	                if (!$scope.selectedProgram) {
 	                    $scope.attributes = TEIGridService.generateGridColumns(atts, null, false).columns;
-	                    fetchGeneratedAttributes();
+	                    if (generateAttributes) {
+	                        fetchGeneratedAttributes();
+	                    }
 	                }
 	            });
 	        }
@@ -13640,22 +13662,30 @@
 	
 	    var fetchGeneratedAttributes = function fetchGeneratedAttributes() {
 	        angular.forEach($scope.attributes, function (att) {
-	            if (att.generated && !$scope.selectedTei[att.id]) {
-	                AttributeUtils.generateUniqueValue(att.id, $scope.selectedTei, $scope.selectedProgram, $scope.selectedOrgUnit).then(function (data) {
-	                    if (data && data.status === "ERROR") {
-	                        NotificationService.showNotifcationDialog($translate.instant("error"), data.message);
-	                        $scope.model.autoGeneratedAttFailed = true;
-	                    } else {
-	                        if (att.valueType === "NUMBER") {
-	                            $scope.selectedTei[att.id] = Number(data);
-	                        } else {
-	                            $scope.selectedTei[att.id] = data;
-	                        }
-	                        $scope.model.autoGeneratedAttFailed = false;
-	                    }
-	                });
-	            }
+	            $scope.fetchGeneratedAttribute(att);
 	        });
+	    };
+	
+	    $scope.fetchGeneratedAttribute = function (att) {
+	        if (att.generated && !$scope.selectedTei[att.id]) {
+	            AttributeUtils.generateUniqueValue(att.id, $scope.selectedTei, $scope.selectedProgram, $scope.selectedOrgUnit).then(function (data) {
+	                if (data && data.status === "ERROR") {
+	                    NotificationService.showNotifcationDialog($translate.instant("error"), data.message);
+	                    $scope.model.autoGeneratedAttFailed = true;
+	                } else {
+	                    if (att.valueType === "NUMBER") {
+	                        $scope.selectedTei[att.id] = Number(data);
+	                    } else {
+	                        $scope.selectedTei[att.id] = data;
+	                    }
+	                    $scope.model.autoGeneratedAttFailed = false;
+	                }
+	            });
+	        }
+	    };
+	
+	    $scope.uninitializedGeneratedAttribute = function (att) {
+	        return att.generated && !$scope.selectedTei[att.id];
 	    };
 	
 	    var goToDashboard = function goToDashboard(destination, teiId) {
@@ -14607,7 +14637,7 @@
 	    };
 	
 	    $scope.showRegistrationButtons = function () {
-	        return $scope.registrationMode === 'REGISTRATION' && ($scope.selectedProgram || showTetRegistrationButtons());
+	        return $scope.registrationMode === 'REGISTRATION' && $scope.widgetTitle !== 'profile' && ($scope.selectedProgram || showTetRegistrationButtons());
 	    };
 	
 	    $scope.showTetRegistrationWarning = function () {
@@ -14926,9 +14956,13 @@
 	
 	    var setOwnerOrgUnit = function setOwnerOrgUnit() {
 	        var owningOrgUnitId = CurrentSelection.currentSelection.tei.programOwnersById[$scope.selectedProgram.id];
-	        OrgUnitFactory.getFromStoreOrServer(owningOrgUnitId).then(function (orgUnit) {
-	            $scope.owningOrgUnitName = orgUnit.displayName;
-	        });
+	        if (owningOrgUnitId) {
+	            OrgUnitFactory.getFromStoreOrServer(owningOrgUnitId).then(function (orgUnit) {
+	                $scope.owningOrgUnitName = orgUnit.displayName;
+	            });
+	        } else {
+	            $scope.owningOrgUnitName = CurrentSelection.get().orgUnit.displayName;
+	        }
 	    };
 	
 	    $scope.$on('ownerUpdated', function (event, args) {
@@ -15424,7 +15458,7 @@
 	    $scope.attributesById = CurrentSelection.getAttributesById();
 	    $scope.optionGroupsById = CurrentSelection.getOptionGroupsById();
 	
-	    DashboardLayoutService.get().then(function (response) {
+	    var dashBoardLayoutPromise = DashboardLayoutService.get().then(function (response) {
 	        $scope.dashBoardLayout = response;
 	        if ($scope.dashBoardLayout.customLayout && $scope.dashBoardLayout.customLayout[$scope.selectedProgramId] && $scope.dashBoardLayout.customLayout[$scope.selectedProgramId].programStageTimeLineLayout) {
 	            DashboardLayoutService.setProgramStageLayout($scope.dashBoardLayout.customLayout[$scope.selectedProgramId].programStageTimeLineLayout);
@@ -16628,7 +16662,7 @@
 	        $scope.showAttributeCategoryOptions = false;
 	
 	        if ($scope.currentEvent) {
-	            $scope.getDataEntryForm();
+	            $scope.dashBoardLayout ? $scope.getDataEntryForm() : dashBoardLayoutPromise.then(getDataEntryForm);
 	        }
 	    };
 	
@@ -16639,7 +16673,7 @@
 	                $scope.deSelectCurrentEvent(resetStage);
 	            } else {
 	                $scope.showLoadingEventSpinner = true;
-	                $timeout(function () {
+	                dashBoardLayoutPromise.then(function () {
 	                    TCOrgUnitService.get(event.orgUnit).then(function (orgUnit) {
 	                        event.orgUnitPath = orgUnit.path;
 	                        $scope.currentElement = {};
@@ -20495,7 +20529,7 @@
 	    };
 	
 	    $scope.showEventInCaptureApp = function (eventId) {
-	        location.href = '../dhis-web-capture/index.html#/viewEvent/' + eventId;
+	        location.href = '../dhis-web-capture/index.html#/viewEvent?viewEventId=' + eventId;
 	    };
 	
 	    var setRelationships = function setRelationships() {
@@ -21567,7 +21601,9 @@
 	        listenToBroadCast();
 	    });
 	
-	    $scope.$watch('widget.useAsTopBar', function (event, args) {
+	    $scope.$watch('widget.useAsTopBar', function (newValue, oldValue) {
+	        // Omit comparing newValue/oldValue to get an extra update with convenient timing:
+	        // see the difference in the profile widget when opening a tracked entity instance.
 	        listenToBroadCast();
 	    });
 	
@@ -21902,7 +21938,7 @@
 	            shouldReset: false,
 	            disabled: true,
 	            onPostLoad: function onPostLoad() {
-	                $rootScope.$broadcast('registrationWidget', { registrationMode: 'REGISTRATION' });
+	                $rootScope.$broadcast('registrationWidget', { registrationMode: 'REGISTRATION', generateAttributes: true });
 	            }
 	        },
 	        lists: {
@@ -39368,4 +39404,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-e4d9497cfb37740d8970.js.map
+//# sourceMappingURL=app-efacd004060c8604ac9d.js.map
