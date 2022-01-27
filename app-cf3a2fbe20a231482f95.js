@@ -13242,16 +13242,9 @@
 	
 	    $rootScope.getCurrentWidget = function (scope) {
 	        var widgetLoaderScope = scope.$parent.$parent;
-	        var widget = function () {
-	            if (widgetLoaderScope.biggerWidget) return widgetLoaderScope.biggerWidget;
-	            if (widgetLoaderScope.smallerWidget) return widgetLoaderScope.smallerWidget;
-	            return null;
-	        }();
-	
-	        if (widget) {
-	            scope.widgetTitle = widget.title;
-	        }
-	        return widget;
+	        if (widgetLoaderScope.biggerWidget) return widgetLoaderScope.biggerWidget;
+	        if (widgetLoaderScope.smallerWidget) return widgetLoaderScope.smallerWidget;
+	        return null;
 	    };
 	
 	    $scope.openTopBarSettings = function () {
@@ -14637,7 +14630,7 @@
 	    };
 	
 	    $scope.showRegistrationButtons = function () {
-	        return $scope.registrationMode === 'REGISTRATION' && $scope.widgetTitle !== 'profile' && ($scope.selectedProgram || showTetRegistrationButtons());
+	        return $scope.registrationMode === 'REGISTRATION' && ($scope.selectedProgram || showTetRegistrationButtons());
 	    };
 	
 	    $scope.showTetRegistrationWarning = function () {
@@ -39404,4 +39397,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-efacd004060c8604ac9d.js.map
+//# sourceMappingURL=app-cf3a2fbe20a231482f95.js.map
