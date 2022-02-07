@@ -15849,6 +15849,8 @@
 	var PROFIL_VAKSINE_2_DATO_ID = exports.PROFIL_VAKSINE_2_DATO_ID = 'q5Zc3PCGtC7';
 	var PROFIL_VAKSINE_3_TYPE_ID = exports.PROFIL_VAKSINE_3_TYPE_ID = 'zbLvlxnfL3i';
 	var PROFIL_VAKSINE_3_DATO_ID = exports.PROFIL_VAKSINE_3_DATO_ID = 'TtvEl8Fjqjp';
+	var PROFIL_VAKSINE_4_TYPE_ID = exports.PROFIL_VAKSINE_4_TYPE_ID = 'g25zWgTxeyW';
+	var PROFIL_VAKSINE_4_DATO_ID = exports.PROFIL_VAKSINE_4_DATO_ID = 'qP0ThbF052n';
 
 /***/ }),
 /* 17 */
@@ -19498,7 +19500,7 @@
 	                        $scope.searchFnr = modalData.searchFnr;
 	                        $scope.sysvakVaccines = (0, _vaksine_utils.createCombinedVaccineObject)(response.immunizations, $scope.selectedTei, DateUtils);
 	                        $scope.canUpdate = $scope.sysvakVaccines.some(function (vacc, ind) {
-	                            return vacc.updatePossible && ind < 3;
+	                            return vacc.updatePossible && ind < 4;
 	                        });
 	
 	                        $scope.noVaccinesMessage = response.kanLevereUtData ? "Det er ingen registrerte vaksineringer på dette fødselsnummeret." : "Du har ikke de nødvendige rettighetene for å hente ut vaksineinformasjon på denne personen.";
@@ -20167,7 +20169,7 @@
 	}
 	
 	function getVaksineDoseFromProfile(selectedTei, doseNr) {
-	    if (doseNr > 3 || doseNr < 1) {
+	    if (doseNr > 4 || doseNr < 1) {
 	        return undefined;
 	    }
 	    var ids = getVaksineIds(doseNr);
@@ -20191,6 +20193,12 @@
 	        return {
 	            typeId: _constants.PROFIL_VAKSINE_3_TYPE_ID,
 	            dateId: _constants.PROFIL_VAKSINE_3_DATO_ID
+	        };
+	    }
+	    if (doseNr === 4) {
+	        return {
+	            typeId: _constants.PROFIL_VAKSINE_4_TYPE_ID,
+	            dateId: _constants.PROFIL_VAKSINE_4_DATO_ID
 	        };
 	    }
 	}
@@ -20291,7 +20299,7 @@
 	}
 	
 	function getUpdatedVaccineAttributes(attributes, vaccines) {
-	    return [getUpdatedAttribute(attributes, vaccines[0] && vaccines[0].type, _constants.PROFIL_VAKSINE_1_TYPE_ID), getUpdatedAttribute(attributes, vaccines[0] && vaccines[0].date, _constants.PROFIL_VAKSINE_1_DATO_ID), getUpdatedAttribute(attributes, vaccines[1] && vaccines[1].type, _constants.PROFIL_VAKSINE_2_TYPE_ID), getUpdatedAttribute(attributes, vaccines[1] && vaccines[1].date, _constants.PROFIL_VAKSINE_2_DATO_ID), getUpdatedAttribute(attributes, vaccines[2] && vaccines[2].type, _constants.PROFIL_VAKSINE_3_TYPE_ID), getUpdatedAttribute(attributes, vaccines[2] && vaccines[2].date, _constants.PROFIL_VAKSINE_3_DATO_ID)];
+	    return [getUpdatedAttribute(attributes, vaccines[0] && vaccines[0].type, _constants.PROFIL_VAKSINE_1_TYPE_ID), getUpdatedAttribute(attributes, vaccines[0] && vaccines[0].date, _constants.PROFIL_VAKSINE_1_DATO_ID), getUpdatedAttribute(attributes, vaccines[1] && vaccines[1].type, _constants.PROFIL_VAKSINE_2_TYPE_ID), getUpdatedAttribute(attributes, vaccines[1] && vaccines[1].date, _constants.PROFIL_VAKSINE_2_DATO_ID), getUpdatedAttribute(attributes, vaccines[2] && vaccines[2].type, _constants.PROFIL_VAKSINE_3_TYPE_ID), getUpdatedAttribute(attributes, vaccines[2] && vaccines[2].date, _constants.PROFIL_VAKSINE_3_DATO_ID), getUpdatedAttribute(attributes, vaccines[3] && vaccines[3].type, _constants.PROFIL_VAKSINE_4_TYPE_ID), getUpdatedAttribute(attributes, vaccines[3] && vaccines[3].date, _constants.PROFIL_VAKSINE_4_DATO_ID)];
 	}
 	
 	function getUpdatedAttribute(attributes, value, id) {
@@ -20323,6 +20331,8 @@
 	    selectedTei[_constants.PROFIL_VAKSINE_2_DATO_ID] = sysvakVaccines[1] && sysvakVaccines[1].date;
 	    selectedTei[_constants.PROFIL_VAKSINE_3_TYPE_ID] = sysvakVaccines[2] && sysvakVaccines[2].name;
 	    selectedTei[_constants.PROFIL_VAKSINE_3_DATO_ID] = sysvakVaccines[2] && sysvakVaccines[2].date;
+	    selectedTei[_constants.PROFIL_VAKSINE_4_TYPE_ID] = sysvakVaccines[3] && sysvakVaccines[3].name;
+	    selectedTei[_constants.PROFIL_VAKSINE_4_DATO_ID] = sysvakVaccines[3] && sysvakVaccines[3].date;
 	}
 
 /***/ }),
@@ -56230,4 +56240,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-84ebdc070231bc848b64.js.map
+//# sourceMappingURL=app-fef190223ab22589494d.js.map
