@@ -13242,9 +13242,16 @@
 	
 	    $rootScope.getCurrentWidget = function (scope) {
 	        var widgetLoaderScope = scope.$parent.$parent;
-	        if (widgetLoaderScope.biggerWidget) return widgetLoaderScope.biggerWidget;
-	        if (widgetLoaderScope.smallerWidget) return widgetLoaderScope.smallerWidget;
-	        return null;
+	        var widget = function () {
+	            if (widgetLoaderScope.biggerWidget) return widgetLoaderScope.biggerWidget;
+	            if (widgetLoaderScope.smallerWidget) return widgetLoaderScope.smallerWidget;
+	            return null;
+	        }();
+	
+	        if (widget) {
+	            scope.widgetTitle = widget.title;
+	        }
+	        return widget;
 	    };
 	
 	    $scope.openTopBarSettings = function () {
@@ -13419,16 +13426,19 @@
 	        if ($scope.selectedProgram) {
 	            $scope.trackedEntityTypes.selected = trackedEntityTypesById[$scope.selectedProgram.trackedEntityType.id];
 	        } else if (currentTet) {
-	            $scope.trackedEntityTypes.selected = $scope.trackedEntityTypes.writable.find(function (t) {
-	                return t.id === currentTet;
-	            });
-	            $scope.setTrackedEntityType();
+	            setWritableTrackedEntityType(currentTet);
+	        } else if (CurrentSelection.get().tei.trackedEntityType) {
+	            setWritableTrackedEntityType(CurrentSelection.get().tei.trackedEntityType);
 	        } else if ($location.search().tracked_entity_type) {
-	            $scope.trackedEntityTypes.selected = $scope.trackedEntityTypes.writable.find(function (t) {
-	                return t.id === $location.search().tracked_entity_type;
-	            });
-	            $scope.setTrackedEntityType();
+	            setWritableTrackedEntityType($location.search().tracked_entity_type);
 	        }
+	    };
+	
+	    var setWritableTrackedEntityType = function setWritableTrackedEntityType(tet) {
+	        $scope.trackedEntityTypes.selected = $scope.trackedEntityTypes.writable.find(function (t) {
+	            return t.id === tet;
+	        });
+	        $scope.setTrackedEntityType();
 	    };
 	
 	    var getProgramRules = function getProgramRules() {
@@ -14630,7 +14640,7 @@
 	    };
 	
 	    $scope.showRegistrationButtons = function () {
-	        return $scope.registrationMode === 'REGISTRATION' && ($scope.selectedProgram || showTetRegistrationButtons());
+	        return $scope.registrationMode === 'REGISTRATION' && $scope.widgetTitle !== 'profile' && ($scope.selectedProgram || showTetRegistrationButtons());
 	    };
 	
 	    $scope.showTetRegistrationWarning = function () {
@@ -14949,9 +14959,13 @@
 	
 	    var setOwnerOrgUnit = function setOwnerOrgUnit() {
 	        var owningOrgUnitId = CurrentSelection.currentSelection.tei.programOwnersById[$scope.selectedProgram.id];
-	        OrgUnitFactory.getFromStoreOrServer(owningOrgUnitId).then(function (orgUnit) {
-	            $scope.owningOrgUnitName = orgUnit.displayName;
-	        });
+	        if (owningOrgUnitId) {
+	            OrgUnitFactory.getFromStoreOrServer(owningOrgUnitId).then(function (orgUnit) {
+	                $scope.owningOrgUnitName = orgUnit.displayName;
+	            });
+	        } else {
+	            $scope.owningOrgUnitName = CurrentSelection.get().orgUnit.displayName;
+	        }
 	    };
 	
 	    $scope.$on('ownerUpdated', function (event, args) {
@@ -39393,4 +39407,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-c9cfe748fbf046d2a9cc.js.map
+//# sourceMappingURL=app-cb5310043538f92f7768.js.map
