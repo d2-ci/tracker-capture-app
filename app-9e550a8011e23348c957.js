@@ -8376,7 +8376,7 @@
 	$templateCache.put('./templates/more-options-list.html','<div class="optionListContainer">\n    <div ng-if="d2Disabled"><input class="form-control" ng-model="d2Model[d2ModelId]" disabled></div>\n    <div ng-click="toggleOptionList()" ng-if="!d2Disabled" class="optionListInput" ng-class="{ \'optionListInputOpen\': optionListOpen }">\n        <div class="optionListInputText" >\n            <span ng-if="d2Model[d2ModelId]">{{d2Model[d2ModelId]}}</span>\n            <span ng-if="!d2Model[d2ModelId]" class="optionListInputTextPlaceholder">{{\'select_or_search\' | translate}}</span>\n            <input ng-show="false" ng-required="d2Required" name="foo" type="text" ng-model="valueForValidation" />\n        </div>\n        <div class="optionListInputDelete" ng-click="removeSelectedOption($event)"><i class="fa fa-times" ng-if="d2Model && d2Model[d2ModelId]"></i></div>\n        <div class="optionListInputToggle"><i class="fa fa-caret-up" ng-show="optionListOpen"></i><i class="fa fa-caret-down" ng-hide="optionListOpen"></i></div>\n    </div>\n    <div ng-if="optionListOpen" class="optionListPopup">\n        <div class="optionListSearchInputContainer">\n            <input type="text" class="form-control" ng-model="searchText" ng-change="search(searchText)" ng-model-options="{ debounce: 600 }" placeholder="Search..."/>\n        </div>\n        <div vs-repeat class="optionListVsRepeater">\n            <div ng-repeat="option in displayOptions track by option.id" class="optionListItem" ng-click="selectOption(option)" ng-class="{ \'optionListItemSelected\': (option.displayName===d2Model[d2ModelId])}">\n                {{option.displayName}}\n            </div>\n        </div>\n    </div>\n</div>\n');
 	$templateCache.put('./templates/orgunit-input.html','<div class="input-group">    \n    <input type="text" name="foo" ng-disabled="true" class="form-control" ng-attr-placeholder="{{\'please_select\' | translate}}" ng-model="d2OrgunitNames[d2Object[id]]" ng-disabled="{{d2Disabled}}" ng-required="{{d2Required}}"> \n    <span class="input-group-btn"> \n        <button class="btn btn-danger hideInPrint trim" type="button" ng-attr-title="{{\'remove\' | translate}}" ng-disabled="d2Disabled" ng-click="removeSelectedOrgUnit(id)" ng-if="d2Object[id]"> \n            <i class="fa fa-trash-o"></i> \n        </button> \n        <button class="btn btn-default hideInPrint trim" type="button" ng-attr-title="{{\'get_from_tree\' | translate}}" ng-disabled="d2Disabled" ng-click="showOrgUnitTree(id)"> \n            <i class="fa fa-plus-square-o"></i> \n        </button> \n    </span> \n</div>');
 	$templateCache.put('./templates/orgunit-tree.html','<div class="modal-header page">\n    <h3>{{\'org_unit\'| translate}}</h3>\n</div>\n<div class="modal-body page">\n    <div class="input-group">    \n        <input type="text" \n            name="orgUnitFilterText" \n            d2-on-enter-blur\n            d2-on-blur-change="filterOrgUnits()"\n            ng-model="orgUnitFilterText" \n            class="form-control" ng-attr-placeholder="{{\'search\' | translate}}"> \n        <span class="input-group-btn"> \n            <button class="btn btn-success hideInPrint trim" type="button" ng-attr-title="{{\'search\' | translate}}" ng-disabled="!orgUnitFilterText" ng-click="filterOrgUnits()"> \n                <i class="fa fa-search"></i> \n            </button> \n            <button class="btn btn-danger hideInPrint trim" type="button" ng-attr-title="{{\'clear\' | translate}}" ng-disabled="!orgUnitFilterText" ng-click="filterOrgUnits(true)"> \n                <i class="fa fa-trash-o"></i>\n            </button> \n        </span> \n    </div>\n    <div class="org-unit-tree" data-stop-propagation="true">\n        <script type="text/ng-template" id="orgUnitTree.html">\n            <span class="org-unit-tree-button" ng-click="expandCollapse(orgUnit)" ng-show="orgUnit.show && orgUnit.children.length > 0"><i class="fa fa-minus-square-o"></i></span>\n            <span class="org-unit-tree-button" ng-click="expandCollapse(orgUnit)" ng-show="(!orgUnit.show && orgUnit.children.length > 0) || (!orgUnit.show && orgUnit.hasChildren)"><i class="fa fa-plus-square-o"></i></span>\n            <span class="org-unit-tree-button" ng-click="setSelectedOrgUnit(orgUnit)" ng-class="{\'selected-org-unit\' : orgUnit.id === model.selectedOrgUnitId}">{{orgUnit.displayName}}</span>\n            <ul class="tree" id="tree" ng-show="orgUnit.show">\n                <li ng-repeat="orgUnit in orgUnit.children | orderBy:[\'level\',\'displayName\']" ng-include="\'orgUnitTree.html\'"></li>\n            </ul>\n        </script>\n        <ul class="tree" id="tree">\n            <li ng-repeat="orgUnit in orgUnitsDataElement | orderBy:[\'level\',\'displayName\']" ng-include="\'orgUnitTree.html\'"></li>\n        </ul>\n    </div>\n</div>\n<div class="modal-footer page">\n    <button class="btn btn-primary" data-ng-click="select()">{{\'select\'| translate}}</button>\n    <button class="btn btn-default" data-ng-click="close()">{{\'close\'| translate}}</button>\n</div>');
-	$templateCache.put('./templates/radio-button.html','<!--\nCopyright (c) 2015, UiO\nAll rights reserved.\n\nRedistribution and use in source and binary forms, with or without\nmodification, are permitted provided that the following conditions are met:\n\n* Redistributions of source code must retain the above copyright notice, this\n  list of conditions and the following disclaimer.\n* Redistributions in binary form must reproduce the above copyright notice,\n  this list of conditions and the following disclaimer in the documentation\n  and/or other materials provided with the distribution.\n\nTHIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"\nAND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE\nIMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE\nARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE\nLIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR\nCONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF\nSUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS\nINTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN\nCONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)\nARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE\nPOSSIBILITY OF SUCH DAMAGE.\n-->\n \n\n<div tabindex="0" ng-if="!disabled" class="custom-radio-group custom-radio-container">\n    <span ng-click="valueClicked(\'true\')" class="cursor-pointer">\n        <span class="fa-stack">                                                                                                        \n            <span class=\'fa fa-stack-1x fa-circle radio-default fa-stack-custom-large\' ng-class=\'radioButtonColor("true")\'></span>        \n            <span class="fa fa-stack-1x fa-circle-thin fa-stack-custom-large"></span>\n            <span class="fa-stack-custom-small" ng-class="radioButtonImage(\'true\')"></span>\n        </span>\n        <span class="custom-radio-text">\n            {{\'Yes\' | translate }}\n        </span>\n    </span>\n    &nbsp;&nbsp;    \n    <span ng-click="valueClicked(\'false\')" class="cursor-pointer">\n        <span class="fa-stack">                                                                                                        \n            <span class=\'fa fa-stack-1x fa-circle fa-stack-custom-large\' ng-class=\'radioButtonColor("false")\'></span>                                                    \n            <span class="fa fa-stack-1x fa-circle-thin fa-stack-custom-large"></span>\n            <span class="fa-stack-custom-small" ng-class="radioButtonImage(\'false\')"></span>\n        </span>\n        <span class="custom-radio-text">\n            {{\'No\' | translate }}\n        </span>        \n    </span>\n    <div ng-if="status === \'error\'" class="custom-radio-error input-error"><span>{{\'save failed\' | translate}}</span></div>\n    \n    \n    <div ng-show="false">\n        <label class="radio-inline">                                                    \n            <input class="radio-display-none" ng-required="required" style=\'margin-top: 1px\' type="radio" ng-model="value" ng-disabled="disabled" name="{{name}}" ng-attr-value="true">                                                    \n        </label>                                                \n        <label class="radio-inline">\n            <input class="radio-display-none" ng-required="required" style=\'margin-top: 1px\' type="radio" ng-model="value" ng-disabled="disabled" name="{{name}}" ng-attr-value="false">\n        </label>\n    </div>\n</div>\n<div ng-if="disabled" class="custom-radio-container">\n    <span class="fa-icon-width" ng-class="getDisabledIcon(value)"></span>\n    <span>{{getDisabledValue(value) | translate}}</span>         \n</div>');
+	$templateCache.put('./templates/radio-button.html','<!--\nCopyright (c) 2015, UiO\nAll rights reserved.\n\nRedistribution and use in source and binary forms, with or without\nmodification, are permitted provided that the following conditions are met:\n\n* Redistributions of source code must retain the above copyright notice, this\n  list of conditions and the following disclaimer.\n* Redistributions in binary form must reproduce the above copyright notice,\n  this list of conditions and the following disclaimer in the documentation\n  and/or other materials provided with the distribution.\n\nTHIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"\nAND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE\nIMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE\nARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE\nLIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR\nCONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF\nSUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS\nINTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN\nCONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)\nARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE\nPOSSIBILITY OF SUCH DAMAGE.\n-->\n \n\n<div tabindex="0" ng-if="!disabled" class="custom-radio-group custom-radio-container">\n    <span ng-click="valueClicked(\'true\')" class="cursor-pointer">\n        <span class="fa-stack">                                                                                                        \n            <span class=\'fa fa-stack-1x fa-circle radio-default fa-stack-custom-large\' ng-class=\'radioButtonColor("true")\'></span>        \n            <span class="fa fa-stack-1x fa-circle-thin fa-stack-custom-large"></span>\n            <span class="fa-stack-custom-small" ng-class="radioButtonImage(\'true\')"></span>\n        </span>\n        <span class="custom-radio-text">\n            {{\'yes\' | translate }}\n        </span>\n    </span>\n    &nbsp;&nbsp;    \n    <span ng-click="valueClicked(\'false\')" class="cursor-pointer">\n        <span class="fa-stack">                                                                                                        \n            <span class=\'fa fa-stack-1x fa-circle fa-stack-custom-large\' ng-class=\'radioButtonColor("false")\'></span>                                                    \n            <span class="fa fa-stack-1x fa-circle-thin fa-stack-custom-large"></span>\n            <span class="fa-stack-custom-small" ng-class="radioButtonImage(\'false\')"></span>\n        </span>\n        <span class="custom-radio-text">\n            {{\'no\' | translate }}\n        </span>        \n    </span>\n    <div ng-if="status === \'error\'" class="custom-radio-error input-error"><span>{{\'save failed\' | translate}}</span></div>\n    \n    \n    <div ng-show="false">\n        <label class="radio-inline">                                                    \n            <input class="radio-display-none" ng-required="required" style=\'margin-top: 1px\' type="radio" ng-model="value" ng-disabled="disabled" name="{{name}}" ng-attr-value="true">                                                    \n        </label>                                                \n        <label class="radio-inline">\n            <input class="radio-display-none" ng-required="required" style=\'margin-top: 1px\' type="radio" ng-model="value" ng-disabled="disabled" name="{{name}}" ng-attr-value="false">\n        </label>\n    </div>\n</div>\n<div ng-if="disabled" class="custom-radio-container">\n    <span class="fa-icon-width" ng-class="getDisabledIcon(value)"></span>\n    <span>{{getDisabledValue(value) | translate}}</span>         \n</div>');
 	$templateCache.put('./templates/radio-input.html','<span ng-repeat="option in displayOptions" \n      class="col-sm-12 form-control cursor-pointer" \n      ng-disabled="d2Disabled"\n      ng-class="{\'input-success\': d2ValueSaved && model.radio === option.displayName}"\n      ng-click="saveValue(option.displayName)">\n    <span class="fa fa-circle-thin fa-stack-custom-large" ng-if="option.displayName !== model.radio"></span> \n    <span class="fa fa-dot-circle-o fa-stack-custom-large" ng-if="option.displayName === model.radio"></span> \n    {{option.displayName}}\n</span>\n\n\n<span ng-show="false">\n    <label ng-repeat="option in displayOptions" class="radio-display-none">\n    <input type="radio" \n           name="{{name}}"\n           ng-required="d2Required"\n           ng-disabled="d2Disabled"\n           ng-model="model.radio"\n           ng-attr-value="{{option.displayName}}"> {{option.displayName}}\n    </label>    \n</span>');
 	$templateCache.put('./templates/serverside-pagination-performant.html','<div class="paging-container">\n    <table style="background-color: #ebf0f6;" width=\'100%\'>\n        <tr>\n            <td>\n            </td>\n            <td>\n                <span>{{\'rows_per_page\'| translate}}:</span> <input type="text" min="1" style="width:50px;" ng-model="pageSizeEdit" d2-enter="changePageSize()" ng-blur="changePageSize()"> \n            </td>\n            <td>\n                <span>{{\'jump_to_page\'| translate}}:</span> <input type="text" min="1" style="width:50px;" ng-model="pageEdit" d2-enter="changePage()" ng-blur="changePage()"> \n            </td>\n        </tr>\n        <tr>\n            <td colspan="3"><hr/></td>\n        </tr>\n        <tr>\n            <td colspan="3">\n                <div class="paging paging-navigation">\n                    <span ng-show="pager.page > 1">\n                        <a href ng-click="getPage(1)" ng-attr-title="{{\'first\'| translate}}"> \n                            &laquo;&laquo;\n                        </a>\n                        <a href ng-click="getPage(pager.page - 1)" ng-attr-title="{{\'previous\'| translate}}"> \n                            &laquo;\n                        </a>                    \n                    </span>\n                    <span ng-hide="pager.page > 1">\n                        <span ng-attr-title="{{\'first\'| translate}}">&laquo;&laquo;</span>\n                        <span ng-attr-title="{{\'previous\'| translate}}">&laquo;</span>\n                    </span>\n                    {{getDisplayPage()}}\n                    <span ng-show="hasNextPage()">\n                        <a href ng-click="getPage(pager.page + 1)" ng-attr-title="{{\'next\'| translate}}" > \n                            &raquo;\n                        </a>\n                    </span>\n                    <span ng-hide="hasNextPage()">\n                            <span class="next" ng-attr-title="{{\'next\'| translate}}">&raquo; </span>\n                        </span>\n                </div>\n            </td>\n        </tr>\n    </table>   \n</div>');
 	$templateCache.put('./templates/serverside-pagination.html','<div class="paging-container">\n    <table style="background-color: #ebf0f6;" width=\'100%\'>\n        <tr>\n            <td>\n                {{\'total_number_of_pages\'| translate}}: {{pager.pageCount}}\n            </td>\n            <td>\n                <span>{{\'rows_per_page\'| translate}}:</span> <input type="text" min="1" style="width:50px;" ng-model="pager.pageSize" d2-enter="resetPageSize()" ng-blur="resetPageSize()"> \n            </td>\n            <td>\n                <span>{{\'jump_to_page\'| translate}}:</span> <input type="text" min="1" style="width:50px;" ng-model="pager.page" d2-enter="jumpToPage()" ng-blur="jumpToPage()"> \n            </td>\n        </tr>\n        <tr>\n            <td colspan="3"><hr/></td>\n        </tr>\n        <tr>\n            <td colspan="3">\n                <div class="paging">\n                    <span ng-show="pager.page > 1">\n                        <a href ng-click="getPage(1)" ng-attr-title="{{\'first\'| translate}}"> \n                            &laquo;&laquo;\n                        </a>\n                        <a href ng-click="getPage(pager.page - 1)" ng-attr-title="{{\'previous\'| translate}}"> \n                            &laquo;\n                        </a>                    \n                    </span>\n                    <span ng-hide="pager.page > 1">\n                        <span ng-attr-title="{{\'first\'| translate}}">&laquo;&laquo;</span>\n                        <span ng-attr-title="{{\'previous\'| translate}}">&laquo;</span>\n                    </span>\n                    <a href ng-click="getPage(i+1)" ng-attr-title="{{\'page\'| translate}} {{i + 1}}" ng-repeat="i in []| forLoop:paginator.lowerLimit():pager.pageCount | limitTo : pager.toolBarDisplay" ng-class="pager.page == i + 1 && \'active\'">\n                        {{i + 1}}\n                    </a>\n\n                    <span ng-show="pager.page < pager.pageCount">\n                        <a href ng-click="getPage(pager.page + 1)" ng-attr-title="{{\'next\'| translate}}" > \n                            &raquo;\n                        </a>\n                        <a href ng-click="getPage(pager.pageCount)" ng-attr-title="{{\'last\'| translate}}"> \n                            &raquo;&raquo;\n                        </a>\n                    </span>\n                    <span ng-hide="pager.page < pager.pageCount">\n                        <span class="next" ng-attr-title="{{\'next\'| translate}}">&raquo; </span>\n                        <span class="last" ng-attr-title="{{\'last\'| translate}}">&raquo;&raquo;</span>\n                    </span>\n                </div>\n            </td>\n        </tr>\n    </table>   \n</div>');
@@ -10751,13 +10751,8 @@
 	                                val = OptionSetService.getName(optionSets[attributesById[grid.headers[i].name].optionSet.id].options, val);
 	                            }
 	                            if (attributesById[grid.headers[i].name] && attributesById[grid.headers[i].name].valueType) {
-	                                switch (attributesById[grid.headers[i].name].valueType) {
-	                                    case "ORGANISATION_UNIT":
-	                                        CommonUtils.checkAndSetOrgUnitName(val);
-	                                        break;
-	                                    case "DATE":
-	                                        val = DateUtils.formatFromApiToUser(val);
-	                                        break;
+	                                if (attributesById[grid.headers[i].name].valueType === "DATE") {
+	                                    val = DateUtils.formatFromApiToUser(val);
 	                                }
 	                            }
 	
@@ -13417,6 +13412,9 @@
 	        }
 	    });
 	
+	    var registrationWidgetReady = false;
+	    var selectedItemsBroadcasted = false;
+	
 	    $scope.duplicateExists = false;
 	    $rootScope.hasAccess = false;
 	    $scope.APIURL = DHIS2URL;
@@ -13913,9 +13911,17 @@
 	            orgUnit: $scope.selectedOrgUnit
 	        });
 	        $timeout(function () {
+	            selectedItemsBroadcasted = true;
 	            $rootScope.$broadcast('selectedItems', { programExists: $scope.programs.length > 0 });
 	        }, 500);
 	    };
+	
+	    $scope.$on('registrationControllerReady', function () {
+	        if (!registrationWidgetReady && selectedItemsBroadcasted) {
+	            $rootScope.$broadcast('selectedItems', { programExists: $scope.programs.length > 0 });
+	        }
+	        registrationWidgetReady = true;
+	    });
 	
 	    $scope.activiateTEI = function () {
 	        var st = !$scope.selectedTei.inactive || $scope.selectedTei.inactive === '' ? true : false;
@@ -14129,6 +14135,11 @@
 	    $scope.optionGroupsById = CurrentSelection.getOptionGroupsById();
 	    $scope.fileNames = CurrentSelection.getFileNames();
 	    $scope.currentFileNames = $scope.fileNames;
+	
+	    // Slow connection fix: this signal is emitted after all listeners on the enrollment dashboard has been set up
+	    $timeout(function () {
+	        $scope.$emit('registrationControllerReady', {});
+	    });
 	
 	    //Placeholder till proper settings for time is implemented. Currently hard coded to 24h format.
 	    $scope.timeFormat = '24h';
@@ -15744,9 +15755,13 @@
 	
 	    var setOwnerOrgUnit = function setOwnerOrgUnit() {
 	        var owningOrgUnitId = CurrentSelection.currentSelection.tei.programOwnersById[$scope.selectedProgram.id];
-	        OrgUnitFactory.getFromStoreOrServer(owningOrgUnitId).then(function (orgUnit) {
-	            $scope.owningOrgUnitName = orgUnit.displayName;
-	        });
+	        if (owningOrgUnitId) {
+	            OrgUnitFactory.getFromStoreOrServer(owningOrgUnitId).then(function (orgUnit) {
+	                $scope.owningOrgUnitName = orgUnit.displayName;
+	            });
+	        } else {
+	            $scope.owningOrgUnitName = CurrentSelection.get().orgUnit.displayName;
+	        }
 	    };
 	
 	    $scope.$on('ownerUpdated', function (event, args) {
@@ -16242,7 +16257,7 @@
 	    $scope.attributesById = CurrentSelection.getAttributesById();
 	    $scope.optionGroupsById = CurrentSelection.getOptionGroupsById();
 	
-	    DashboardLayoutService.get().then(function (response) {
+	    var dashBoardLayoutPromise = DashboardLayoutService.get().then(function (response) {
 	        $scope.dashBoardLayout = response;
 	        if ($scope.dashBoardLayout.customLayout && $scope.dashBoardLayout.customLayout[$scope.selectedProgramId] && $scope.dashBoardLayout.customLayout[$scope.selectedProgramId].programStageTimeLineLayout) {
 	            DashboardLayoutService.setProgramStageLayout($scope.dashBoardLayout.customLayout[$scope.selectedProgramId].programStageTimeLineLayout);
@@ -17438,7 +17453,7 @@
 	        $scope.showAttributeCategoryOptions = false;
 	
 	        if ($scope.currentEvent) {
-	            $scope.getDataEntryForm();
+	            $scope.dashBoardLayout ? $scope.getDataEntryForm() : dashBoardLayoutPromise.then(getDataEntryForm);
 	        }
 	    };
 	
@@ -17449,7 +17464,7 @@
 	                $scope.deSelectCurrentEvent(resetStage);
 	            } else {
 	                $scope.showLoadingEventSpinner = true;
-	                $timeout(function () {
+	                dashBoardLayoutPromise.then(function () {
 	                    TCOrgUnitService.get(event.orgUnit).then(function (orgUnit) {
 	                        event.orgUnitPath = orgUnit.path;
 	                        $scope.currentElement = {};
@@ -22371,9 +22386,9 @@
 	    });
 	
 	    $scope.$watch('widget.useAsTopBar', function (newValue, oldValue) {
-	        if (newValue !== oldValue) {
-	            listenToBroadCast();
-	        }
+	        // Omit comparing newValue/oldValue to get an extra update with convenient timing:
+	        // see the difference in the profile widget when opening a tracked entity instance.
+	        listenToBroadCast();
 	    });
 	
 	    //listen to changes in enrollment editing
@@ -40191,4 +40206,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-e7cee82e0f59b87583d8.js.map
+//# sourceMappingURL=app-9e550a8011e23348c957.js.map
