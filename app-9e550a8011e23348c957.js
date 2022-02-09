@@ -15755,9 +15755,13 @@
 	
 	    var setOwnerOrgUnit = function setOwnerOrgUnit() {
 	        var owningOrgUnitId = CurrentSelection.currentSelection.tei.programOwnersById[$scope.selectedProgram.id];
-	        OrgUnitFactory.getFromStoreOrServer(owningOrgUnitId).then(function (orgUnit) {
-	            $scope.owningOrgUnitName = orgUnit.displayName;
-	        });
+	        if (owningOrgUnitId) {
+	            OrgUnitFactory.getFromStoreOrServer(owningOrgUnitId).then(function (orgUnit) {
+	                $scope.owningOrgUnitName = orgUnit.displayName;
+	            });
+	        } else {
+	            $scope.owningOrgUnitName = CurrentSelection.get().orgUnit.displayName;
+	        }
 	    };
 	
 	    $scope.$on('ownerUpdated', function (event, args) {
@@ -40202,4 +40206,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-420c83bfed882fa71265.js.map
+//# sourceMappingURL=app-9e550a8011e23348c957.js.map
