@@ -38121,7 +38121,7 @@
 /* 303 */
 /***/ (function(module, exports) {
 
-	'use strict';
+	"use strict";
 	
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
@@ -38132,22 +38132,12 @@
 	    var enrollment = selections.selectedEnrollment && selections.selectedEnrollment.enrollment;
 	    if (enrollment) {
 	        var selectedEnrollment = selections.selectedEnrollment;
-	        var today = dateUtils.getToday();
-	        var userProfile = sessionStorageService.get('USER_PROFILE');
-	        var storedBy = userProfile && userProfile.userCredentials && userProfile.userCredentials.username ? userProfile.userCredentials.username : '';
 	
-	        var noteText = 'SMS sendt til ' + phoneNumber + ': ' + smsMsg;
+	        var noteText = "SMS sendt til " + phoneNumber + ": " + smsMsg;
 	        var newNote = {
-	            value: noteText,
-	            storedDate: dateUtils.formatFromUserToApi(today),
-	            displayDate: today,
-	            storedBy: storedBy
+	            value: noteText
 	        };
-	        if (selectedEnrollment.notes) {
-	            selectedEnrollment.notes.splice(0, 0, newNote);
-	        } else {
-	            selectedEnrollment.notes = [newNote];
-	        }
+	        selectedEnrollment.notes = [newNote];
 	        enrollmentService.updateForNote(selectedEnrollment);
 	    }
 	}
@@ -56371,4 +56361,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-42ddd814cdaca6d04296.js.map
+//# sourceMappingURL=app-fdc4d306b115d05c5548.js.map
