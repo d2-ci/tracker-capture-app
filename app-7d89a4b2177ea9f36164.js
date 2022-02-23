@@ -4685,7 +4685,7 @@
 	};
 	
 	var removeGS1Identifier = function removeGS1Identifier(value) {
-	    value.substring(3);
+	    return value.substring(3);
 	};
 	
 	var getApplicationIdentifier = function getApplicationIdentifier(gs1Group) {
@@ -39746,4 +39746,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-bcf43606359c490f5823.js.map
+//# sourceMappingURL=app-7d89a4b2177ea9f36164.js.map
