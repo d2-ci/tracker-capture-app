@@ -4659,33 +4659,34 @@
 	gs1Elements.set('COMPANY_INTERNAL_8', '98');
 	gs1Elements.set('COMPANY_INTERNAL_9', '99');
 	
-	var aiFixedLengthMap = new Map();
-	aiFixedLengthMap.set('SSCC', 20);
-	aiFixedLengthMap.set('GTIN', 16);
-	aiFixedLengthMap.set('CONTENT', 16);
-	aiFixedLengthMap.set('03', 16);
-	aiFixedLengthMap.set('04', 18);
-	aiFixedLengthMap.set('PROD_DATE', 8);
-	aiFixedLengthMap.set('DUE_DATE', 8);
-	aiFixedLengthMap.set('PACK_DATE', 8);
-	aiFixedLengthMap.set('14', 8);
-	aiFixedLengthMap.set('BEST_BEFORE_DATE', 8);
-	aiFixedLengthMap.set('SELL_BY', 8);
-	aiFixedLengthMap.set('EXP_DATE', 8);
-	aiFixedLengthMap.set('18', 8);
-	aiFixedLengthMap.set('19', 8);
-	aiFixedLengthMap.set('VARIANT', 4);
-	aiFixedLengthMap.set('31', 10);
-	aiFixedLengthMap.set('32', 10);
-	aiFixedLengthMap.set('33', 10);
-	aiFixedLengthMap.set('34', 10);
-	aiFixedLengthMap.set('35', 10);
-	aiFixedLengthMap.set('36', 10);
-	aiFixedLengthMap.set('41', 10);
+	var aiFixedLengthMap = {
+	    SSCC: 20,
+	    GTIN: 16,
+	    CONTENT: 16,
+	    '03': 16,
+	    '04': 18,
+	    PROD_DATE: 8,
+	    DUE_DATE: 8,
+	    PACK_DATE: 8,
+	    '14': 8,
+	    BEST_BEFORE_DATE: 8,
+	    SELL_BY: 8,
+	    EXP_DATE: 8,
+	    '18': 8,
+	    '19': 8,
+	    VARIANT: 4,
+	    '31': 10,
+	    '32': 10,
+	    '33': 10,
+	    '34': 10,
+	    '35': 10,
+	    '36': 10,
+	    '41': 10
+	};
 	
-	function removeGS1Identifier(value) {
+	var removeGS1Identifier = function removeGS1Identifier(value) {
 	    return value.substring(3);
-	}
+	};
 	
 	var getApplicationIdentifier = function getApplicationIdentifier(gs1Group) {
 	    var _iteratorNormalCompletion = true;
@@ -4750,7 +4751,7 @@
 	    if (gs1Group) {
 	        var gs1GroupLength = gs1Group.length;
 	        var ai = getApplicationIdentifier(gs1Group);
-	        var nextValueLength = aiFixedLengthMap.get(ai);
+	        var nextValueLength = aiFixedLengthMap[ai];
 	        if (nextValueLength == null) nextValueLength = gs1GroupLength;
 	        dataMap.set(ai, gs1Group.substring(2, nextValueLength));
 	        handleGroupData(gs1Group.substring(nextValueLength));
@@ -39743,4 +39744,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-5791392910ed69ea1793.js.map
+//# sourceMappingURL=app-3394a3e0128101c9c2db.js.map
