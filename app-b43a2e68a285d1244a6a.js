@@ -23475,7 +23475,7 @@
 	                    //Open TEI if unique and in same search scope and in selected org unit
 	                    if (gridData.rows.own.length === 1 && res.callingScope === res.resultScope && searchGroup.uniqueGroup) {
 	                        $scope.searching = null;
-	                        openTei(gridData.rows.own[0]);
+	                        openTei(gridData.rows.own[0], [$scope.selectedOrgUnit.id]);
 	                        return;
 	                    }
 	                } else if (rowsCnt > 0) {
@@ -23500,7 +23500,7 @@
 	        }
 	    };
 	
-	    var openTei = function openTei(tei, fromAudit, programOwners) {
+	    var openTei = function openTei(tei, programOwners, fromAudit) {
 	        if ($scope.searchingForRelatedTei) {
 	            $rootScope.$broadcast('assignRelationshipTei', tei);
 	        } else {
@@ -23714,7 +23714,7 @@
 	            var def = $q.defer();
 	            def.resolve();
 	            if (res.action === "OPENTEI") {
-	                openTei(res.tei, res.fromAudit, res.programOwners);
+	                openTei(res.tei, res.programOwners, res.fromAudit);
 	            } else if (res.action === "OPENREGISTRATION") {
 	                var registrationPrefill = getRegistrationPrefill(searchGroup);
 	                $scope.goToRegistrationWithData(registrationPrefill);
@@ -40156,4 +40156,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-890329f57d14895918dc.js.map
+//# sourceMappingURL=app-b43a2e68a285d1244a6a.js.map
