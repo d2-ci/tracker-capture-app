@@ -4668,24 +4668,24 @@
 	    PROD_DATE: 8,
 	    DUE_DATE: 8,
 	    PACK_DATE: 8,
-	    '14': 8,
+	    14: 8,
 	    BEST_BEFORE_DATE: 8,
 	    SELL_BY: 8,
 	    EXP_DATE: 8,
-	    '18': 8,
-	    '19': 8,
+	    18: 8,
+	    19: 8,
 	    VARIANT: 4,
-	    '31': 10,
-	    '32': 10,
-	    '33': 10,
-	    '34': 10,
-	    '35': 10,
-	    '36': 10,
-	    '41': 10
+	    31: 10,
+	    32: 10,
+	    33: 10,
+	    34: 10,
+	    35: 10,
+	    36: 10,
+	    41: 10
 	};
 	
 	var removeGS1Identifier = function removeGS1Identifier(value) {
-	    return value.substring(3);
+	    value.substring(3);
 	};
 	
 	var getApplicationIdentifier = function getApplicationIdentifier(gs1Group) {
@@ -4698,10 +4698,10 @@
 	            var element = _step.value;
 	
 	            var ai = gs1Elements.get(element);
-	            if (ai.endsWith("*")) {
+	            if (ai.endsWith('*')) {
 	                ai = ai.substring(0, ai.length - 1);
 	            }
-	            if (gs1Group.startsWith(ai) && ai.endsWith("*")) {
+	            if (gs1Group.startsWith(ai) && ai.endsWith('*')) {
 	                return gs1Group.substring(0, ai.length + 1);
 	            } else if (gs1Group.startsWith(ai)) {
 	                return ai;
@@ -4752,7 +4752,10 @@
 	        var gs1GroupLength = gs1Group.length;
 	        var ai = getApplicationIdentifier(gs1Group);
 	        var nextValueLength = aiFixedLengthMap[ai];
-	        if (nextValueLength == null) nextValueLength = gs1GroupLength;
+	        if (nextValueLength == null) {
+	            nextValueLength = gs1GroupLength;
+	        }
+	
 	        dataMap.set(ai, gs1Group.substring(2, nextValueLength));
 	        handleGroupData(gs1Group.substring(nextValueLength));
 	    }
@@ -4773,13 +4776,12 @@
 	    if (dataMatrix && dataMatrix.length >= 3) {
 	        var gs1Identifier = dataMatrix.substring(0, 3);
 	        if (gs1Elements.get('GS1_d2_IDENTIFIER') === gs1Identifier || gs1Elements.get('GS1_Q3_IDENTIFIER') === gs1Identifier) {
-	            return "'" + extractGS1DataMatrixValue(key, dataMatrix) + "'";
-	        } else {
-	            return "Unsupported GS1 identifier: " + gs1Identifier;
+	            var dataMatrixValue = extractGS1DataMatrixValue(key, dataMatrix);
+	            return '\'' + dataMatrixValue + '\'';
 	        }
-	    } else {
-	        return "Incomplete DataMatrix input";
+	        return 'Unsupported GS1 identifier: {gs1Identifier}';
 	    }
+	    return 'Incomplete DataMatrix input';
 	};
 
 /***/ }),
@@ -39744,4 +39746,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-3394a3e0128101c9c2db.js.map
+//# sourceMappingURL=app-bcf43606359c490f5823.js.map
