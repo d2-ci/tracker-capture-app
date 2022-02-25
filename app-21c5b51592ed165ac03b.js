@@ -15762,8 +15762,36 @@
 	      });
 	      return promise;
 	    },
+	    getMsisStatus: function getMsisStatus(kommuneNr, userId) {
+	      var url = '../' + DHIS2URL + '/provesvar/import/synkroniser/status';
+	      var promise = $http({
+	        method: 'POST',
+	        url: url,
+	        data: { kommunenr: kommuneNr, userid: userId },
+	        headers: { 'Content-Type': 'application/json', 'ingress-csrf': $cookies['ingress-csrf'] }
+	      }).then(function (response) {
+	        return response.data;
+	      }, function (error) {
+	        return null;
+	      });
+	      return promise;
+	    },
 	    startLabTestSync: function startLabTestSync(kommuneNr, userId) {
 	      var url = '../' + DHIS2URL + '/innreise/synkroniser/start';
+	      var promise = $http({
+	        method: 'POST',
+	        url: url,
+	        data: { kommunenr: kommuneNr, userid: userId },
+	        headers: { 'Content-Type': 'application/json', 'ingress-csrf': $cookies['ingress-csrf'] }
+	      }).then(function (response) {
+	        return response.data;
+	      }, function (error) {
+	        return null;
+	      });
+	      return promise;
+	    },
+	    startMsisSync: function startMsisSync(kommuneNr, userId) {
+	      var url = '../' + DHIS2URL + '/provesvar/import/synkroniser/start';
 	      var promise = $http({
 	        method: 'POST',
 	        url: url,
@@ -15871,6 +15899,7 @@
 	var INDEKS_IKKE_TILDELTE_OPPGAVER = exports.INDEKS_IKKE_TILDELTE_OPPGAVER = 'qhZI9qjnvIU';
 	var NAERKONTAKT_IKKE_TILDELTE_OPPGAVER = exports.NAERKONTAKT_IKKE_TILDELTE_OPPGAVER = 'jtmtrzAAIcf';
 	var INNREISE_IKKE_TILDELTE_OPPGAVER = exports.INNREISE_IKKE_TILDELTE_OPPGAVER = 'uTVW4JPHoN0';
+	var INDEKS_STATUS_ARBEIDSLISTE = exports.INDEKS_STATUS_ARBEIDSLISTE = 'W4edFyiOeI1';
 
 /***/ }),
 /* 17 */
@@ -38849,6 +38878,14 @@
 	        return program && program.id == _constants.INNREISE_PROGRAM_ID;
 	    };
 	
+	    $scope.isIndeksProgram = function (program) {
+	        return program && program.id == _constants.INDEKSERING_PROGRAM_ID;
+	    };
+	
+	    $scope.isStatusArbeidsliste = function () {
+	        return $scope.currentTrackedEntityList.config.id === _constants.INDEKS_STATUS_ARBEIDSLISTE;
+	    };
+	
 	    $scope.proveSvarSyncIsLoading = false;
 	    $scope.syncLabTests = function () {
 	        if ($scope.isInnreiseProgram($scope.selectedProgram)) {
@@ -38908,11 +38945,67 @@
 	        }
 	    };
 	
+	    $scope.importLabTests = function () {
+	        if ($scope.isStatusArbeidsliste()) {
+	            $scope.msisStartFailed = false;
+	            var userId;
+	            try {
+	                userId = JSON.parse(sessionStorage.USER_PROFILE).id;
+	            } finally {}
+	            $scope.msisImportIsLoading = true;
+	            FNrLookupService.startMsisSync($scope.selectedOrgUnit.code, userId).then(function (svar) {
+	                $scope.msisImportIsLoading = false;
+	                if (svar) {
+	                    $scope.mapMsisStatusToScope(svar);
+	                    fetchWorkingList();
+	                } else {
+	                    $scope.msisStartFailed = true;
+	                    $scope.kanStarteNyMsisSynk = false;
+	                }
+	            });
+	        }
+	    };
+	
+	    $scope.msisStatusLastet = false;
+	    $scope.msisStartFailed = false;
+	    $scope.msisAktivert = false;
+	    $scope.harTilgangTilMsis = false;
+	    $scope.msisSistOppdatert = false;
+	    $scope.kanStarteNyMsisSynk = null;
+	    $scope.msisStatus = null;
+	    $scope.msisStatusQueryFailed = false;
+	
+	    $scope.mapMsisStatusToScope = function (svar) {
+	        $scope.msisStatusLastet = true;
+	        $scope.msisAktivert = svar.importAktivert;
+	        $scope.msisSistOppdatert = svar.sistOppdatert ? (0, _converters.convertDatestringToFullTime)(svar.sistOppdatert) : undefined;
+	        $scope.kanStarteNyMsisSynk = svar.kanStarteNySynk;
+	        $scope.harTilgangTilProvesvar = svar.harTilgangTilProvesvar;
+	        $scope.msisStatus = svar.status;
+	    };
+	
+	    $scope.getMsisStatus = function () {
+	        if ($scope.isIndeksProgram($scope.selectedProgram)) {
+	            var userId;
+	            try {
+	                userId = JSON.parse(sessionStorage.USER_PROFILE).id;
+	            } finally {}
+	            FNrLookupService.getMsisStatus($scope.selectedOrgUnit.code, userId).then(function (svar) {
+	                if (svar) {
+	                    $scope.mapMsisStatusToScope(svar);
+	                } else {
+	                    $scope.msisStatusQueryFailed = true;
+	                }
+	            });
+	        }
+	    };
+	
 	    $scope.showNoProvesvardataHentet = function () {
 	        return !$scope.innreiseProvesvarSistOppdatert && !$scope.hasStartedSync;
 	    };
 	
 	    $scope.checkLabTestStatus();
+	    $scope.getMsisStatus();
 	
 	    $scope.getExportList = function (format) {
 	        var deferred = $q.defer();
@@ -56361,4 +56454,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-fdc4d306b115d05c5548.js.map
+//# sourceMappingURL=app-21c5b51592ed165ac03b.js.map
