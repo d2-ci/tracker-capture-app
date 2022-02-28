@@ -4694,10 +4694,9 @@
 	    var _iteratorError = undefined;
 	
 	    try {
-	        for (var _iterator = gs1Elements.keys()[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-	            var element = _step.value;
+	        for (var _iterator = gs1Elements.values()[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+	            var ai = _step.value;
 	
-	            var ai = gs1Elements.get(element);
 	            if (ai.endsWith('*')) {
 	                ai = ai.substring(0, ai.length - 1);
 	            }
@@ -4745,7 +4744,7 @@
 	    }
 	};
 	
-	var dataMap = new Map();
+	var dataMap = void 0;
 	
 	var handleGroupData = function handleGroupData(gs1Group) {
 	    if (gs1Group) {
@@ -4756,20 +4755,31 @@
 	            nextValueLength = gs1GroupLength;
 	        }
 	
-	        dataMap.set(ai, gs1Group.substring(2, nextValueLength));
+	        dataMap.set(ai, gs1Group.substring(ai.length, nextValueLength));
 	        handleGroupData(gs1Group.substring(nextValueLength));
 	    }
 	};
 	
+	var dataMatrixMappedCache = {};
+	
 	var extractGS1DataMatrixValue = function extractGS1DataMatrixValue(key, dataMatrix) {
 	    var keyToReturn = translateKey(key);
+	    var ai = gs1Elements.get(keyToReturn);
+	
+	    if (dataMatrixMappedCache[dataMatrix]) {
+	        return dataMatrixMappedCache[dataMatrix].get(ai);
+	    }
+	
+	    dataMap = new Map();
 	
 	    var gs1Groups = removeGS1Identifier(dataMatrix).split(gs1Elements.get('GS1_GROUP_SEPARATOR'));
 	    gs1Groups.forEach(function (gs1Group) {
 	        handleGroupData(gs1Group);
 	    });
 	
-	    return dataMap.get(gs1Elements.get(keyToReturn));
+	    dataMatrixMappedCache[dataMatrix] = dataMap;
+	
+	    return dataMap.get(ai);
 	};
 	
 	var extractDataMatrixValue = exports.extractDataMatrixValue = function extractDataMatrixValue(key, dataMatrix) {
@@ -39746,4 +39756,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-7d89a4b2177ea9f36164.js.map
+//# sourceMappingURL=app-14ac697ea42fff5e9e16.js.map
