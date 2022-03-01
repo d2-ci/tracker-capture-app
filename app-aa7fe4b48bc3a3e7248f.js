@@ -3435,7 +3435,7 @@
 	                                    programStage: action.programStage,
 	                                    programIndicator: action.programIndicator,
 	                                    programStageSection: action.programStageSection && action.programStageSection.id ? action.programStageSection.id : null,
-	                                    content: action.content,
+	                                    content: action.displayContent,
 	                                    data: action.data,
 	                                    ineffect: undefined
 	                                };
@@ -21779,7 +21779,7 @@
 	                if (rule.programRuleActions) {
 	                    angular.forEach(rule.programRuleActions, function (action) {
 	                        if (action.location && action.location === $scope.widgetTitle && (action.programRuleActionType === 'DISPLAYTEXT' || action.programRuleActionType === 'DISPLAYKEYVALUEPAIR')) {
-	                            fields.push({ id: action.id, name: action.content });
+	                            fields.push({ id: action.id, name: action.displayContent });
 	                        }
 	                    });
 	                }
@@ -23224,9 +23224,9 @@
 	                        angular.forEach(rule.programRuleActions, function (action) {
 	                            if (action.location && (action.programRuleActionType === 'DISPLAYTEXT' || action.programRuleActionType === 'DISPLAYKEYVALUEPAIR')) {
 	                                if (action.location === 'feedback') {
-	                                    feedBackFields[action.id] = action.content + " " + action.data;
+	                                    feedBackFields[action.id] = action.displayContent + " " + action.data;
 	                                } else if (action.location === 'indicators') {
-	                                    inidicatorFields[action.id] = action.content + " " + action.data;
+	                                    inidicatorFields[action.id] = action.displayContent + " " + action.data;
 	                                }
 	                            }
 	                        });
@@ -39407,4 +39407,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-cb5310043538f92f7768.js.map
+//# sourceMappingURL=app-aa7fe4b48bc3a3e7248f.js.map
