@@ -1697,6 +1697,7 @@
 	                                        displayName: variableName,
 	                                        programRuleVariableSourceType: 'DATAELEMENT_CURRENT_EVENT',
 	                                        dataElement: variableNameParts[1],
+	                                        valueType: 'TEXT',
 	                                        program: programUid,
 	                                        useCodeForOptionSet: true
 	                                    };
@@ -1706,6 +1707,7 @@
 	                                        displayName: variableName,
 	                                        programRuleVariableSourceType: 'TEI_ATTRIBUTE',
 	                                        trackedEntityAttribute: variableNameParts[0],
+	                                        valueType: 'TEXT',
 	                                        program: programUid,
 	                                        useCodeForOptionSet: true
 	                                    };
@@ -1978,14 +1980,14 @@
 	                        if (dataElement) {
 	                            variables = pushVariable(variables, programVariable.displayName, "", null, dataElement.dataElement.valueType, false, '#', '', programVariable.useCodeForOptionSet);
 	                        } else {
-	                            variables = pushVariable(variables, programVariable.displayName, "", null, "TEXT", false, '#', '', programVariable.useCodeForOptionSet);
+	                            variables = pushVariable(variables, programVariable.displayName, "", null, programVariable.valueType, false, '#', '', programVariable.useCodeForOptionSet);
 	                        }
 	                    } else if (programVariable.trackedEntityAttribute) {
 	                        //The variable is an attribute, set correct prefix and a blank value
-	                        variables = pushVariable(variables, programVariable.displayName, "", null, "TEXT", false, 'A', '', programVariable.useCodeForOptionSet);
+	                        variables = pushVariable(variables, programVariable.displayName, "", null, programVariable.valueType, false, 'A', '', programVariable.useCodeForOptionSet);
 	                    } else {
 	                        //Fallback for calculated(assigned) values:
-	                        variables = pushVariable(variables, programVariable.displayName, "", null, "TEXT", false, '#', '', programVariable.useCodeForOptionSet);
+	                        variables = pushVariable(variables, programVariable.displayName, "", null, programVariable.valueType, false, '#', '', programVariable.useCodeForOptionSet);
 	                    }
 	                }
 	            });
@@ -3507,7 +3509,7 @@
 	                                    if (variablesHash[variabletoassign]) {
 	                                        var updatedValue = $rootScope.ruleeffects[ruleEffectKey][action.id].data;
 	
-	                                        var valueType = determineValueType(updatedValue);
+	                                        var valueType = variablesHash[variabletoassign].variableType || determineValueType(updatedValue);
 	
 	                                        if ($rootScope.ruleeffects[ruleEffectKey][action.id].dataElement) {
 	                                            updatedValue = VariableService.getDataElementValueOrCodeForValue(variablesHash[variabletoassign].useCodeForOptionSet, updatedValue, $rootScope.ruleeffects[ruleEffectKey][action.id].dataElement.id, allDataElements, optionSets);
@@ -10015,6 +10017,7 @@
 	                                        displayName: variableName,
 	                                        programRuleVariableSourceType: 'DATAELEMENT_NEWEST_EVENT_PROGRAM_STAGE',
 	                                        dataElement: variableNameParts[1],
+	                                        valueType: 'TEXT',
 	                                        programStage: variableNameParts[0],
 	                                        program: programUid,
 	                                        useCodeForOptionSet: true
@@ -10024,6 +10027,7 @@
 	                                    newVariableObject = {
 	                                        displayName: variableName,
 	                                        programRuleVariableSourceType: 'TEI_ATTRIBUTE',
+	                                        valueType: 'TEXT',
 	                                        trackedEntityAttribute: variableNameParts[0],
 	                                        program: programUid,
 	                                        useCodeForOptionSet: true
@@ -39756,4 +39760,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-0a0b2d5b270357290123.js.map
+//# sourceMappingURL=app-d7a972066fd30bd4e313.js.map
