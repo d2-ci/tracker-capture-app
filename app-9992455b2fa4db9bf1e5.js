@@ -6629,11 +6629,23 @@
 	                currentFilteredOptions = filteredOptions;
 	            };
 	
+	            var compareWithoutDiacritics = function compareWithoutDiacritics(actual, expected) {
+	                var normalizedString = String(actual).normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+	                return normalizedString.search(expected) >= 0;
+	            };
+	
+	            var compareWithDiacritics = function compareWithDiacritics(actual, expected) {
+	                var normalizedString = String(actual).normalize("NFD");
+	                return normalizedString.search(expected) >= 0;
+	            };
+	
 	            $scope.search = function (searchParam) {
 	                if (!searchParam) {
 	                    currentFilteredOptions = filteredOptions;
 	                } else {
-	                    currentFilteredOptions = $filter('filter')(filteredOptions, searchParam);
+	                    var needleWithDiacritics = String(searchParam).normalize("NFD");
+	                    var needleWithoutDiacritics = String(needleWithDiacritics).replace(/[\u0300-\u036f]/g, "");
+	                    currentFilteredOptions = needleWithDiacritics == needleWithoutDiacritics ? $filter('filter')(filteredOptions, needleWithoutDiacritics, compareWithoutDiacritics) : $filter('filter')(filteredOptions, needleWithDiacritics, compareWithDiacritics);
 	                }
 	                setOptions();
 	            };
@@ -39760,4 +39772,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-d7a972066fd30bd4e313.js.map
+//# sourceMappingURL=app-9992455b2fa4db9bf1e5.js.map
