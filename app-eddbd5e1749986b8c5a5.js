@@ -11863,7 +11863,7 @@
 	            ruleBoundData.textInEffect = false;
 	            ruleBoundData.keyDataInEffect = false;
 	
-	            if (event === 'registration') return;
+	            if (!event || event === 'registration') return;
 	
 	            //In case the 
 	            if (ruleBoundData.lastEventUpdated !== event) {
@@ -17526,6 +17526,7 @@
 	        $scope.currentEvent = null;
 	        $scope.currentElement = { id: '', saved: false };
 	        $scope.showDataEntryDiv = !$scope.showDataEntryDiv;
+	        $rootScope.$broadcast("dataEntryEventChanged", { event: null });
 	    };
 	
 	    $scope.tableRowIsEditable = function (eventRow) {
@@ -19263,6 +19264,14 @@
 	    $scope.$watch("currentEvent", function (newValue, oldValue) {
 	        if (angular.isDefined(newValue)) {
 	            $scope.stageOpenInEventLayout = "";
+	        }
+	    });
+	
+	    $scope.$watch(function (scope) {
+	        return scope.currentEvent && scope.currentEvent.status;
+	    }, function (newValue, oldValue) {
+	        if (newValue) {
+	            $scope.executeRules(); // needed by rules using e.g. V{event_status}
 	        }
 	    });
 	
@@ -22581,7 +22590,7 @@
 	
 	    //listen for updated rule effects
 	    $scope.$on('ruleeffectsupdated', function (event, args) {
-	        if (args.event !== 'registration') {
+	        if (currentEventId && currentEventId === args.event) {
 	            $scope.data = RuleBoundFactory.getDisplayEffects($scope.data, args.event, $rootScope.ruleeffects, $scope.widgetTitle);
 	        }
 	    });
@@ -40216,4 +40225,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-e0f84fd0f45782a24bc9.js.map
+//# sourceMappingURL=app-eddbd5e1749986b8c5a5.js.map
