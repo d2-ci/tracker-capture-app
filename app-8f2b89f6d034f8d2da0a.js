@@ -4459,6 +4459,11 @@
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
+	
+	var _aiFixedLengthMap;
+	
+	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+	
 	var gs1Elements = new Map();
 	gs1Elements.set('GS1_E0_IDENTIFIER', ']E0'); // EAN-13, UPC-A, UPC-E
 	gs1Elements.set('GS1_E1_IDENTIFIER', ']E1'); // Two-digit add-on symbol
@@ -4661,30 +4666,7 @@
 	gs1Elements.set('COMPANY_INTERNAL_8', '98');
 	gs1Elements.set('COMPANY_INTERNAL_9', '99');
 	
-	var aiFixedLengthMap = {
-	    '00': 20,
-	    '01': 16,
-	    '02': 16,
-	    '03': 16,
-	    '04': 18,
-	    '11': 8,
-	    '12': 8,
-	    '13': 8,
-	    '14': 8,
-	    '15': 8,
-	    '16': 8,
-	    '17': 8,
-	    '18': 8,
-	    '19': 8,
-	    '20': 4,
-	    '31': 10,
-	    '32': 10,
-	    '33': 10,
-	    '34': 10,
-	    '35': 10,
-	    '36': 10,
-	    '41': 10
-	};
+	var aiFixedLengthMap = (_aiFixedLengthMap = {}, _defineProperty(_aiFixedLengthMap, gs1Elements.get('SSCC'), 20), _defineProperty(_aiFixedLengthMap, gs1Elements.get('GTIN'), 16), _defineProperty(_aiFixedLengthMap, gs1Elements.get('CONTENT'), 16), _defineProperty(_aiFixedLengthMap, '03', 16), _defineProperty(_aiFixedLengthMap, '04', 18), _defineProperty(_aiFixedLengthMap, gs1Elements.get('PROD_DATE'), 8), _defineProperty(_aiFixedLengthMap, gs1Elements.get('DUE_DATE'), 8), _defineProperty(_aiFixedLengthMap, gs1Elements.get('PACK_DATE'), 8), _defineProperty(_aiFixedLengthMap, '14', 8), _defineProperty(_aiFixedLengthMap, gs1Elements.get('BEST_BEFORE_DATE'), 8), _defineProperty(_aiFixedLengthMap, gs1Elements.get('SELL_BY'), 8), _defineProperty(_aiFixedLengthMap, gs1Elements.get('EXP_DATE'), 8), _defineProperty(_aiFixedLengthMap, '18', 8), _defineProperty(_aiFixedLengthMap, '19', 8), _defineProperty(_aiFixedLengthMap, gs1Elements.get('VARIANT'), 4), _defineProperty(_aiFixedLengthMap, '31', 10), _defineProperty(_aiFixedLengthMap, '32', 10), _defineProperty(_aiFixedLengthMap, '33', 10), _defineProperty(_aiFixedLengthMap, '34', 10), _defineProperty(_aiFixedLengthMap, '35', 10), _defineProperty(_aiFixedLengthMap, '36', 10), _defineProperty(_aiFixedLengthMap, '41', 10), _aiFixedLengthMap);
 	
 	var removeGS1Identifier = function removeGS1Identifier(value) {
 	    return value.substring(3);
@@ -39760,4 +39742,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-0486b63ae6d8370d6dcd.js.map
+//# sourceMappingURL=app-8f2b89f6d034f8d2da0a.js.map
