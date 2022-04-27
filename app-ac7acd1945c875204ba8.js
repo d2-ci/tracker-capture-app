@@ -15196,7 +15196,7 @@
 	  };
 	
 	  var getKjonn = function getKjonn(kjonn) {
-	    var codes = [{ "id": 1, "verdi": "1", "beskrivelse": "Mann", "oid": 3101 }, { "id": 2, "verdi": "2", "beskrivelse": "Kvinne", "oid": 3101 }, { "id": 3, "verdi": "9", "beskrivelse": "Ikke kjent", "oid": 3101 }];
+	    var codes = [{ "id": 1, "verdi": "1", "beskrivelse": "Mann", "oid": 3101 }, { "id": 2, "verdi": "2", "beskrivelse": "Kvinne", "oid": 3101 }, { "id": 3, "verdi": "0", "beskrivelse": "Ikke kjent", "oid": 3101 }];
 	    return codeLookup(codes, "beskrivelse", kjonn);
 	  };
 	
@@ -56454,4 +56454,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-21c5b51592ed165ac03b.js.map
+//# sourceMappingURL=app-ac7acd1945c875204ba8.js.map
