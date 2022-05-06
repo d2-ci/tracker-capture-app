@@ -3410,89 +3410,6 @@
 	        return events;
 	    };
 	
-	    var internalGetOrLoadScope = function internalGetOrLoadScope(currentEvent, programStageId, orgUnitId) {
-	        if (crossEventRulesExist) {
-	            //If crossEventRulesExist, we need to get a scope that contains more than the current event.
-	            if (lastEventId !== currentEvent.event || lastEventDate !== currentEvent.eventDate || !eventScopeExceptCurrent) {
-	                //The scope might need updates, as the parameters of the event has changed
-	
-	                lastEventId = currentEvent.event;
-	                lastEventDate = currentEvent.eventDate;
-	
-	                var pager = { pageSize: NUMBER_OF_EVENTS_IN_SCOPE };
-	                var ordering = { id: "eventDate", direction: "desc" };
-	
-	                var promise = DHIS2EventFactory.getByStage(orgUnitId, programStageId, null, pager, true, null, null, ordering).then(function (events) {
-	                    var allEventsWithPossibleDuplicates = internalProcessEventGrid(events);
-	                    return allEventsWithPossibleDuplicates;
-	                });
-	
-	                if (lastEventDate) {
-	                    promise = promise.then(function (allEventsWithPossibleDuplicates) {
-	                        var filterUrl = '&dueDateStart=' + DateUtils.formatFromUserToApi(lastEventDate) + '&dueDateEnd=' + DateUtils.formatFromUserToApi(lastEventDate);
-	                        return DHIS2EventFactory.getByStage(orgUnitId, programStageId, null, pager, true, null, filterUrl, ordering).then(function (events) {
-	                            allEventsWithPossibleDuplicates = allEventsWithPossibleDuplicates.concat(internalProcessEventGrid(events));
-	                            return allEventsWithPossibleDuplicates;
-	                        });
-	                    });
-	                }
-	
-	                return promise.then(function (allEventsWithPossibleDuplicates) {
-	                    eventScopeExceptCurrent = [];
-	                    var eventIdDictionary = {};
-	                    angular.forEach(allEventsWithPossibleDuplicates, function (eventInScope) {
-	                        if (currentEvent.event !== eventInScope.event && !eventIdDictionary[eventInScope.event]) {
-	                            //Add event and update dictionary to avoid duplicates:                                
-	                            eventIdDictionary[eventInScope.event] = true;
-	                        }
-	                    });
-	
-	                    //make a sorted list of all events to pass to rules execution service:
-	                    var allEventsInScope = eventScopeExceptCurrent.concat([currentEvent]);
-	                    allEventsInScope = orderByFilter(allEventsInScope, '-eventDate').reverse();
-	                    var byStage = {};
-	                    byStage[currentEvent.programStage] = allEventsInScope;
-	                    return { all: allEventsInScope, byStage: byStage };
-	                });
-	            } else {
-	                //make a sorted list of all events to pass to rules execution service:
-	                var allEvents = eventScopeExceptCurrent.concat([currentEvent]);
-	                allEvents = orderByFilter(allEvents, '-eventDate').reverse();
-	                var byStage = {};
-	                byStage[currentEvent.programStage] = allEvents;
-	                return $q.when({ all: allEvents, byStage: byStage });
-	            }
-	        } else {
-	            //return a scope containing only the current event
-	            var byStage = {};
-	            byStage[currentEvent.programStage] = [currentEvent];
-	            return $q.when({ all: [currentEvent], byStage: byStage });
-	        }
-	    };
-	    var internalGetOrLoadRules = function internalGetOrLoadRules(programId) {
-	        //If no rules is stored in memory, or this service is being called in the context of a different program, get the rules again:
-	        if (allProgramRules === false || lastProgramId !== programId) {
-	            return RulesFactory.loadRules(programId).then(function (rules) {
-	                allProgramRules = rules;
-	                lastProgramId = programId;
-	
-	                //Check if any of the rules is using any source type thar requires a bigger event scope
-	                crossEventRulesExist = false;
-	                if (rules.programVariables && rules.programVariables.length) {
-	                    for (var i = 0; i < rules.programVariables.length; i++) {
-	                        if (rules.programVariables[i].programRuleVariableSourceType === "DATAELEMENT_NEWEST_EVENT_PROGRAM" || rules.programVariables[i].programRuleVariableSourceType === "DATAELEMENT_NEWEST_EVENT_PROGRAM_STAGE" || rules.programVariables[i].programRuleVariableSourceType === "DATAELEMENT_PREVIOUS_EVENT") {
-	                            crossEventRulesExist = true;
-	                        }
-	                    }
-	                }
-	
-	                return rules;
-	            });
-	        } else {
-	            return $q.when(allProgramRules);
-	        }
-	    };
-	
 	    var clearDataElementValueForShowHideOptionActions = function clearDataElementValueForShowHideOptionActions(dataElements, affectedEvent, optionVisibility, prStDes, optionSets) {
 	        angular.forEach(dataElements, function (de) {
 	            var value = affectedEvent[de];
@@ -3548,13 +3465,6 @@
 	    return {
 	        executeRules: function executeRules(allProgramRules, executingEvent, evs, allDataElements, allTrackedEntityAttributes, selectedEntity, selectedEnrollment, optionSets, flags) {
 	            return internalExecuteRules(allProgramRules, executingEvent, evs, allDataElements, allTrackedEntityAttributes, selectedEntity, selectedEnrollment, optionSets, flags);
-	        },
-	        loadAndExecuteRulesScope: function loadAndExecuteRulesScope(currentEvent, programId, programStageId, programStageDataElements, allTrackedEntityAttributes, optionSets, orgUnitId, flags) {
-	            return internalGetOrLoadRules(programId).then(function (rules) {
-	                return internalGetOrLoadScope(currentEvent, programStageId, orgUnitId).then(function (scope) {
-	                    return internalExecuteRules(rules, currentEvent, scope, programStageDataElements, allTrackedEntityAttributes, null, null, optionSets, flags);
-	                });
-	            });
 	        },
 	        processRuleEffectsForTrackedEntityAttributes: function processRuleEffectsForTrackedEntityAttributes(context, currentTei, teiOriginalValues, attributesById, optionSets, optionGroupsById) {
 	            var hiddenFields = {};
@@ -9823,6 +9733,7 @@
 	                            var newAction = {
 	                                id: pi.id,
 	                                content: pi.displayDescription ? pi.displayDescription : pi.displayName,
+	                                displayContent: pi.displayName,
 	                                data: pi.expression,
 	                                programRuleActionType: 'DISPLAYKEYVALUEPAIR',
 	                                location: 'indicators'
@@ -39612,4 +39523,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-c994c969b3579cb17f30.js.map
+//# sourceMappingURL=app-83bbefa8539d60025541.js.map
