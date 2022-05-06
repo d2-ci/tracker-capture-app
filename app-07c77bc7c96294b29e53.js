@@ -1658,119 +1658,117 @@
 	                    var variables = [];
 	                    var programRules = [];
 	                    angular.forEach(pis, function (pi) {
-	                        if (pi.displayInForm) {
-	                            var newAction = {
-	                                id: pi.id,
-	                                content: pi.shortName ? pi.shortName : pi.displayName,
-	                                data: pi.expression,
-	                                programRuleActionType: 'DISPLAYKEYVALUEPAIR',
-	                                location: 'indicators'
-	                            };
-	                            var newRule = {
-	                                displayName: pi.displayName,
-	                                id: pi.id,
-	                                shortname: pi.shortname,
-	                                code: pi.code,
-	                                program: pi.program,
-	                                description: pi.description,
-	                                condition: pi.filter ? pi.filter : 'true',
-	                                programRuleActions: [newAction]
-	                            };
+	                        var newAction = {
+	                            id: pi.id,
+	                            content: pi.shortName ? pi.shortName : pi.displayName,
+	                            data: pi.expression,
+	                            programRuleActionType: 'DISPLAYKEYVALUEPAIR',
+	                            location: 'indicators'
+	                        };
+	                        var newRule = {
+	                            displayName: pi.displayName,
+	                            id: pi.id,
+	                            shortname: pi.shortname,
+	                            code: pi.code,
+	                            program: pi.program,
+	                            description: pi.description,
+	                            condition: pi.filter ? pi.filter : 'true',
+	                            programRuleActions: [newAction]
+	                        };
 	
-	                            programRules.push(newRule);
+	                        programRules.push(newRule);
 	
-	                            var variablesInCondition = newRule.condition.match(/[A#]{\w+.?\w*}/g);
-	                            var variablesInData = newAction.data.match(/[A#]{\w+.?\w*}/g);
-	                            var valueCountPresent = newRule.condition.indexOf("V{value_count}") >= 0 || newAction.data.indexOf("V{value_count}") >= 0;
-	                            var positiveValueCountPresent = newRule.condition.indexOf("V{zero_pos_value_count}") >= 0 || newAction.data.indexOf("V{zero_pos_value_count}") >= 0;
-	                            var variableObjectsCurrentExpression = [];
+	                        var variablesInCondition = newRule.condition.match(/[A#]{\w+.?\w*}/g);
+	                        var variablesInData = newAction.data.match(/[A#]{\w+.?\w*}/g);
+	                        var valueCountPresent = newRule.condition.indexOf("V{value_count}") >= 0 || newAction.data.indexOf("V{value_count}") >= 0;
+	                        var positiveValueCountPresent = newRule.condition.indexOf("V{zero_pos_value_count}") >= 0 || newAction.data.indexOf("V{zero_pos_value_count}") >= 0;
+	                        var variableObjectsCurrentExpression = [];
 	
-	                            var pushDirectAddressedVariable = function pushDirectAddressedVariable(variableWithCurls) {
-	                                var variableName = $filter('trimvariablequalifiers')(variableWithCurls);
-	                                var variableNameParts = variableName.split('.');
+	                        var pushDirectAddressedVariable = function pushDirectAddressedVariable(variableWithCurls) {
+	                            var variableName = $filter('trimvariablequalifiers')(variableWithCurls);
+	                            var variableNameParts = variableName.split('.');
 	
-	                                var newVariableObject;
+	                            var newVariableObject;
 	
-	                                if (variableNameParts.length === 2) {
-	                                    //this is a programstage and dataelement specification. translate to program variable:
-	                                    newVariableObject = {
-	                                        displayName: variableName,
-	                                        programRuleVariableSourceType: 'DATAELEMENT_CURRENT_EVENT',
-	                                        dataElement: variableNameParts[1],
-	                                        valueType: 'TEXT',
-	                                        program: programUid,
-	                                        useCodeForOptionSet: true
-	                                    };
-	                                } else if (variableNameParts.length === 1) {
-	                                    //This is an attribute - let us translate to program variable:
-	                                    newVariableObject = {
-	                                        displayName: variableName,
-	                                        programRuleVariableSourceType: 'TEI_ATTRIBUTE',
-	                                        trackedEntityAttribute: variableNameParts[0],
-	                                        valueType: 'TEXT',
-	                                        program: programUid,
-	                                        useCodeForOptionSet: true
-	                                    };
+	                            if (variableNameParts.length === 2) {
+	                                //this is a programstage and dataelement specification. translate to program variable:
+	                                newVariableObject = {
+	                                    displayName: variableName,
+	                                    programRuleVariableSourceType: 'DATAELEMENT_CURRENT_EVENT',
+	                                    dataElement: variableNameParts[1],
+	                                    valueType: 'TEXT',
+	                                    program: programUid,
+	                                    useCodeForOptionSet: true
+	                                };
+	                            } else if (variableNameParts.length === 1) {
+	                                //This is an attribute - let us translate to program variable:
+	                                newVariableObject = {
+	                                    displayName: variableName,
+	                                    programRuleVariableSourceType: 'TEI_ATTRIBUTE',
+	                                    trackedEntityAttribute: variableNameParts[0],
+	                                    valueType: 'TEXT',
+	                                    program: programUid,
+	                                    useCodeForOptionSet: true
+	                                };
+	                            }
+	
+	                            variables.push(newVariableObject);
+	
+	                            return newVariableObject;
+	                        };
+	
+	                        angular.forEach(variablesInCondition, function (variableInCondition) {
+	                            var pushed = pushDirectAddressedVariable(variableInCondition);
+	                        });
+	
+	                        angular.forEach(variablesInData, function (variableInData) {
+	                            var pushed = pushDirectAddressedVariable(variableInData);
+	
+	                            //We only count the number of values in the data part of the rule
+	                            //(Called expression in program indicators)
+	                            variableObjectsCurrentExpression.push(pushed);
+	                        });
+	
+	                        //Change expression or data part of the rule to match the program rules execution model
+	                        if (valueCountPresent) {
+	                            var valueCountText;
+	                            angular.forEach(variableObjectsCurrentExpression, function (variableCurrentRule) {
+	                                if (valueCountText) {
+	                                    //This is not the first value in the value count part of the expression.
+	                                    valueCountText += ' + d2:count(\'' + variableCurrentRule.displayName + '\')';
+	                                } else {
+	                                    //This is the first part value in the value count expression:
+	                                    valueCountText = '(d2:count(\'' + variableCurrentRule.displayName + '\')';
 	                                }
-	
-	                                variables.push(newVariableObject);
-	
-	                                return newVariableObject;
-	                            };
-	
-	                            angular.forEach(variablesInCondition, function (variableInCondition) {
-	                                var pushed = pushDirectAddressedVariable(variableInCondition);
 	                            });
+	                            //To finish the value count expression we need to close the paranthesis:
+	                            valueCountText += ')';
 	
-	                            angular.forEach(variablesInData, function (variableInData) {
-	                                var pushed = pushDirectAddressedVariable(variableInData);
-	
-	                                //We only count the number of values in the data part of the rule
-	                                //(Called expression in program indicators)
-	                                variableObjectsCurrentExpression.push(pushed);
-	                            });
-	
-	                            //Change expression or data part of the rule to match the program rules execution model
-	                            if (valueCountPresent) {
-	                                var valueCountText;
-	                                angular.forEach(variableObjectsCurrentExpression, function (variableCurrentRule) {
-	                                    if (valueCountText) {
-	                                        //This is not the first value in the value count part of the expression. 
-	                                        valueCountText += ' + d2:count(\'' + variableCurrentRule.displayName + '\')';
-	                                    } else {
-	                                        //This is the first part value in the value count expression:
-	                                        valueCountText = '(d2:count(\'' + variableCurrentRule.displayName + '\')';
-	                                    }
-	                                });
-	                                //To finish the value count expression we need to close the paranthesis:
-	                                valueCountText += ')';
-	
-	                                //Replace all occurrences of value counts in both the data and expression:
-	                                newRule.condition = newRule.condition.replace(new RegExp("V{value_count}", 'g'), valueCountText);
-	                                newAction.data = newAction.data.replace(new RegExp("V{value_count}", 'g'), valueCountText);
-	                            }
-	                            if (positiveValueCountPresent) {
-	                                var zeroPosValueCountText;
-	                                angular.forEach(variableObjectsCurrentExpression, function (variableCurrentRule) {
-	                                    if (zeroPosValueCountText) {
-	                                        //This is not the first value in the value count part of the expression. 
-	                                        zeroPosValueCountText += '+ d2:countifzeropos(\'' + variableCurrentRule.displayName + '\')';
-	                                    } else {
-	                                        //This is the first part value in the value count expression:
-	                                        zeroPosValueCountText = '(d2:countifzeropos(\'' + variableCurrentRule.displayName + '\')';
-	                                    }
-	                                });
-	                                //To finish the value count expression we need to close the paranthesis:
-	                                zeroPosValueCountText += ')';
-	
-	                                //Replace all occurrences of value counts in both the data and expression:
-	                                newRule.condition = newRule.condition.replace(new RegExp("V{zero_pos_value_count}", 'g'), zeroPosValueCountText);
-	                                newAction.data = newAction.data.replace(new RegExp("V{zero_pos_value_count}", 'g'), zeroPosValueCountText);
-	                            }
-	
-	                            newAction.data = performStaticReplacements(newAction.data);
-	                            newRule.condition = performStaticReplacements(newRule.condition);
+	                            //Replace all occurrences of value counts in both the data and expression:
+	                            newRule.condition = newRule.condition.replace(new RegExp("V{value_count}", 'g'), valueCountText);
+	                            newAction.data = newAction.data.replace(new RegExp("V{value_count}", 'g'), valueCountText);
 	                        }
+	                        if (positiveValueCountPresent) {
+	                            var zeroPosValueCountText;
+	                            angular.forEach(variableObjectsCurrentExpression, function (variableCurrentRule) {
+	                                if (zeroPosValueCountText) {
+	                                    //This is not the first value in the value count part of the expression.
+	                                    zeroPosValueCountText += '+ d2:countifzeropos(\'' + variableCurrentRule.displayName + '\')';
+	                                } else {
+	                                    //This is the first part value in the value count expression:
+	                                    zeroPosValueCountText = '(d2:countifzeropos(\'' + variableCurrentRule.displayName + '\')';
+	                                }
+	                            });
+	                            //To finish the value count expression we need to close the paranthesis:
+	                            zeroPosValueCountText += ')';
+	
+	                            //Replace all occurrences of value counts in both the data and expression:
+	                            newRule.condition = newRule.condition.replace(new RegExp("V{zero_pos_value_count}", 'g'), zeroPosValueCountText);
+	                            newAction.data = newAction.data.replace(new RegExp("V{zero_pos_value_count}", 'g'), zeroPosValueCountText);
+	                        }
+	
+	                        newAction.data = performStaticReplacements(newAction.data);
+	                        newRule.condition = performStaticReplacements(newRule.condition);
 	                    });
 	
 	                    var programIndicators = { rules: programRules, variables: variables };
@@ -9976,6 +9974,7 @@
 	                            var newAction = {
 	                                id: pi.id,
 	                                content: pi.displayDescription ? pi.displayDescription : pi.displayName,
+	                                displayContent: pi.displayName,
 	                                data: pi.expression,
 	                                programRuleActionType: 'DISPLAYKEYVALUEPAIR',
 	                                location: 'indicators'
@@ -39765,4 +39764,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-871c04a1f5a3f6675009.js.map
+//# sourceMappingURL=app-07c77bc7c96294b29e53.js.map
