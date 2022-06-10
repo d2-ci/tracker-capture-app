@@ -6277,12 +6277,12 @@
 	            };
 	
 	            var compareWithoutDiacritics = function compareWithoutDiacritics(actual, expected) {
-	                var normalizedString = String(actual).normalize("NFD").toLowerCase().replace(/[\u0300-\u036f]/g, "");
+	                var normalizedString = actual.normalize("NFD").toLowerCase().replace(/[\u0300-\u036f]/g, "");
 	                return normalizedString.search(expected) >= 0;
 	            };
 	
 	            var compareWithDiacritics = function compareWithDiacritics(actual, expected) {
-	                var normalizedString = String(actual).normalize("NFD").toLowerCase();
+	                var normalizedString = actual.normalize("NFD").toLowerCase();
 	                return normalizedString.search(expected) >= 0;
 	            };
 	
@@ -6290,8 +6290,8 @@
 	                if (!searchParam) {
 	                    currentFilteredOptions = filteredOptions;
 	                } else {
-	                    var needleWithDiacritics = String(searchParam).normalize("NFD").toLowerCase();
-	                    var needleWithoutDiacritics = String(needleWithDiacritics).replace(/[\u0300-\u036f]/g, "");
+	                    var needleWithDiacritics = searchParam.normalize("NFD").toLowerCase();
+	                    var needleWithoutDiacritics = needleWithDiacritics.replace(/[\u0300-\u036f]/g, "");
 	                    currentFilteredOptions = needleWithDiacritics == needleWithoutDiacritics ? filteredOptions.filter(function (option) {
 	                        return compareWithoutDiacritics(option.displayName, needleWithoutDiacritics);
 	                    }) : filteredOptions.filter(function (option) {
@@ -39478,4 +39478,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-27ae4fc755619f920898.js.map
+//# sourceMappingURL=app-568fc07fd85370efe167.js.map
