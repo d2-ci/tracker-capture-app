@@ -6277,12 +6277,12 @@
 	            };
 	
 	            var compareWithoutDiacritics = function compareWithoutDiacritics(actual, expected) {
-	                var normalizedString = String(actual).normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+	                var normalizedString = actual.normalize("NFD").toLowerCase().replace(/[\u0300-\u036f]/g, "");
 	                return normalizedString.search(expected) >= 0;
 	            };
 	
 	            var compareWithDiacritics = function compareWithDiacritics(actual, expected) {
-	                var normalizedString = String(actual).normalize("NFD");
+	                var normalizedString = actual.normalize("NFD").toLowerCase();
 	                return normalizedString.search(expected) >= 0;
 	            };
 	
@@ -6290,9 +6290,13 @@
 	                if (!searchParam) {
 	                    currentFilteredOptions = filteredOptions;
 	                } else {
-	                    var needleWithDiacritics = String(searchParam).normalize("NFD");
-	                    var needleWithoutDiacritics = String(needleWithDiacritics).replace(/[\u0300-\u036f]/g, "");
-	                    currentFilteredOptions = needleWithDiacritics == needleWithoutDiacritics ? $filter('filter')(filteredOptions, needleWithoutDiacritics, compareWithoutDiacritics) : $filter('filter')(filteredOptions, needleWithDiacritics, compareWithDiacritics);
+	                    var needleWithDiacritics = searchParam.normalize("NFD").toLowerCase();
+	                    var needleWithoutDiacritics = needleWithDiacritics.replace(/[\u0300-\u036f]/g, "");
+	                    currentFilteredOptions = needleWithDiacritics == needleWithoutDiacritics ? filteredOptions.filter(function (option) {
+	                        return compareWithoutDiacritics(option.displayName, needleWithoutDiacritics);
+	                    }) : filteredOptions.filter(function (option) {
+	                        return compareWithDiacritics(option.displayName, needleWithDiacritics);
+	                    });
 	                }
 	                setOptions();
 	            };
@@ -11175,11 +11179,13 @@
 	        });
 	        return writable;
 	    };
-	}]).service('TCOrgUnitService', ["$q", "$rootScope", "TCStorageService", "OrgUnitFactory", function ($q, $rootScope, TCStorageService, OrgUnitFactory) {
+	}]).service('TCOrgUnitService', ["$q", "$http", "$rootScope", "TCStorageService", "OrgUnitFactory", function ($q, $http, $rootScope, TCStorageService, OrgUnitFactory) {
 	    this.get = function (uid) {
 	        var def = $q.defer();
 	        TCStorageService.currentStore.open().done(function () {
-	            TCStorageService.currentStore.get('organisationUnits', uid).done(function (orgUnit) {
+	            TCStorageService.currentStore.get('organisationUnits', uid).then(function (orgUnit) {
+	                return orgUnit || getOrgUnitFromServer(uid);
+	            }).then(function (orgUnit) {
 	                $rootScope.$apply(function () {
 	                    def.resolve(orgUnit);
 	                });
@@ -11209,6 +11215,17 @@
 	                return orgUnit.id === idFromPath && orgUnit.id !== lastId;
 	            });
 	        });
+	    };
+	    var getOrgUnitFromServer = function getOrgUnitFromServer(uid) {
+	        var promise = $http.get(DHIS2URL + ('/organisationUnits/' + uid + '.json?paging=false&fields=id,displayName,path')).then(function (response) {
+	            return response.data;
+	        });
+	
+	        // Insert downloaded organisation unit in IndexedDB
+	        promise.then(function (orgUnit) {
+	            TCStorageService.currentStore.set('organisationUnits', orgUnit);
+	        });
+	        return promise;
 	    };
 	}]);
 
@@ -39474,4 +39491,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-0b5852f60578692e9aa8.js.map
+//# sourceMappingURL=app-fbcf8bcd18833ce60b87.js.map
