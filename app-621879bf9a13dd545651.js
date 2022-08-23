@@ -6610,12 +6610,12 @@
 	            };
 	
 	            var compareWithoutDiacritics = function compareWithoutDiacritics(actual, expected) {
-	                var normalizedString = String(actual).normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+	                var normalizedString = actual.normalize("NFD").toLowerCase().replace(/[\u0300-\u036f]/g, "");
 	                return normalizedString.search(expected) >= 0;
 	            };
 	
 	            var compareWithDiacritics = function compareWithDiacritics(actual, expected) {
-	                var normalizedString = String(actual).normalize("NFD");
+	                var normalizedString = actual.normalize("NFD").toLowerCase();
 	                return normalizedString.search(expected) >= 0;
 	            };
 	
@@ -6623,9 +6623,13 @@
 	                if (!searchParam) {
 	                    currentFilteredOptions = filteredOptions;
 	                } else {
-	                    var needleWithDiacritics = String(searchParam).normalize("NFD");
-	                    var needleWithoutDiacritics = String(needleWithDiacritics).replace(/[\u0300-\u036f]/g, "");
-	                    currentFilteredOptions = needleWithDiacritics == needleWithoutDiacritics ? $filter('filter')(filteredOptions, needleWithoutDiacritics, compareWithoutDiacritics) : $filter('filter')(filteredOptions, needleWithDiacritics, compareWithDiacritics);
+	                    var needleWithDiacritics = searchParam.normalize("NFD").toLowerCase();
+	                    var needleWithoutDiacritics = needleWithDiacritics.replace(/[\u0300-\u036f]/g, "");
+	                    currentFilteredOptions = needleWithDiacritics == needleWithoutDiacritics ? filteredOptions.filter(function (option) {
+	                        return compareWithoutDiacritics(option.displayName, needleWithoutDiacritics);
+	                    }) : filteredOptions.filter(function (option) {
+	                        return compareWithDiacritics(option.displayName, needleWithDiacritics);
+	                    });
 	                }
 	                setOptions();
 	            };
@@ -39777,4 +39781,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-59bed4079454eebdff62.js.map
+//# sourceMappingURL=app-621879bf9a13dd545651.js.map
