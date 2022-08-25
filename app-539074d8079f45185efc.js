@@ -4560,7 +4560,7 @@
 	gs1Elements.set('COMPANY_INTERNAL_8', '98');
 	gs1Elements.set('COMPANY_INTERNAL_9', '99');
 	
-	var aiFixedLengthMap = (_aiFixedLengthMap = {}, _defineProperty(_aiFixedLengthMap, gs1Elements.get('SSCC'), 20), _defineProperty(_aiFixedLengthMap, gs1Elements.get('GTIN'), 16), _defineProperty(_aiFixedLengthMap, gs1Elements.get('CONTENT'), 16), _defineProperty(_aiFixedLengthMap, '03', 16), _defineProperty(_aiFixedLengthMap, '04', 18), _defineProperty(_aiFixedLengthMap, gs1Elements.get('PROD_DATE'), 8), _defineProperty(_aiFixedLengthMap, gs1Elements.get('DUE_DATE'), 8), _defineProperty(_aiFixedLengthMap, gs1Elements.get('PACK_DATE'), 8), _defineProperty(_aiFixedLengthMap, '14', 8), _defineProperty(_aiFixedLengthMap, gs1Elements.get('BEST_BEFORE_DATE'), 8), _defineProperty(_aiFixedLengthMap, gs1Elements.get('SELL_BY'), 8), _defineProperty(_aiFixedLengthMap, gs1Elements.get('EXP_DATE'), 8), _defineProperty(_aiFixedLengthMap, '18', 8), _defineProperty(_aiFixedLengthMap, '19', 8), _defineProperty(_aiFixedLengthMap, gs1Elements.get('VARIANT'), 4), _defineProperty(_aiFixedLengthMap, '31', 10), _defineProperty(_aiFixedLengthMap, '32', 10), _defineProperty(_aiFixedLengthMap, '33', 10), _defineProperty(_aiFixedLengthMap, '34', 10), _defineProperty(_aiFixedLengthMap, '35', 10), _defineProperty(_aiFixedLengthMap, '36', 10), _defineProperty(_aiFixedLengthMap, '41', 10), _aiFixedLengthMap);
+	var aiFixedLengthMap = (_aiFixedLengthMap = {}, _defineProperty(_aiFixedLengthMap, gs1Elements.get('SSCC'), 20), _defineProperty(_aiFixedLengthMap, gs1Elements.get('GTIN'), 16), _defineProperty(_aiFixedLengthMap, gs1Elements.get('CONTENT'), 16), _defineProperty(_aiFixedLengthMap, '03', 16), _defineProperty(_aiFixedLengthMap, '04', 18), _defineProperty(_aiFixedLengthMap, gs1Elements.get('PROD_DATE'), 8), _defineProperty(_aiFixedLengthMap, gs1Elements.get('DUE_DATE'), 8), _defineProperty(_aiFixedLengthMap, gs1Elements.get('PACK_DATE'), 8), _defineProperty(_aiFixedLengthMap, '14', 8), _defineProperty(_aiFixedLengthMap, gs1Elements.get('BEST_BEFORE_DATE'), 8), _defineProperty(_aiFixedLengthMap, gs1Elements.get('SELL_BY'), 8), _defineProperty(_aiFixedLengthMap, gs1Elements.get('EXP_DATE'), 8), _defineProperty(_aiFixedLengthMap, '18', 8), _defineProperty(_aiFixedLengthMap, '19', 8), _defineProperty(_aiFixedLengthMap, gs1Elements.get('VARIANT'), 4), _defineProperty(_aiFixedLengthMap, '31', 10), _defineProperty(_aiFixedLengthMap, '32', 10), _defineProperty(_aiFixedLengthMap, '33', 10), _defineProperty(_aiFixedLengthMap, '34', 10), _defineProperty(_aiFixedLengthMap, '35', 10), _defineProperty(_aiFixedLengthMap, '36', 10), _defineProperty(_aiFixedLengthMap, '41', 16), _aiFixedLengthMap);
 	
 	var removeGS1Identifier = function removeGS1Identifier(value) {
 	    return value.substring(3);
@@ -4628,7 +4628,7 @@
 	    if (gs1Group) {
 	        var gs1GroupLength = gs1Group.length;
 	        var ai = getApplicationIdentifier(gs1Group);
-	        var nextValueLength = aiFixedLengthMap[ai];
+	        var nextValueLength = aiFixedLengthMap[ai.substring(0, 2)];
 	        if (nextValueLength == null) {
 	            nextValueLength = gs1GroupLength;
 	        }
@@ -40484,4 +40484,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-65167139ff89f7e890b2.js.map
+//# sourceMappingURL=app-539074d8079f45185efc.js.map
