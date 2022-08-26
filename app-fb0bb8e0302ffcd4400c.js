@@ -447,7 +447,15 @@
 
 	'use strict';
 	
+	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+	
+	var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }(); /* Pagination service */
+	/* global angular, dhis2, moment */
+	
+	
 	var _dhis2D2GS1DataMatrix = __webpack_require__(5);
+	
+	function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 	
 	var d2Services = angular.module('d2Services', ['ngResource'])
 	
@@ -2775,445 +2783,575 @@
 	        return getZScoreFromMap(Math.round(heightInCm * 2) / 2, weight, map);
 	    }
 	
-	    var runDhisFunctions = function runDhisFunctions(expression, variablesHash, flag, selectedOrgUnit) {
-	        //Called from "runExpression". Only proceed with this logic in case there seems to be dhis function calls: "d2:" is present.
-	        if (angular.isDefined(expression) && expression.indexOf("d2:") !== -1) {
-	            var dhisFunctions = [{ name: "d2:daysBetween", parameters: 2 }, { name: "d2:weeksBetween", parameters: 2 }, { name: "d2:monthsBetween", parameters: 2 }, { name: "d2:yearsBetween", parameters: 2 }, { name: "d2:floor", parameters: 1 }, { name: "d2:modulus", parameters: 2 }, { name: "d2:concatenate" }, { name: "d2:addDays", parameters: 2 }, { name: "d2:zing", parameters: 1 }, { name: "d2:oizp", parameters: 1 }, { name: "d2:count", parameters: 1 }, { name: "d2:countIfZeroPos", parameters: 1 }, { name: "d2:countIfValue", parameters: 2 }, { name: "d2:ceil", parameters: 1 }, { name: "d2:round", parameters: 1 }, { name: "d2:hasValue", parameters: 1 }, { name: "d2:lastEventDate", parameters: 1 }, { name: "d2:validatePattern", parameters: 2 }, { name: "d2:addControlDigits", parameters: 1 }, { name: "d2:checkControlDigits", parameters: 1 }, { name: "d2:left", parameters: 2 }, { name: "d2:right", parameters: 2 }, { name: "d2:substring", parameters: 3 }, { name: "d2:split", parameters: 3 }, { name: "d2:zScoreWFA", parameters: 3 }, { name: "d2:zScoreWFH", parameters: 3 }, { name: "d2:zScoreHFA", parameters: 3 }, { name: "d2:length", parameters: 1 }, { name: "d2:inOrgUnitGroup", parameters: 1 }, { name: "d2:hasUserRole", parameters: 1 }, { name: "d2:condition", parameters: 3 }, { name: "d2:extractDataMatrixValue", parameters: 2 }];
-	            var continueLooping = true;
-	            //Safety harness on 10 loops, in case of unanticipated syntax causing unintencontinued looping
-	            for (var i = 0; i < 10 && continueLooping; i++) {
-	                var expressionUpdated = false;
-	                var brokenExecution = false;
-	                angular.forEach(dhisFunctions, function (dhisFunction) {
-	                    //Select the function call, with any number of parameters inside single quotations, or number parameters witout quotations
-	                    var regularExFunctionCall = new RegExp(dhisFunction.name + "\\( *(([\\d/\\*\\+\\-%\. ]+)|( *'[^']*'))*( *, *(([\\d/\\*\\+\\-%\. ]+)|'[^']*'))* *\\)", 'g');
-	                    var callsToThisFunction = expression.match(regularExFunctionCall);
-	                    angular.forEach(callsToThisFunction, function (callToThisFunction) {
-	                        //Remove the function name and paranthesis:
-	                        var justparameters = callToThisFunction.replace(/(^[^\(]+\()|\)$/g, "");
-	                        //Remove white spaces before and after parameters:
-	                        justparameters = justparameters.trim();
-	                        //Then split into single parameters:
-	                        var parameters = justparameters.match(/(('[^']+')|([^,]+))/g);
-	
-	                        //Show error if no parameters is given and the function requires parameters,
-	                        //or if the number of parameters is wrong.
-	                        if (angular.isDefined(dhisFunction.parameters)) {
-	                            //But we are only checking parameters where the dhisFunction actually has a defined set of parameters(concatenate, for example, does not have a fixed number);
-	                            var numParameters = parameters ? parameters.length : 0;
-	
-	                            if (numParameters !== dhisFunction.parameters) {
-	                                $log.warn(dhisFunction.name + " was called with the incorrect number of parameters");
-	
-	                                //Mark this function call as broken:
-	                                brokenExecution = true;
-	                            }
-	                        }
-	
-	                        //In case the function call is nested, the parameter itself contains an expression, run the expression.
-	                        if (!brokenExecution && angular.isDefined(parameters) && parameters !== null) {
-	                            for (var i = 0; i < parameters.length; i++) {
-	                                parameters[i] = runExpression(parameters[i], dhisFunction.name, "parameter:" + i, flag, variablesHash, selectedOrgUnit);
-	                            }
-	                        }
-	
-	                        //Special block for d2:weeksBetween(*,*) - add such a block for all other dhis functions.
-	                        if (brokenExecution) {
-	                            //Function call is not possible to evaluate, remove the call:
-	                            expression = expression.replace(callToThisFunction, "false");
-	                            expressionUpdated = true;
-	                        } else if (dhisFunction.name === "d2:daysBetween") {
-	                            var firstdate = $filter('trimquotes')(parameters[0]);
-	                            var seconddate = $filter('trimquotes')(parameters[1]);
-	                            firstdate = moment(firstdate, CalendarService.getSetting().momentFormat);
-	                            seconddate = moment(seconddate, CalendarService.getSetting().momentFormat);
-	                            //Replace the end evaluation of the dhis function:
-	                            expression = expression.replace(callToThisFunction, seconddate.diff(firstdate, 'days'));
-	                            expressionUpdated = true;
-	                        } else if (dhisFunction.name === "d2:weeksBetween") {
-	                            var firstdate = $filter('trimquotes')(parameters[0]);
-	                            var seconddate = $filter('trimquotes')(parameters[1]);
-	                            firstdate = moment(firstdate, CalendarService.getSetting().momentFormat);
-	                            seconddate = moment(seconddate, CalendarService.getSetting().momentFormat);
-	                            //Replace the end evaluation of the dhis function:
-	                            expression = expression.replace(callToThisFunction, seconddate.diff(firstdate, 'weeks'));
-	                            expressionUpdated = true;
-	                        } else if (dhisFunction.name === "d2:monthsBetween") {
-	                            var firstdate = $filter('trimquotes')(parameters[0]);
-	                            var seconddate = $filter('trimquotes')(parameters[1]);
-	                            firstdate = moment(firstdate, CalendarService.getSetting().momentFormat);
-	                            seconddate = moment(seconddate, CalendarService.getSetting().momentFormat);
-	                            //Replace the end evaluation of the dhis function:
-	                            expression = expression.replace(callToThisFunction, seconddate.diff(firstdate, 'months'));
-	                            expressionUpdated = true;
-	                        } else if (dhisFunction.name === "d2:yearsBetween") {
-	                            var firstdate = $filter('trimquotes')(parameters[0]);
-	                            var seconddate = $filter('trimquotes')(parameters[1]);
-	                            firstdate = moment(firstdate, CalendarService.getSetting().momentFormat);
-	                            seconddate = moment(seconddate, CalendarService.getSetting().momentFormat);
-	                            //Replace the end evaluation of the dhis function:
-	                            expression = expression.replace(callToThisFunction, seconddate.diff(firstdate, 'years'));
-	                            expressionUpdated = true;
-	                        } else if (dhisFunction.name === "d2:floor") {
-	                            var floored = Math.floor(parameters[0]);
-	                            //Replace the end evaluation of the dhis function:
-	                            expression = expression.replace(callToThisFunction, floored);
-	                            expressionUpdated = true;
-	                        } else if (dhisFunction.name === "d2:modulus") {
-	                            var dividend = Number(parameters[0]);
-	                            var divisor = Number(parameters[1]);
-	                            var rest = dividend % divisor;
-	                            //Replace the end evaluation of the dhis function:
-	                            expression = expression.replace(callToThisFunction, rest);
-	                            expressionUpdated = true;
-	                        } else if (dhisFunction.name === "d2:concatenate") {
-	                            var returnString = "'";
-	                            for (var i = 0; i < parameters.length; i++) {
-	                                returnString += parameters[i];
-	                            }
-	                            returnString += "'";
-	                            expression = expression.replace(callToThisFunction, returnString);
-	                            expressionUpdated = true;
-	                        } else if (dhisFunction.name === "d2:addDays") {
-	                            var date = $filter('trimquotes')(parameters[0]);
-	                            var daystoadd = $filter('trimquotes')(parameters[1]);
-	                            var newdate = DateUtils.format(moment(date, CalendarService.getSetting().momentFormat).add(daystoadd, 'days'));
-	                            var newdatestring = "'" + newdate + "'";
-	                            //Replace the end evaluation of the dhis function:
-	                            expression = expression.replace(callToThisFunction, newdatestring);
-	                            expressionUpdated = true;
-	                        } else if (dhisFunction.name === "d2:zing") {
-	                            var number = parameters[0];
-	                            if (number < 0) {
-	                                number = 0;
-	                            }
-	
-	                            //Replace the end evaluation of the dhis function:
-	                            expression = expression.replace(callToThisFunction, number);
-	                            expressionUpdated = true;
-	                        } else if (dhisFunction.name === "d2:oizp") {
-	                            var number = parameters[0];
-	                            var output = 1;
-	                            if (number < 0) {
-	                                output = 0;
-	                            }
-	
-	                            //Replace the end evaluation of the dhis function:
-	                            expression = expression.replace(callToThisFunction, output);
-	                            expressionUpdated = true;
-	                        } else if (dhisFunction.name === "d2:count") {
-	                            var variableName = parameters[0];
-	                            var variableObject = variablesHash[variableName];
-	                            var count = 0;
-	                            if (variableObject) {
-	                                if (variableObject.hasValue) {
-	                                    if (variableObject.allValues && variableObject.allValues.length > 0) {
-	                                        count = variableObject.allValues.length;
-	                                    } else {
-	                                        //If there is a value found for the variable, the count is 1 even if there is no list of alternate values
-	                                        //This happens for variables of "DATAELEMENT_CURRENT_STAGE" and "TEI_ATTRIBUTE"
-	                                        count = 1;
-	                                    }
-	                                }
-	                            } else {
-	                                $log.warn("could not find variable to count: " + variableName);
-	                            }
-	
-	                            //Replace the end evaluation of the dhis function:
-	                            expression = expression.replace(callToThisFunction, count);
-	                            expressionUpdated = true;
-	                        } else if (dhisFunction.name === "d2:countIfZeroPos") {
-	                            var variableName = $filter('trimvariablequalifiers')(parameters[0]);
-	                            var variableObject = variablesHash[variableName];
-	
-	                            var count = 0;
-	                            if (variableObject) {
-	                                if (variableObject.hasValue) {
-	                                    if (variableObject.allValues && variableObject.allValues.length > 0) {
-	                                        for (var i = 0; i < variableObject.allValues.length; i++) {
-	                                            if (variableObject.allValues[i] >= 0) {
-	                                                count++;
-	                                            }
-	                                        }
-	                                    } else {
-	                                        //The variable has a value, but no list of alternates. This means we only compare the elements real value
-	                                        if (variableObject.variableValue >= 0) {
-	                                            count = 1;
-	                                        }
-	                                    }
-	                                }
-	                            } else {
-	                                $log.warn("could not find variable to countifzeropos: " + variableName);
-	                            }
-	
-	                            //Replace the end evaluation of the dhis function:
-	                            expression = expression.replace(callToThisFunction, count);
-	                            expressionUpdated = true;
-	                        } else if (dhisFunction.name === "d2:countIfValue") {
-	                            var variableName = parameters[0];
-	                            var variableObject = variablesHash[variableName];
-	
-	                            var valueToCompare = VariableService.processValue(parameters[1], variableObject.variableType);
-	
-	                            var count = 0;
-	                            if (variableObject) {
-	                                if (variableObject.hasValue) {
-	                                    if (variableObject.allValues && variableObject.allValues.length > 0) {
-	                                        for (var i = 0; i < variableObject.allValues.length; i++) {
-	                                            if (valueToCompare === variableObject.allValues[i]) {
-	                                                count++;
-	                                            }
-	                                        }
-	                                    } else {
-	                                        //The variable has a value, but no list of alternates. This means we compare the standard variablevalue
-	                                        if (valueToCompare === variableObject.variableValue) {
-	                                            count = 1;
-	                                        }
-	                                    }
-	                                }
-	                            } else {
-	                                $log.warn("could not find variable to countifvalue: " + variableName);
-	                            }
-	
-	                            //Replace the end evaluation of the dhis function:
-	                            expression = expression.replace(callToThisFunction, count);
-	                            expressionUpdated = true;
-	                        } else if (dhisFunction.name === "d2:ceil") {
-	                            var ceiled = Math.ceil(parameters[0]);
-	                            //Replace the end evaluation of the dhis function:
-	                            expression = expression.replace(callToThisFunction, ceiled);
-	                            expressionUpdated = true;
-	                        } else if (dhisFunction.name === "d2:round") {
-	                            var rounded = Math.round(parameters[0]);
-	                            //Replace the end evaluation of the dhis function:
-	                            expression = expression.replace(callToThisFunction, rounded);
-	                            expressionUpdated = true;
-	                        } else if (dhisFunction.name === "d2:hasValue") {
-	                            var variableName = parameters[0];
-	                            var variableObject = variablesHash[variableName];
-	                            var valueFound = false;
-	                            if (variableObject) {
-	                                if (variableObject.hasValue) {
-	                                    valueFound = true;
-	                                }
-	                            } else {
-	                                $log.warn("could not find variable to check if has value: " + variableName);
-	                            }
-	
-	                            //Replace the end evaluation of the dhis function:
-	                            expression = expression.replace(callToThisFunction, valueFound);
-	                            expressionUpdated = true;
-	                        } else if (dhisFunction.name === "d2:lastEventDate") {
-	                            var variableName = parameters[0];
-	                            var variableObject = variablesHash[variableName];
-	                            var valueFound = "''";
-	                            if (variableObject) {
-	                                if (variableObject.variableEventDate) {
-	                                    valueFound = VariableService.processValue(variableObject.variableEventDate, 'DATE');
-	                                } else {
-	                                    $log.warn("no last event date found for variable: " + variableName);
-	                                }
-	                            } else {
-	                                $log.warn("could not find variable to check last event date: " + variableName);
-	                            }
-	
-	                            //Replace the end evaluation of the dhis function:
-	                            expression = expression.replace(callToThisFunction, valueFound);
-	                            expressionUpdated = true;
-	                        } else if (dhisFunction.name === "d2:validatePattern") {
-	                            var inputToValidate = parameters[0].toString();
-	                            var pattern = parameters[1];
-	                            var regEx = new RegExp(pattern, 'g');
-	                            var match = inputToValidate.match(regEx);
-	
-	                            var matchFound = false;
-	                            if (match !== null && inputToValidate === match[0]) {
-	                                matchFound = true;
-	                            }
-	
-	                            //Replace the end evaluation of the dhis function:
-	                            expression = expression.replace(callToThisFunction, matchFound);
-	                            expressionUpdated = true;
-	                        } else if (dhisFunction.name === "d2:addControlDigits") {
-	
-	                            var baseNumber = parameters[0];
-	                            var baseDigits = baseNumber.split('');
-	                            var error = false;
-	
-	                            var firstDigit = 0;
-	                            var secondDigit = 0;
-	
-	                            if (baseDigits && baseDigits.length < 10) {
-	                                var firstSum = 0;
-	                                var baseNumberLength = baseDigits.length;
-	                                //weights support up to 9 base digits:
-	                                var firstWeights = [3, 7, 6, 1, 8, 9, 4, 5, 2];
-	                                for (var i = 0; i < baseNumberLength && !error; i++) {
-	                                    firstSum += parseInt(baseDigits[i]) * firstWeights[i];
-	                                }
-	                                firstDigit = firstSum % 11;
-	
-	                                //Push the first digit to the array before continuing, as the second digit is a result of the
-	                                //base digits and the first control digit.
-	                                baseDigits.push(firstDigit);
-	                                //Weights support up to 9 base digits plus first control digit:
-	                                var secondWeights = [5, 4, 3, 2, 7, 6, 5, 4, 3, 2];
-	                                var secondSum = 0;
-	                                for (var i = 0; i < baseNumberLength + 1 && !error; i++) {
-	                                    secondSum += parseInt(baseDigits[i]) * secondWeights[i];
-	                                }
-	                                secondDigit = secondSum % 11;
-	
-	                                if (firstDigit === 10) {
-	                                    $log.warn("First control digit became 10, replacing with 0");
-	                                    firstDigit = 0;
-	                                }
-	                                if (secondDigit === 10) {
-	                                    $log.warn("Second control digit became 10, replacing with 0");
-	                                    secondDigit = 0;
-	                                }
-	                            } else {
-	                                $log.warn("Base nuber not well formed(" + baseNumberLength + " digits): " + baseNumber);
-	                            }
-	
-	                            if (!error) {
-	                                //Replace the end evaluation of the dhis function:
-	                                expression = expression.replace(callToThisFunction, baseNumber + firstDigit + secondDigit);
-	                                expressionUpdated = true;
-	                            } else {
-	                                //Replace the end evaluation of the dhis function:
-	                                expression = expression.replace(callToThisFunction, baseNumber);
-	                                expressionUpdated = true;
-	                            }
-	                        } else if (dhisFunction.name === "d2:checkControlDigits") {
-	                            $log.warn("checkControlDigits not implemented yet");
-	
-	                            //Replace the end evaluation of the dhis function:
-	                            expression = expression.replace(callToThisFunction, parameters[0]);
-	                            expressionUpdated = true;
-	                        } else if (dhisFunction.name === "d2:left") {
-	                            var string = String(parameters[0]);
-	                            var numChars = string.length < parameters[1] ? string.length : parameters[1];
-	                            var returnString = string.substring(0, numChars);
-	                            returnString = VariableService.processValue(returnString, 'TEXT');
-	                            expression = expression.replace(callToThisFunction, returnString);
-	                            expressionUpdated = true;
-	                        } else if (dhisFunction.name === "d2:right") {
-	                            var string = String(parameters[0]);
-	                            var numChars = string.length < parameters[1] ? string.length : parameters[1];
-	                            var returnString = string.substring(string.length - numChars, string.length);
-	                            returnString = VariableService.processValue(returnString, 'TEXT');
-	                            expression = expression.replace(callToThisFunction, returnString);
-	                            expressionUpdated = true;
-	                        } else if (dhisFunction.name === "d2:substring") {
-	                            var string = String(parameters[0]);
-	                            var startChar = string.length < parameters[1] - 1 ? -1 : parameters[1];
-	                            var endChar = string.length < parameters[2] ? -1 : parameters[2];
-	                            if (startChar < 0 || endChar < 0) {
-	                                expression = expression.replace(callToThisFunction, "''");
-	                                expressionUpdated = true;
-	                            } else {
-	                                var returnString = string.substring(startChar, endChar);
-	                                returnString = VariableService.processValue(returnString, 'TEXT');
-	                                expression = expression.replace(callToThisFunction, returnString);
-	                                expressionUpdated = true;
-	                            }
-	                        } else if (dhisFunction.name === "d2:split") {
-	                            var string = String(parameters[0]);
-	                            var splitArray = string.split(parameters[1]);
-	                            var returnPart = "";
-	                            if (splitArray.length >= parameters[2]) {
-	                                returnPart = splitArray[parameters[2]];
-	                            }
-	                            returnPart = VariableService.processValue(returnPart, 'TEXT');
-	                            expression = expression.replace(callToThisFunction, returnPart);
-	                            expressionUpdated = true;
-	                        } else if (dhisFunction.name === "d2:zScoreWFA") {
-	                            expression = expression.replace(callToThisFunction, getZScoreWFA(parameters[0], parameters[1], parameters[2]));
-	                            expressionUpdated = true;
-	                        } else if (dhisFunction.name === "d2:zScoreHFA") {
-	                            expression = expression.replace(callToThisFunction, getZScoreHFA(parameters[0], parameters[1], parameters[2]));
-	                            expressionUpdated = true;
-	                        } else if (dhisFunction.name === "d2:zScoreWFH") {
-	                            expression = expression.replace(callToThisFunction, getZScoreWFH(parameters[0], parameters[1], parameters[2]));
-	                            expressionUpdated = true;
-	                        } else if (dhisFunction.name === "d2:length") {
-	                            expression = expression.replace(callToThisFunction, String(parameters[0]).length);
-	                            expressionUpdated = true;
-	                        } else if (dhisFunction.name === "d2:condition") {
-	                            var toEvaluate = parameters[0] + "? " + parameters[1] + " : " + parameters[2];
-	                            var result = eval(toEvaluate);
-	                            expression = expression.replace(callsToThisFunction, result);
-	                            expressionUpdated = true;
-	                        } else if (dhisFunction.name === "d2:inOrgUnitGroup") {
-	                            var group = parameters[0];
-	                            var isInGroup = "false";
-	                            var orgUnitGroups = selectedOrgUnit && selectedOrgUnit.g || [];
-	                            var foundGroup = orgUnitGroups.find(function (o) {
-	                                return o.id === group || o.code === group;
-	                            });
-	                            if (foundGroup) {
-	                                isInGroup = "true";
-	                            }
-	
-	                            expression = expression.replace(callToThisFunction, isInGroup);
-	                            expressionUpdated = true;
-	                        } else if (dhisFunction.name === "d2:hasUserRole") {
-	                            var userRole = parameters[0];
-	                            var user = SessionStorageService.get('USER_PROFILE');
-	                            var valueFound = false;
-	                            angular.forEach(user.userCredentials.userRoles, function (role) {
-	                                if (role.id === userRole) {
-	                                    valueFound = true;
-	                                }
-	                            });
-	
-	                            //Replace the end evaluation of the dhis function:
-	                            expression = expression.replace(callToThisFunction, valueFound);
-	                            expressionUpdated = true;
-	                        } else if (dhisFunction.name === "d2:extractDataMatrixValue") {
-	                            expression = expression.replace(callsToThisFunction, (0, _dhis2D2GS1DataMatrix.extractDataMatrixValue)(parameters[0], parameters[1]));
-	                            expressionUpdated = true;
-	                        }
-	                    });
-	                });
-	
-	                //We only want to continue looping until we made a successful replacement,
-	                //and there is still occurrences of "d2:" in the code. In cases where d2: occur outside
-	                //the expected d2: function calls, one unneccesary iteration will be done and the
-	                //successfulExecution will be false coming back here, ending the loop. The last iteration
-	                //should be zero to marginal performancewise.
-	                if (expressionUpdated && expression.indexOf("d2:") !== -1) {
-	                    continueLooping = true;
-	                } else {
-	                    continueLooping = false;
+	    var dhisFunctions = {
+	        "d2:daysBetween": {
+	            parameters: 2,
+	            execute: function execute(parameters) {
+	                var firstdate = $filter('trimquotes')(parameters[0]);
+	                var seconddate = $filter('trimquotes')(parameters[1]);
+	                firstdate = moment(firstdate, CalendarService.getSetting().momentFormat);
+	                seconddate = moment(seconddate, CalendarService.getSetting().momentFormat);
+	                return seconddate.diff(firstdate, 'days');
+	            }
+	        },
+	        "d2:weeksBetween": {
+	            parameters: 2,
+	            execute: function execute(parameters) {
+	                var firstdate = $filter('trimquotes')(parameters[0]);
+	                var seconddate = $filter('trimquotes')(parameters[1]);
+	                firstdate = moment(firstdate, CalendarService.getSetting().momentFormat);
+	                seconddate = moment(seconddate, CalendarService.getSetting().momentFormat);
+	                return seconddate.diff(firstdate, 'weeks');
+	            }
+	        },
+	        "d2:monthsBetween": {
+	            parameters: 2,
+	            execute: function execute(parameters) {
+	                var firstdate = $filter('trimquotes')(parameters[0]);
+	                var seconddate = $filter('trimquotes')(parameters[1]);
+	                firstdate = moment(firstdate, CalendarService.getSetting().momentFormat);
+	                seconddate = moment(seconddate, CalendarService.getSetting().momentFormat);
+	                return seconddate.diff(firstdate, 'months');
+	            }
+	        },
+	        "d2:yearsBetween": {
+	            parameters: 2,
+	            execute: function execute(parameters) {
+	                var firstdate = $filter('trimquotes')(parameters[0]);
+	                var seconddate = $filter('trimquotes')(parameters[1]);
+	                firstdate = moment(firstdate, CalendarService.getSetting().momentFormat);
+	                seconddate = moment(seconddate, CalendarService.getSetting().momentFormat);
+	                return seconddate.diff(firstdate, 'years');
+	            }
+	        },
+	        "d2:floor": {
+	            parameters: 1,
+	            execute: function execute(parameters) {
+	                return Math.floor(parameters[0]);
+	            }
+	        },
+	        "d2:modulus": {
+	            parameters: 2,
+	            execute: function execute(parameters) {
+	                var dividend = Number(parameters[0]);
+	                var divisor = Number(parameters[1]);
+	                return dividend % divisor;
+	            }
+	        },
+	        "d2:concatenate": {
+	            execute: function execute(parameters) {
+	                var returnString = "'";
+	                for (var i = 0; i < parameters.length; i++) {
+	                    returnString += parameters[i];
 	                }
+	                returnString += "'";
+	                return returnString;
+	            }
+	        },
+	        "d2:addDays": {
+	            parameters: 2,
+	            execute: function execute(parameters) {
+	                var date = $filter('trimquotes')(parameters[0]);
+	                var daystoadd = $filter('trimquotes')(parameters[1]);
+	                var newdate = DateUtils.format(moment(date, CalendarService.getSetting().momentFormat).add(daystoadd, 'days'));
+	                var newdatestring = "'" + newdate + "'";
+	                return newdatestring;
+	            }
+	        },
+	        "d2:zing": {
+	            parameters: 1,
+	            execute: function execute(parameters) {
+	                var number = parameters[0];
+	                if (number < 0) {
+	                    number = 0;
+	                }
+	                return number;
+	            }
+	        },
+	        "d2:oizp": function d2Oizp(parameters) {
+	            var number = parameters[0];
+	            var output = 1;
+	            if (number < 0) {
+	                output = 0;
+	            }
+	            return output;
+	        },
+	        "d2:count": {
+	            parameters: 1,
+	            execute: function execute(parameters, variablesHash) {
+	                var variableName = parameters[0];
+	                var variableObject = variablesHash[variableName];
+	                var count = 0;
+	                if (variableObject) {
+	                    if (variableObject.hasValue) {
+	                        if (variableObject.allValues && variableObject.allValues.length > 0) {
+	                            count = variableObject.allValues.length;
+	                        } else {
+	                            //If there is a value found for the variable, the count is 1 even if there is no list of alternate values
+	                            //This happens for variables of "DATAELEMENT_CURRENT_STAGE" and "TEI_ATTRIBUTE"
+	                            count = 1;
+	                        }
+	                    }
+	                } else {
+	                    $log.warn("could not find variable to count: " + variableName);
+	                }
+	                return count;
+	            }
+	        },
+	        "d2:countIfZeroPos": {
+	            parameters: 1,
+	            execute: function execute(parameters, variablesHash) {
+	                var variableName = $filter('trimvariablequalifiers')(parameters[0]);
+	                var variableObject = variablesHash[variableName];
+	
+	                var count = 0;
+	                if (variableObject) {
+	                    if (variableObject.hasValue) {
+	                        if (variableObject.allValues && variableObject.allValues.length > 0) {
+	                            for (var i = 0; i < variableObject.allValues.length; i++) {
+	                                if (variableObject.allValues[i] >= 0) {
+	                                    count++;
+	                                }
+	                            }
+	                        } else {
+	                            //The variable has a value, but no list of alternates. This means we only compare the elements real value
+	                            if (variableObject.variableValue >= 0) {
+	                                count = 1;
+	                            }
+	                        }
+	                    }
+	                } else {
+	                    $log.warn("could not find variable to countifzeropos: " + variableName);
+	                }
+	                return count;
+	            }
+	        },
+	        "d2:countIfValue": {
+	            parameters: 2,
+	            execute: function execute(parameters, variablesHash) {
+	                var variableName = parameters[0];
+	                var variableObject = variablesHash[variableName];
+	
+	                var valueToCompare = VariableService.processValue(parameters[1], variableObject.variableType);
+	
+	                var count = 0;
+	                if (variableObject) {
+	                    if (variableObject.hasValue) {
+	                        if (variableObject.allValues && variableObject.allValues.length > 0) {
+	                            for (var i = 0; i < variableObject.allValues.length; i++) {
+	                                if (valueToCompare === variableObject.allValues[i]) {
+	                                    count++;
+	                                }
+	                            }
+	                        } else {
+	                            //The variable has a value, but no list of alternates. This means we compare the standard variablevalue
+	                            if (valueToCompare === variableObject.variableValue) {
+	                                count = 1;
+	                            }
+	                        }
+	                    }
+	                } else {
+	                    $log.warn("could not find variable to countifvalue: " + variableName);
+	                }
+	                return count;
+	            }
+	        },
+	        "d2:ceil": {
+	            parameters: 1,
+	            execute: function execute(parameters) {
+	                return Math.ceil(parameters[0]);
+	            }
+	        },
+	        "d2:round": {
+	            parameters: 1,
+	            execute: function execute(parameters) {
+	                return Math.round(parameters[0]);
+	            }
+	        },
+	        "d2:hasValue": {
+	            parameters: 1,
+	            execute: function execute(parameters, variablesHash) {
+	                var variableName = parameters[0];
+	                var variableObject = variablesHash[variableName];
+	                var valueFound = false;
+	                if (variableObject) {
+	                    if (variableObject.hasValue) {
+	                        valueFound = true;
+	                    }
+	                } else {
+	                    $log.warn("could not find variable to check if has value: " + variableName);
+	                }
+	                return valueFound;
+	            }
+	        },
+	        "d2:lastEventDate": {
+	            parameters: 1,
+	            execute: function execute(parameters, variablesHash) {
+	                z;
+	                var variableName = parameters[0];
+	                var variableObject = variablesHash[variableName];
+	                var valueFound = "''";
+	                if (variableObject) {
+	                    if (variableObject.variableEventDate) {
+	                        valueFound = VariableService.processValue(variableObject.variableEventDate, 'DATE');
+	                    } else {
+	                        $log.warn("no last event date found for variable: " + variableName);
+	                    }
+	                } else {
+	                    $log.warn("could not find variable to check last event date: " + variableName);
+	                }
+	                return valueFound;
+	            }
+	        },
+	        "d2:validatePattern": {
+	            parameters: 2,
+	            execute: function execute(parameters) {
+	                var inputToValidate = parameters[0].toString();
+	                var pattern = parameters[1];
+	                var regEx = new RegExp(pattern, 'g');
+	                var match = inputToValidate.match(regEx);
+	
+	                var matchFound = false;
+	                if (match !== null && inputToValidate === match[0]) {
+	                    matchFound = true;
+	                }
+	                return matchFound;
+	            }
+	        },
+	        "d2:addControlDigits": {
+	            parameters: 1,
+	            execute: function execute(parameters) {
+	                var baseNumber = parameters[0];
+	                var baseDigits = baseNumber.split('');
+	                var error = false;
+	
+	                var firstDigit = 0;
+	                var secondDigit = 0;
+	
+	                if (baseDigits && baseDigits.length < 10) {
+	                    var firstSum = 0;
+	                    var baseNumberLength = baseDigits.length;
+	                    //weights support up to 9 base digits:
+	                    var firstWeights = [3, 7, 6, 1, 8, 9, 4, 5, 2];
+	                    for (var i = 0; i < baseNumberLength && !error; i++) {
+	                        firstSum += parseInt(baseDigits[i]) * firstWeights[i];
+	                    }
+	                    firstDigit = firstSum % 11;
+	
+	                    //Push the first digit to the array before continuing, as the second digit is a result of the
+	                    //base digits and the first control digit.
+	                    baseDigits.push(firstDigit);
+	                    //Weights support up to 9 base digits plus first control digit:
+	                    var secondWeights = [5, 4, 3, 2, 7, 6, 5, 4, 3, 2];
+	                    var secondSum = 0;
+	                    for (var i = 0; i < baseNumberLength + 1 && !error; i++) {
+	                        secondSum += parseInt(baseDigits[i]) * secondWeights[i];
+	                    }
+	                    secondDigit = secondSum % 11;
+	
+	                    if (firstDigit === 10) {
+	                        $log.warn("First control digit became 10, replacing with 0");
+	                        firstDigit = 0;
+	                    }
+	                    if (secondDigit === 10) {
+	                        $log.warn("Second control digit became 10, replacing with 0");
+	                        secondDigit = 0;
+	                    }
+	                } else {
+	                    $log.warn("Base nuber not well formed(" + baseNumberLength + " digits): " + baseNumber);
+	                }
+	
+	                return !error ? baseNumber + firstDigit + secondDigit : baseNumber;
+	            }
+	        },
+	        "d2:checkControlDigits": {
+	            parameters: 1,
+	            execute: function execute(parameters) {
+	                $log.warn("checkControlDigits not implemented yet");
+	
+	                return parameters[0];
+	            }
+	        },
+	        "d2:left": {
+	            parameters: 2,
+	            execute: function execute(parameters) {
+	                var string = String(parameters[0]);
+	                var numChars = string.length < parameters[1] ? string.length : parameters[1];
+	                var returnString = string.substring(0, numChars);
+	                returnString = VariableService.processValue(returnString, 'TEXT');
+	                return returnString;
+	            }
+	        },
+	        "d2:right": {
+	            parameters: 2,
+	            execute: function execute(parameters) {
+	                var string = String(parameters[0]);
+	                var numChars = string.length < parameters[1] ? string.length : parameters[1];
+	                var returnString = string.substring(string.length - numChars, string.length);
+	                returnString = VariableService.processValue(returnString, 'TEXT');
+	                return returnString;
+	            }
+	        },
+	        "d2:substring": {
+	            parameters: 3,
+	            execute: function execute(parameters) {
+	                var string = String(parameters[0]);
+	                var startChar = string.length < parameters[1] - 1 ? -1 : parameters[1];
+	                var endChar = string.length < parameters[2] ? -1 : parameters[2];
+	                if (startChar < 0 || endChar < 0) {
+	                    return "''";
+	                }
+	                var returnString = string.substring(startChar, endChar);
+	                returnString = VariableService.processValue(returnString, 'TEXT');
+	                return returnString;
+	            }
+	        },
+	        "d2:split": {
+	            parameters: 3,
+	            execute: function execute(parameters) {
+	                var string = String(parameters[0]);
+	                var splitArray = string.split(parameters[1]);
+	                var returnPart = "";
+	                if (splitArray.length >= parameters[2]) {
+	                    returnPart = splitArray[parameters[2]];
+	                }
+	                return VariableService.processValue(returnPart, 'TEXT');
+	            }
+	        },
+	        "d2:zScoreWFA": {
+	            parameters: 3,
+	            execute: function execute(parameters) {
+	                return getZScoreWFA(parameters[0], parameters[1], parameters[2]);
+	            }
+	        },
+	        "d2:zScoreHFA": {
+	            parameters: 3,
+	            execute: function execute(parameters) {
+	                return getZScoreHFA(parameters[0], parameters[1], parameters[2]);
+	            }
+	        },
+	        "d2:zScoreWFH": {
+	            parameters: 3,
+	            execute: function execute(parameters) {
+	                return getZScoreWFH(parameters[0], parameters[1], parameters[2]);
+	            }
+	        },
+	        "d2:length": {
+	            parameters: 1,
+	            execute: function execute(parameters) {
+	                return String(parameters[0]).length;
+	            }
+	        },
+	        "d2:condition": {
+	            parameters: 3,
+	            execute: function execute(parameters) {
+	                var toEvaluate = parameters[0] + "? " + parameters[1] + " : " + parameters[2];
+	                return evaluate(toEvaluate);
+	            }
+	        },
+	        "d2:inOrgUnitGroup": {
+	            parameters: 1,
+	            execute: function execute(parameters) {
+	                var group = parameters[0];
+	                var isInGroup = "false";
+	                var orgUnitGroups = selectedOrgUnit && selectedOrgUnit.g || [];
+	                var foundGroup = orgUnitGroups.find(function (o) {
+	                    return o.id === group || o.code === group;
+	                });
+	                if (foundGroup) {
+	                    isInGroup = "true";
+	                }
+	                return isInGroup;
+	            }
+	        },
+	        "d2:hasUserRole": {
+	            parameters: 1,
+	            execute: function execute(parameters) {
+	                var userRole = parameters[0];
+	                var user = SessionStorageService.get('USER_PROFILE');
+	                var valueFound = false;
+	                angular.forEach(user.userCredentials.userRoles, function (role) {
+	                    if (role.id === userRole) {
+	                        valueFound = true;
+	                    }
+	                });
+	                return valueFound;
+	            }
+	        },
+	        "d2:extractDataMatrixValue": {
+	            parameters: 2,
+	            execute: function execute(parameters) {
+	                return (0, _dhis2D2GS1DataMatrix.extractDataMatrixValue)(parameters[0], parameters[1]);
+	            }
+	        }
+	    };
+	
+	    /**
+	     * Creates a function with closed scope where the given string can be executed as javascript
+	     * @param code
+	     * @returns {*}
+	     */
+	    function evaluate(code) {
+	        var func = new Function('"use strict";return ' + code);
+	        return func();
+	    }
+	
+	    function extractArgumentIndices(expression, expressionModuloStrings, startIndexFunction) {
+	        var index = expressionModuloStrings.indexOf('(', startIndexFunction) + 1;
+	        var argStart = index;
+	        var parenthesesCount = 1;
+	        var argIndexes = [];
+	
+	        for (; index < expression.length; index += 1) {
+	            if (expressionModuloStrings[index] === '(') {
+	                parenthesesCount += 1;
+	            } else if (expressionModuloStrings[index] === ')') {
+	                parenthesesCount -= 1;
+	                if (parenthesesCount === 0) {
+	                    argIndexes.push([argStart, index]);
+	                    break;
+	                }
+	            } else if (parenthesesCount === 1 && expressionModuloStrings[index] === ',') {
+	                argIndexes.push([argStart, index]);
+	                argStart = index + 1;
 	            }
 	        }
 	
-	        return expression;
+	        return {
+	            argIndexes: argIndexes,
+	            closingIndex: index
+	        };
+	    }
+	
+	    function extractArguments(expression, expressionModuloStrings, startIndexFunction) {
+	        var _extractArgumentIndic = extractArgumentIndices(expression, expressionModuloStrings, startIndexFunction),
+	            argIndexes = _extractArgumentIndic.argIndexes,
+	            closingIndex = _extractArgumentIndic.closingIndex;
+	
+	        return {
+	            args: argIndexes.map(function (_ref) {
+	                var _ref2 = _slicedToArray(_ref, 2),
+	                    start = _ref2[0],
+	                    end = _ref2[1];
+	
+	                return {
+	                    argument: expression.substring(start, end),
+	                    argumentModuloStrings: expressionModuloStrings.substring(start, end)
+	                };
+	            }),
+	            closingIndex: closingIndex
+	        };
+	    }
+	
+	    /**
+	     * Checks whether
+	     *  a) no parameters is given when a function requires parameters,
+	     *  b) the number of parameters given is not aligned with the function definition.
+	     *
+	     * @param dhisFunctionParameters
+	     * @param parameters
+	     * @returns {boolean}
+	     */
+	    function isFunctionSignatureBroken(dhisFunctionParameters, parameters) {
+	        if (dhisFunctionParameters) {
+	            // But we are only checking parameters where the dhisFunction actually has
+	            // a defined set of parameters(concatenate, for example, does not have a fixed number);
+	            var numParameters = parameters.length || 0;
+	
+	            return numParameters !== dhisFunctionParameters;
+	        }
+	        return false;
+	    };
+	
+	    function internalExecuteExpression(applicableDhisFunctions, expression, expressionModuloStrings, variablesHash) {
+	        // Find all d2-functions appearing in the given expression
+	        var includedDhisFunctions = applicableDhisFunctions.filter(function (_ref3) {
+	            var name = _ref3.name;
+	            return expressionModuloStrings.includes('' + name);
+	        });
+	
+	        if (!includedDhisFunctions.length) {
+	            return evaluate(expression);
+	        }
+	
+	        var includedFunctionNames = includedDhisFunctions.map(function (_ref4) {
+	            var name = _ref4.name;
+	            return name;
+	        }).join('|');
+	        var regularExFunctionCall = new RegExp('\\b(?:' + includedFunctionNames + ')\\b', 'g');
+	        var functionCalls = [].concat(_toConsumableArray(expression.matchAll(regularExFunctionCall)));
+	
+	        // Run each d2-function. d2-functions appearing in the argument list of another d2-function
+	        // is handled using recursive calls to internalExecuteExpression.
+	
+	        var _functionCalls$reduce = functionCalls.reduce(function (_ref5, functionCall) {
+	            var accExpression = _ref5.accExpression,
+	                currentExpressionIndex = _ref5.currentExpressionIndex;
+	
+	            if (functionCall.index < currentExpressionIndex) {
+	                // This means the d2-function appears in the argument list of another
+	                // d2-function, and has therefore already been executed at this point
+	                return {
+	                    accExpression: accExpression,
+	                    currentExpressionIndex: currentExpressionIndex
+	                };
+	            }
+	
+	            accExpression += expression.substring(currentExpressionIndex, functionCall.index);
+	
+	            var _extractArguments = extractArguments(expression, expressionModuloStrings, functionCall.index),
+	                args = _extractArguments.args,
+	                closingIndex = _extractArguments.closingIndex;
+	
+	            var evaluatedArguments = args.map(function (_ref6) {
+	                var argument = _ref6.argument,
+	                    argumentModuloStrings = _ref6.argumentModuloStrings;
+	                return internalExecuteExpression(includedDhisFunctions, argument, argumentModuloStrings, variablesHash);
+	            });
+	            var functionName = functionCall[0];
+	            var dhisFunction = dhisFunctions[functionName];
+	            if (isFunctionSignatureBroken(dhisFunction.parameters, evaluatedArguments)) {
+	                $log.warn(functionName + " was not passed valid arguments");
+	                // Function call is not possible to evaluate, remove the call
+	                accExpression += 'false';
+	            } else {
+	                var dhisFunctionResult = dhisFunction.execute(evaluatedArguments, variablesHash);
+	                accExpression += dhisFunctionResult;
+	            }
+	
+	            return {
+	                accExpression: accExpression,
+	                currentExpressionIndex: closingIndex + 1
+	            };
+	        }, { accExpression: '', currentExpressionIndex: 0 }),
+	            accExpressionWithFunctionResults = _functionCalls$reduce.accExpression,
+	            expressionIndexAfterFunctionExecution = _functionCalls$reduce.currentExpressionIndex;
+	
+	        var expressionToEvaluate = accExpressionWithFunctionResults + expression.substring(expressionIndexAfterFunctionExecution, expression.length);
+	
+	        return evaluate(expressionToEvaluate);
 	    };
 	
 	    var runExpression = function runExpression(expression, beforereplacement, identifier, flag, variablesHash, selectedOrgUnit) {
-	        //determine if expression is true, and actions should be effectuated
-	        //If DEBUG mode, use try catch and report errors. If not, omit the heavy try-catch loop.:
 	        var answer = false;
-	        if (flag && flag.debug) {
-	            try {
+	        try {
+	            var expressionModuloStrings = expression.replace(/'[^']*'|"[^"]*"/g, function (match) {
+	                return ' '.repeat(match.length);
+	            });
+	            var applicableDhisFunctions = Object.entries(dhisFunctions).map(function (_ref7) {
+	                var _ref8 = _slicedToArray(_ref7, 2),
+	                    key = _ref8[0],
+	                    value = _ref8[1];
 	
-	                var dhisfunctionsevaluated = runDhisFunctions(expression, variablesHash, flag, selectedOrgUnit);
-	                answer = eval(dhisfunctionsevaluated);
+	                return _extends({}, value, { name: key });
+	            });
+	            answer = internalExecuteExpression(applicableDhisFunctions, expression, expressionModuloStrings, variablesHash);
 	
-	                if (flag.verbose) {
-	                    $log.info("Expression with id " + identifier + " was successfully run. Original condition was: " + beforereplacement + " - Evaluation ended up as:" + expression + " - Result of evaluation was:" + answer);
-	                }
-	            } catch (e) {
-	                $log.warn("Expression with id " + identifier + " could not be run. Original condition was: " + beforereplacement + " - Evaluation ended up as:" + expression + " - error message:" + e);
+	            if (flag.verbose) {
+	                $log.info("Expression with id " + identifier + " was successfully run. Original condition was: " + beforereplacement + " - Evaluation ended up as:" + expression + " - Result of evaluation was:" + answer);
 	            }
-	        } else {
-	            //Just run the expression. This is much faster than the debug route: http://jsperf.com/try-catch-block-loop-performance-comparison
-	            var dhisfunctionsevaluated = runDhisFunctions(expression, variablesHash, flag);
-	            answer = eval(dhisfunctionsevaluated);
+	        } catch (e) {
+	            $log.warn("Expression with id " + identifier + " could not be run. Original condition was: " + beforereplacement + " - Evaluation ended up as:" + expression + " - error message:" + e);
 	        }
 	        return answer;
 	    };
@@ -4445,8 +4583,7 @@
 	            });
 	        }
 	    };
-	}]); /* Pagination service */
-	/* global angular, dhis2, moment */
+	}]);
 
 /***/ }),
 /* 5 */
@@ -39781,4 +39918,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-621879bf9a13dd545651.js.map
+//# sourceMappingURL=app-fb0bb8e0302ffcd4400c.js.map
