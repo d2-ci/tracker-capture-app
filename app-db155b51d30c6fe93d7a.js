@@ -14413,10 +14413,6 @@
 	        }
 	    });
 	
-	    $scope.showFieldIssues = function (field) {
-	        return field.$modelValue || $scope.interacted(field);
-	    };
-	
 	    $scope.interacted = function (field) {
 	        var status = false;
 	        if (field) {
@@ -39681,4 +39677,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-11d11cc077554789e9fa.js.map
+//# sourceMappingURL=app-db155b51d30c6fe93d7a.js.map
