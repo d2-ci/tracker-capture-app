@@ -4665,7 +4665,7 @@
 	        var gs1Identifier = dataMatrix.substring(0, 3);
 	        if (gs1Elements.get('GS1_d2_IDENTIFIER') === gs1Identifier || gs1Elements.get('GS1_Q3_IDENTIFIER') === gs1Identifier) {
 	            var dataMatrixValue = extractGS1DataMatrixValue(key, dataMatrix);
-	            return '\'' + dataMatrixValue + '\'';
+	            return dataMatrixValue;
 	        }
 	        return 'Unsupported GS1 identifier: {gs1Identifier}';
 	    }
@@ -39677,4 +39677,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-6830ba4326f4dcc743e9.js.map
+//# sourceMappingURL=app-60cf9643fd182910f8c3.js.map
