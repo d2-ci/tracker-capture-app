@@ -4286,7 +4286,7 @@
 	            return deferred.promise;
 	        }
 	    };
-	}]).factory("AttributeUtils", ["$http", "DHIS2URL", function ($http, DHIS2URL) {
+	}]).factory("AttributeUtils", ["$http", "DHIS2URL", "$translate", function ($http, DHIS2URL, $translate) {
 	    var getValueUrl = function getValueUrl(valueToSet, selectedTei, program, orgUnit, required) {
 	        var valueUrlBase = valueToSet + "=";
 	        var valueUrl = null;
@@ -4343,14 +4343,11 @@
 	                });
 	            });
 	        },
-	        defaultAttributeSections: function defaultAttributeSections(attributes) {
-	            var _ref10;
+	        defaultAttributeSections: function defaultAttributeSections(attributes, widgetTitle) {
+	            var _ref9;
 	
-	            var attributeSections = [{ attributes: attributes.filter(function (_ref9) {
-	                    var attribute = _ref9.attribute;
-	                    return attribute;
-	                }) }];
-	            return _ref10 = {}, _defineProperty(_ref10, true, attributeSections), _defineProperty(_ref10, false, attributeSections), _ref10;
+	            var attributeSections = [{ displayName: widgetTitle === 'profile' ? '' : $translate.instant('profile'), attributes: attributes }];
+	            return _ref9 = {}, _defineProperty(_ref9, true, attributeSections), _defineProperty(_ref9, false, attributeSections), _ref9;
 	        },
 	        userDefinedAttributeSections: function userDefinedAttributeSections(attributes, programSections) {
 	            var _programSections$redu;
@@ -4368,8 +4365,8 @@
 	                var attributeList = acc[false][0].attributes;
 	                acc[true].push({
 	                    displayName: programSection.displayName,
-	                    attributes: programSection.trackedEntityAttributes.map(function (_ref11) {
-	                        var id = _ref11.id;
+	                    attributes: programSection.trackedEntityAttributes.map(function (_ref10) {
+	                        var id = _ref10.id;
 	
 	                        attributeList.push(programTrackedEntityAttributes[id]);
 	                        return programTrackedEntityAttributes[id];
@@ -13932,7 +13929,7 @@
 	                        $scope.customDataEntryForm = CustomFormService.getForProgramStage($scope.currentStage, $scope.prStDes);
 	                    }
 	                }
-	                $scope.attributeSections = $scope.selectedProgram.programSections.length ? AttributeUtils.userDefinedAttributeSections($scope.attributes, $scope.selectedProgram.programSections) : AttributeUtils.defaultAttributeSections($scope.attributes);
+	                $scope.attributeSections = $scope.selectedProgram.programSections.length ? AttributeUtils.userDefinedAttributeSections($scope.attributes, $scope.selectedProgram.programSections) : AttributeUtils.defaultAttributeSections($scope.attributes, $scope.widgetTitle);
 	            });
 	        }
 	
@@ -13948,7 +13945,7 @@
 	                    if (generateAttributes) {
 	                        fetchGeneratedAttributes();
 	                    }
-	                    $scope.attributeSections = AttributeUtils.defaultAttributeSections($scope.attributes);
+	                    $scope.attributeSections = AttributeUtils.defaultAttributeSections($scope.attributes, $scope.widgetTitle);
 	                }
 	            });
 	        }
@@ -40526,4 +40523,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-449bb3753b0e5c0d7cb3.js.map
+//# sourceMappingURL=app-e9fb46fd50e6e61a8022.js.map
