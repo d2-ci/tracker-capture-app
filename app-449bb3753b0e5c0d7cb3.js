@@ -4352,7 +4352,7 @@
 	                }) }];
 	            return _ref10 = {}, _defineProperty(_ref10, true, attributeSections), _defineProperty(_ref10, false, attributeSections), _ref10;
 	        },
-	        customAttributeSections: function customAttributeSections(attributes, programSections) {
+	        userDefinedAttributeSections: function userDefinedAttributeSections(attributes, programSections) {
 	            var _programSections$redu;
 	
 	            var programTrackedEntityAttributes = attributes.reduce(function (acc, attribute) {
@@ -4376,7 +4376,7 @@
 	                    })
 	                });
 	                return acc;
-	            }, (_programSections$redu = {}, _defineProperty(_programSections$redu, true, []), _defineProperty(_programSections$redu, false, [{ attributes: [] }]), _defineProperty(_programSections$redu, 'custom', true), _programSections$redu));
+	            }, (_programSections$redu = {}, _defineProperty(_programSections$redu, true, []), _defineProperty(_programSections$redu, false, [{ attributes: [] }]), _programSections$redu));
 	        }
 	    };
 	}]);
@@ -13932,7 +13932,7 @@
 	                        $scope.customDataEntryForm = CustomFormService.getForProgramStage($scope.currentStage, $scope.prStDes);
 	                    }
 	                }
-	                $scope.attributeSections = $scope.selectedProgram.programSections.length ? AttributeUtils.customAttributeSections($scope.attributes, $scope.selectedProgram.programSections) : AttributeUtils.defaultAttributeSections($scope.attributes);
+	                $scope.attributeSections = $scope.selectedProgram.programSections.length ? AttributeUtils.userDefinedAttributeSections($scope.attributes, $scope.selectedProgram.programSections) : AttributeUtils.defaultAttributeSections($scope.attributes);
 	            });
 	        }
 	
@@ -21676,7 +21676,7 @@
 	                    $scope.trackedEntityForm.displayIncidentDate = $scope.base.selectedProgramForRelative.displayIncidentDate;
 	                    $scope.customRegistrationForm = CustomFormService.getForTrackedEntity($scope.trackedEntityForm, 'RELATIONSHIP');
 	                }
-	                $scope.attributeSections = $scope.base.selectedProgramForRelative.programSections.length ? AttributeUtils.customAttributeSections($scope.attributes, $scope.base.selectedProgramForRelative.programSections) : AttributeUtils.defaultAttributeSections($scope.attributes);
+	                $scope.attributeSections = $scope.base.selectedProgramForRelative.programSections.length ? AttributeUtils.userDefinedAttributeSections($scope.attributes, $scope.base.selectedProgramForRelative.programSections) : AttributeUtils.defaultAttributeSections($scope.attributes);
 	            }
 	            assignInheritance();
 	            fetchGeneratedAttributes();
@@ -40526,4 +40526,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-b7ac02678db6ee9792f7.js.map
+//# sourceMappingURL=app-449bb3753b0e5c0d7cb3.js.map
