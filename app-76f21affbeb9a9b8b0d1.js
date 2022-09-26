@@ -3793,7 +3793,7 @@
 	                                    programStage: action.programStage,
 	                                    programIndicator: action.programIndicator,
 	                                    programStageSection: action.programStageSection && action.programStageSection.id ? action.programStageSection.id : null,
-	                                    content:action.displayContent,
+	                                    content:action.content,
 	                                    data:action.data,
 	                                    ineffect:undefined
 	                                };
@@ -39991,4 +39991,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-90edf389b0bfaa724afc.js.map
+//# sourceMappingURL=app-76f21affbeb9a9b8b0d1.js.map
