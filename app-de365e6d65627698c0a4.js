@@ -669,7 +669,7 @@
 	            if (!dateValue) {
 	                return;
 	            }
-	            dateValue = moment(dateValue, "YYYY-MM-DD");
+	            dateValue = moment(dateValue, CalendarService.getSetting().momentFormat);
 	            if (dateValue.isBefore(moment())) {
 	                return true;
 	            }
@@ -679,7 +679,7 @@
 	            if (!dateValue) {
 	                return;
 	            }
-	            dateValue = moment(dateValue, "YYYY-MM-DD");
+	            dateValue = moment(dateValue, CalendarService.getSetting().momentFormat);
 	            if (dateValue.isAfter(moment())) {
 	                return true;
 	            }
@@ -15452,6 +15452,10 @@
 	
 	    $scope.activateDeactivateEnrollment = function () {
 	
+	        if (isInvalidEnrollmentDate() || isInvalidIncidentDate()) {
+	            return;
+	        }
+	
 	        if ($scope.enrollmentForm && $scope.enrollmentForm.$invalid) {
 	            NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("form_invalid"));
 	            return;
@@ -15478,6 +15482,10 @@
 	    };
 	
 	    $scope.completeReopenEnrollment = function () {
+	
+	        if (isInvalidEnrollmentDate() || isInvalidIncidentDate()) {
+	            return;
+	        }
 	
 	        if ($scope.enrollmentForm && $scope.enrollmentForm.$invalid) {
 	            NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("form_invalid"));
@@ -15550,6 +15558,10 @@
 	
 	    $scope.markForFollowup = function () {
 	
+	        if (isInvalidEnrollmentDate() || isInvalidIncidentDate()) {
+	            return;
+	        }
+	
 	        if ($scope.enrollmentForm && $scope.enrollmentForm.$invalid) {
 	            NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("form_invalid"));
 	            return;
@@ -15560,12 +15572,8 @@
 	    };
 	
 	    $scope.updateEnrollmentDate = function () {
-	        if ($scope.enrollmentForm && $scope.enrollmentForm.enrollmentDateForm && $scope.enrollmentForm.enrollmentDateForm.$invalid || !DateUtils.isValid($scope.enrollmentDateState.date) || !$scope.selectedProgram.selectEnrollmentDatesInFuture && DateUtils.isAfterToday($scope.enrollmentDateState.date)) {
-	            $scope.enrollmentDateState.date = $scope.selectedEnrollment.enrollmentDate;
-	            return NotificationService.showNotifcationDialog($translate.instant('error'), $scope.selectedProgram.enrollmentDateLabel + ' ' + $translate.instant('invalid'));
-	        } else if (!$scope.userAuthority.canEditExpiredStuff && !DateUtils.verifyExpiryDate($scope.enrollmentDateState.date, $scope.selectedProgram.expiryPeriodType, $scope.selectedProgram.expiryDays)) {
-	            $scope.enrollmentDateState.date = $scope.selectedEnrollment.enrollmentDate;
-	            return NotificationService.showNotifcationDialog($translate.instant('error'), $scope.selectedProgram.enrollmentDateLabel + ' ' + $translate.instant('expired'));
+	        if (isInvalidEnrollmentDate()) {
+	            return;
 	        } else if ($scope.enrollmentDateState.warnIfEdit) {
 	            $scope.askUserToConfirmDateChange($scope.selectedProgram.enrollmentDateLabel).then(function (result) {
 	                $scope.selectedEnrollment.enrollmentDate = $scope.enrollmentDateState.date;
@@ -15579,13 +15587,22 @@
 	        }
 	    };
 	
+	    var isInvalidEnrollmentDate = function isInvalidEnrollmentDate() {
+	        if ($scope.enrollmentForm && $scope.enrollmentForm.enrollmentDateForm && $scope.enrollmentForm.enrollmentDateForm.$invalid || !DateUtils.isValid($scope.enrollmentDateState.date) || !$scope.selectedProgram.selectEnrollmentDatesInFuture && DateUtils.isAfterToday($scope.enrollmentDateState.date)) {
+	            $scope.enrollmentDateState.date = $scope.selectedEnrollment.enrollmentDate;
+	            NotificationService.showNotifcationDialog($translate.instant('error'), $scope.selectedProgram.enrollmentDateLabel + ' ' + $translate.instant('invalid'));
+	            return true;
+	        } else if (!$scope.userAuthority.canEditExpiredStuff && !DateUtils.verifyExpiryDate($scope.enrollmentDateState.date, $scope.selectedProgram.expiryPeriodType, $scope.selectedProgram.expiryDays)) {
+	            $scope.enrollmentDateState.date = $scope.selectedEnrollment.enrollmentDate;
+	            NotificationService.showNotifcationDialog($translate.instant('error'), $scope.selectedProgram.enrollmentDateLabel + ' ' + $translate.instant('expired'));
+	            return true;
+	        }
+	        return false;
+	    };
+	
 	    $scope.updateIncidentDate = function () {
-	        if ($scope.enrollmentForm && $scope.enrollmentForm.incidentDateForm && $scope.enrollmentForm.incidentDateForm.$invalid || !DateUtils.isValid($scope.incidentDateState.date) || !$scope.selectedProgram.selectIncidentDatesInFuture && DateUtils.isAfterToday($scope.incidentDateState.date)) {
-	            $scope.incidentDateState.date = $scope.selectedEnrollment.incidentDate;
-	            return NotificationService.showNotifcationDialog($translate.instant('error'), $scope.selectedProgram.incidentDateLabel + ' ' + $translate.instant('invalid'));
-	        } else if (!$scope.userAuthority.canEditExpiredStuff && !DateUtils.verifyExpiryDate($scope.incidentDateState.date, $scope.selectedProgram.expiryPeriodType, $scope.selectedProgram.expiryDays)) {
-	            $scope.incidentDateState.date = $scope.selectedEnrollment.incidentDate;
-	            return NotificationService.showNotifcationDialog($translate.instant('error'), $scope.selectedProgram.incidentDateLabel + ' ' + $translate.instant('expired'));
+	        if (isInvalidIncidentDate()) {
+	            return;
 	        } else if ($scope.incidentDateState.warnIfEdit) {
 	            $scope.askUserToConfirmDateChange($scope.selectedProgram.incidentDateLabel).then(function (result) {
 	                $scope.selectedEnrollment.incidentDate = $scope.incidentDateState.date;
@@ -15597,6 +15614,19 @@
 	            $scope.selectedEnrollment.incidentDate = $scope.incidentDateState.date;
 	            updateReportDate('incidentdate');
 	        }
+	    };
+	
+	    var isInvalidIncidentDate = function isInvalidIncidentDate() {
+	        if ($scope.enrollmentForm && $scope.enrollmentForm.incidentDateForm && $scope.enrollmentForm.incidentDateForm.$invalid || !DateUtils.isValid($scope.incidentDateState.date) || !$scope.selectedProgram.selectIncidentDatesInFuture && DateUtils.isAfterToday($scope.incidentDateState.date)) {
+	            $scope.incidentDateState.date = $scope.selectedEnrollment.incidentDate;
+	            NotificationService.showNotifcationDialog($translate.instant('error'), $scope.selectedProgram.incidentDateLabel + ' ' + $translate.instant('invalid'));
+	            return true;
+	        } else if (!$scope.userAuthority.canEditExpiredStuff && !DateUtils.verifyExpiryDate($scope.incidentDateState.date, $scope.selectedProgram.expiryPeriodType, $scope.selectedProgram.expiryDays)) {
+	            $scope.incidentDateState.date = $scope.selectedEnrollment.incidentDate;
+	            NotificationService.showNotifcationDialog($translate.instant('error'), $scope.selectedProgram.incidentDateLabel + ' ' + $translate.instant('expired'));
+	            return true;
+	        }
+	        return false;
 	    };
 	
 	    $scope.askUserToConfirmDateChange = function (dateName) {
@@ -15611,6 +15641,9 @@
 	    };
 	
 	    $scope.updateEnrollmentGeometry = function () {
+	        if (isInvalidEnrollmentDate() || isInvalidIncidentDate()) {
+	            return;
+	        }
 	        if ($scope.enrollmentForm && $scope.enrollmentForm.geometryForm && $scope.enrollmentForm.geometryForm.$invalid) {
 	            $scope.enrollmentGeometryState.geometry = $scope.selectedEnrollment.geometry;
 	            return NotificationService.showNotifcationDialog($translate.instant('error'), $scope.selectedProgram.featureType.toLowerCase() + ' ' + $translate.instant('invalid'));
@@ -15624,6 +15657,9 @@
 	    };
 	
 	    var updateReportDate = function updateReportDate(type) {
+	        if (type === 'enrollmentdate' && isInvalidIncidentDate() || type === 'incidentdate' && isInvalidEnrollmentDate()) {
+	            return;
+	        }
 	        currentReportDate = { type: type, status: 'pending' };
 	        EnrollmentService.update($scope.selectedEnrollment).then(function () {
 	            currentReportDate.status = 'saved';
@@ -15659,6 +15695,9 @@
 	    };
 	
 	    $scope.saveCoordinate = function (param) {
+	        if (isInvalidEnrollmentDate() || isInvalidIncidentDate()) {
+	            return;
+	        }
 	        var en = angular.copy($scope.currentEnrollment);
 	        $scope.enrollmentLatSaved = false;
 	        $scope.enrollmentLngSaved = false;
@@ -40538,4 +40577,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-14eca9c1007874037778.js.map
+//# sourceMappingURL=app-de365e6d65627698c0a4.js.map
