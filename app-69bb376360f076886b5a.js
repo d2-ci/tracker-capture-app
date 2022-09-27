@@ -451,6 +451,8 @@
 	
 	var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
 	
+	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+	
 	function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 	
 	/* Pagination service */
@@ -4277,7 +4279,7 @@
 	            return deferred.promise;
 	        }
 	    };
-	}]).factory("AttributeUtils", ["$http", "DHIS2URL", function ($http, DHIS2URL) {
+	}]).factory("AttributeUtils", ["$http", "DHIS2URL", "$translate", function ($http, DHIS2URL, $translate) {
 	    var getValueUrl = function getValueUrl(valueToSet, selectedTei, program, orgUnit, required) {
 	        var valueUrlBase = valueToSet + "=";
 	        var valueUrl = null;
@@ -4333,6 +4335,38 @@
 	                    return response.data;
 	                });
 	            });
+	        },
+	        defaultAttributeSections: function defaultAttributeSections(attributes, widgetTitle) {
+	            var _ref9;
+	
+	            var attributeSections = [{ displayName: widgetTitle === 'profile' ? '' : $translate.instant('profile'), attributes: attributes }];
+	            return _ref9 = {}, _defineProperty(_ref9, true, attributeSections), _defineProperty(_ref9, false, attributeSections), _ref9;
+	        },
+	        userDefinedAttributeSections: function userDefinedAttributeSections(attributes, programSections) {
+	            var _programSections$redu;
+	
+	            var programTrackedEntityAttributes = attributes.reduce(function (acc, attribute) {
+	                if (attribute.programTrackedEntityAttribute) {
+	                    acc[attribute.programTrackedEntityAttribute.trackedEntityAttribute.id] = attribute;
+	                }
+	                return acc;
+	            }, {});
+	
+	            // `true`: all attributes combined into a single section
+	            // `false`: attributes distributed into multiple sections
+	            return programSections.reduce(function (acc, programSection) {
+	                var attributeList = acc[false][0].attributes;
+	                acc[true].push({
+	                    displayName: programSection.displayName,
+	                    attributes: programSection.trackedEntityAttributes.map(function (_ref10) {
+	                        var id = _ref10.id;
+	
+	                        attributeList.push(programTrackedEntityAttributes[id]);
+	                        return programTrackedEntityAttributes[id];
+	                    })
+	                });
+	                return acc;
+	            }, (_programSections$redu = {}, _defineProperty(_programSections$redu, true, []), _defineProperty(_programSections$redu, false, [{ attributes: [] }]), _programSections$redu));
 	        }
 	    };
 	}]);
@@ -13553,7 +13587,7 @@
 	                if (generateAttributes) {
 	                    fetchGeneratedAttributes();
 	                }
-	                if ($scope.selectedProgram && $scope.selectedProgram.id) {
+	                if ($scope.selectedProgram.id) {
 	                    if ($scope.selectedProgram.dataEntryForm && $scope.selectedProgram.dataEntryForm.htmlCode) {
 	                        $scope.customRegistrationFormExists = true;
 	                        $scope.trackedEntityForm = $scope.selectedProgram.dataEntryForm;
@@ -13593,6 +13627,7 @@
 	                        $scope.customDataEntryForm = CustomFormService.getForProgramStage($scope.currentStage, $scope.prStDes);
 	                    }
 	                }
+	                $scope.attributeSections = $scope.selectedProgram.programSections.length ? AttributeUtils.userDefinedAttributeSections($scope.attributes, $scope.selectedProgram.programSections) : AttributeUtils.defaultAttributeSections($scope.attributes, $scope.widgetTitle);
 	            });
 	        }
 	
@@ -13608,6 +13643,7 @@
 	                    if (generateAttributes) {
 	                        fetchGeneratedAttributes();
 	                    }
+	                    $scope.attributeSections = AttributeUtils.defaultAttributeSections($scope.attributes, $scope.widgetTitle);
 	                }
 	            });
 	        }
@@ -21319,14 +21355,17 @@
 	        $scope.customFormExists = false;
 	        AttributesFactory.getByProgram($scope.base.selectedProgramForRelative).then(function (atts) {
 	            $scope.attributes = TEIGridService.generateGridColumns(atts, null, false).columns;
-	            if ($scope.base.selectedProgramForRelative && $scope.base.selectedProgramForRelative.id && $scope.base.selectedProgramForRelative.dataEntryForm && $scope.base.selectedProgramForRelative.dataEntryForm.htmlCode) {
-	                $scope.customFormExists = true;
-	                $scope.trackedEntityForm = $scope.base.selectedProgramForRelative.dataEntryForm;
-	                $scope.trackedEntityForm.attributes = $scope.attributes;
-	                $scope.trackedEntityForm.selectIncidentDatesInFuture = $scope.base.selectedProgramForRelative.selectIncidentDatesInFuture;
-	                $scope.trackedEntityForm.selectEnrollmentDatesInFuture = $scope.base.selectedProgramForRelative.selectEnrollmentDatesInFuture;
-	                $scope.trackedEntityForm.displayIncidentDate = $scope.base.selectedProgramForRelative.displayIncidentDate;
-	                $scope.customRegistrationForm = CustomFormService.getForTrackedEntity($scope.trackedEntityForm, 'RELATIONSHIP');
+	            if ($scope.base.selectedProgramForRelative) {
+	                if ($scope.base.selectedProgramForRelative.id && $scope.base.selectedProgramForRelative.dataEntryForm && $scope.base.selectedProgramForRelative.dataEntryForm.htmlCode) {
+	                    $scope.customFormExists = true;
+	                    $scope.trackedEntityForm = $scope.base.selectedProgramForRelative.dataEntryForm;
+	                    $scope.trackedEntityForm.attributes = $scope.attributes;
+	                    $scope.trackedEntityForm.selectIncidentDatesInFuture = $scope.base.selectedProgramForRelative.selectIncidentDatesInFuture;
+	                    $scope.trackedEntityForm.selectEnrollmentDatesInFuture = $scope.base.selectedProgramForRelative.selectEnrollmentDatesInFuture;
+	                    $scope.trackedEntityForm.displayIncidentDate = $scope.base.selectedProgramForRelative.displayIncidentDate;
+	                    $scope.customRegistrationForm = CustomFormService.getForTrackedEntity($scope.trackedEntityForm, 'RELATIONSHIP');
+	                }
+	                $scope.attributeSections = $scope.base.selectedProgramForRelative.programSections.length ? AttributeUtils.userDefinedAttributeSections($scope.attributes, $scope.base.selectedProgramForRelative.programSections) : AttributeUtils.defaultAttributeSections($scope.attributes);
 	            }
 	            assignInheritance();
 	            fetchGeneratedAttributes();
@@ -40200,4 +40239,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-fa645756b0dcf26409d8.js.map
+//# sourceMappingURL=app-69bb376360f076886b5a.js.map
