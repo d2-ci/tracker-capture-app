@@ -2814,8 +2814,12 @@
 	            }
 	        },
 	        "d2:round": {
-	            parameters: 1,
+	            parameters: { min: 1, max: 2 },
 	            execute: function execute(parameters) {
+	                if (parameters[1]) {
+	                    var decimalCorrection = Math.pow(10, Math.round(parameters[1]));
+	                    return Math.round((parameters[0] + Number.EPSILON) * decimalCorrection) / decimalCorrection;
+	                }
 	                return Math.round(parameters[0]);
 	            }
 	        },
@@ -3109,7 +3113,7 @@
 	            // a defined set of parameters(concatenate, for example, does not have a fixed number);
 	            var numParameters = parameters.length || 0;
 	
-	            return numParameters !== dhisFunctionParameters;
+	            return dhisFunctionParameters.min ? numParameters < dhisFunctionParameters.min || dhisFunctionParameters.max < numParameters : numParameters !== dhisFunctionParameters;
 	        }
 	        return false;
 	    };
@@ -40616,4 +40620,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-0070efb57d708857505c.js.map
+//# sourceMappingURL=app-51182a2e39289083b5c9.js.map
