@@ -3524,7 +3524,7 @@
 	                                }
 	                        });
 	                    });
-	                    var result = { event: ruleEffectKey, callerId: flag.callerId, eventsCreated: eventsCreated };
+	                    var result = { event: ruleEffectKey, callerId: flag.callerId, eventsCreated: eventsCreated, ruleeffectsupdated: updatedEffectsExits };
 	                    //Broadcast rules finished if there was any actual changes to the event.
 	                    if (updatedEffectsExits) {
 	                        $rootScope.$broadcast("ruleeffectsupdated", result);
@@ -16172,9 +16172,6 @@
 	                            $scope.saveDataValueForEvent(prStDe, null, affectedEvent, true);
 	                        }
 	                    }
-	                } else {
-	                    // Assignment aborted, mark effect as ineffectual
-	                    effect.ineffect = false;
 	                }
 	            } else if (effect.action === "SETMANDATORYFIELD") {
 	                if (effect.dataElement) {
@@ -16495,7 +16492,7 @@
 	                $scope.currentStage.rulesExecuted = true;
 	            });
 	        } else {
-	            TrackerRulesExecutionService.executeRules($scope.allProgramRules, $scope.currentEvent, evs, $scope.prStDes, $scope.attributesById, $scope.selectedTei, $scope.selectedEnrollment, $scope.optionSets, flag);
+	            return TrackerRulesExecutionService.executeRules($scope.allProgramRules, $scope.currentEvent, evs, $scope.prStDes, $scope.attributesById, $scope.selectedTei, $scope.selectedEnrollment, $scope.optionSets, flag);
 	        }
 	    };
 	
@@ -17442,10 +17439,12 @@
 	
 	        $scope.currentElement = { id: "eventDate", event: eventToSave.event, saved: false };
 	
+	        var isScheduleEvent = eventToSave.status === 'SCHEDULE';
+	
 	        var e = { event: eventToSave.event,
 	            enrollment: eventToSave.enrollment,
 	            dueDate: DateUtils.formatFromUserToApi(eventToSave.dueDate),
-	            status: eventToSave.status === 'SCHEDULE' ? 'ACTIVE' : eventToSave.status,
+	            status: isScheduleEvent ? 'ACTIVE' : eventToSave.status,
 	            program: eventToSave.program,
 	            programStage: eventToSave.programStage,
 	            orgUnit: eventToSave.dataValues && eventToSave.dataValues.length > 0 ? eventToSave.orgUnit : $scope.selectedOrgUnit.id,
@@ -17478,7 +17477,11 @@
 	            $scope.currentElement = { id: "eventDate", event: eventToSave.event, saved: true };
 	            $scope.currentEventOriginal = angular.copy($scope.currentEvent);
 	            $scope.currentStageEventsOriginal = angular.copy($scope.currentStageEvents);
-	            $scope.executeRules();
+	            $scope.executeRules().then(function (result) {
+	                if (isScheduleEvent && !(result && result.ruleeffectsupdated)) {
+	                    processRuleEffect(result.event, result.callerId);
+	                }
+	            });
 	        });
 	    };
 	
@@ -40617,4 +40620,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-ca1b2d4d15ab8210964f.js.map
+//# sourceMappingURL=app-9c1b61424e5c3eba569d.js.map
