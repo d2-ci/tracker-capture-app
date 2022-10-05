@@ -21915,6 +21915,14 @@
 	        $scope.warningMessages = effectResult.warningMessages;
 	    });
 	
+	    $scope.saveDataValueForRadio = function (field, context, value) {
+	        // Minimal working implementation for executing program rules based on changes in Yes/No attributes.
+	        // The more complex implementation in registration-controller.js may contain the solution in case
+	        // this contains shortcomings.
+	        context[field.id] = value;
+	        return $scope.executeRules();
+	    };
+	
 	    $scope.interacted = function (field) {
 	        var status = false;
 	        if (field) {
@@ -40608,4 +40616,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-111ff913113f1422de09.js.map
+//# sourceMappingURL=app-f6796e91d29e0373a798.js.map
