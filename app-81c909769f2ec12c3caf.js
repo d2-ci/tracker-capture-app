@@ -1664,12 +1664,12 @@
 	        } else if (valueType === 'BOOLEAN' || valueType === 'TRUE_ONLY') {
 	            if (processedValue === "Yes") {
 	                processedValue = true;
-	            } else if (processedValue === "No") {
+	            } else if (processedValue === "No" || processedValue === "false") {
 	                processedValue = false;
 	            } else if (processedValue && eval(processedValue)) {
 	                processedValue = true;
 	            } else {
-	                processedValue = false;
+	                processedValue = '';
 	            }
 	        } else if (valueType === "INTEGER" || valueType === "NUMBER" || valueType === "INTEGER_POSITIVE" || valueType === "INTEGER_NEGATIVE" || valueType === "INTEGER_ZERO_OR_POSITIVE" || valueType === "PERCENTAGE") {
 	            if (processedValue) {
@@ -9602,6 +9602,7 @@
 	                                        displayName: variableName,
 	                                        programRuleVariableSourceType: 'DATAELEMENT_NEWEST_EVENT_PROGRAM_STAGE',
 	                                        dataElement: variableNameParts[1],
+	                                        valueType: 'TEXT',
 	                                        programStage: variableNameParts[0],
 	                                        program: programUid,
 	                                        useCodeForOptionSet: true
@@ -9611,6 +9612,7 @@
 	                                    newVariableObject = {
 	                                        displayName: variableName,
 	                                        programRuleVariableSourceType: 'TEI_ATTRIBUTE',
+	                                        valueType: 'TEXT',
 	                                        trackedEntityAttribute: variableNameParts[0],
 	                                        program: programUid,
 	                                        useCodeForOptionSet: true
@@ -40279,4 +40281,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-c1b448b99ee15711e072.js.map
+//# sourceMappingURL=app-81c909769f2ec12c3caf.js.map
