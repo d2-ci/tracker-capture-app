@@ -1665,12 +1665,12 @@
 	        } else if (valueType === 'BOOLEAN' || valueType === 'TRUE_ONLY') {
 	            if (processedValue === "Yes") {
 	                processedValue = true;
-	            } else if (processedValue === "No") {
+	            } else if (processedValue === "No" || processedValue === "false") {
 	                processedValue = false;
 	            } else if (processedValue && eval(processedValue)) {
 	                processedValue = true;
 	            } else {
-	                processedValue = false;
+	                processedValue = '';
 	            }
 	        } else if (valueType === "INTEGER" || valueType === "NUMBER" || valueType === "INTEGER_POSITIVE" || valueType === "INTEGER_NEGATIVE" || valueType === "INTEGER_ZERO_OR_POSITIVE" || valueType === "PERCENTAGE") {
 	            if (processedValue) {
@@ -40616,4 +40616,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-0070efb57d708857505c.js.map
+//# sourceMappingURL=app-6fb754dce1038f1be8eb.js.map
