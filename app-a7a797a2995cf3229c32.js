@@ -1669,7 +1669,7 @@
 	            } else if (processedValue && eval(processedValue)) {
 	                processedValue = true;
 	            } else {
-	                processedValue = '';
+	                processedValue = "''";
 	            }
 	        } else if (valueType === "INTEGER" || valueType === "NUMBER" || valueType === "INTEGER_POSITIVE" || valueType === "INTEGER_NEGATIVE" || valueType === "INTEGER_ZERO_OR_POSITIVE" || valueType === "PERCENTAGE") {
 	            if (processedValue) {
@@ -40326,4 +40326,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-9911ab04f64f6bc75cb0.js.map
+//# sourceMappingURL=app-a7a797a2995cf3229c32.js.map
