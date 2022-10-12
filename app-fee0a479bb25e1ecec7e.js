@@ -1836,14 +1836,14 @@
 	                        if (dataElement) {
 	                            variables = pushVariable(variables, programVariable.displayName, "", null, dataElement.dataElement.valueType, false, '#', '', programVariable.useCodeForOptionSet);
 	                        } else {
-	                            variables = pushVariable(variables, programVariable.displayName, "", null, programVariable.valueType, false, '#', '', programVariable.useCodeForOptionSet);
+	                            variables = pushVariable(variables, programVariable.displayName, "", null, "TEXT", false, '#', '', programVariable.useCodeForOptionSet);
 	                        }
 	                    } else if (programVariable.trackedEntityAttribute) {
 	                        //The variable is an attribute, set correct prefix and a blank value
-	                        variables = pushVariable(variables, programVariable.displayName, "", null, programVariable.valueType, false, 'A', '', programVariable.useCodeForOptionSet);
+	                        variables = pushVariable(variables, programVariable.displayName, "", null, "TEXT", false, 'A', '', programVariable.useCodeForOptionSet);
 	                    } else {
 	                        //Fallback for calculated(assigned) values:
-	                        variables = pushVariable(variables, programVariable.displayName, "", null, programVariable.valueType, false, '#', '', programVariable.useCodeForOptionSet);
+	                        variables = pushVariable(variables, programVariable.displayName, "", null, "TEXT", false, '#', '', programVariable.useCodeForOptionSet);
 	                    }
 	                }
 	            });
@@ -3419,7 +3419,7 @@
 	                                    programStage: action.programStage,
 	                                    programIndicator: action.programIndicator,
 	                                    programStageSection: action.programStageSection && action.programStageSection.id ? action.programStageSection.id : null,
-	                                    content: action.displayContent,
+	                                    content: action.content,
 	                                    data: action.data,
 	                                    ineffect: undefined
 	                                };
@@ -40281,4 +40281,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-cdc92f2849f952b5bfb0.js.map
+//# sourceMappingURL=app-fee0a479bb25e1ecec7e.js.map
