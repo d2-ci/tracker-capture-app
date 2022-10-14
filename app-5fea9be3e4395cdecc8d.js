@@ -3002,7 +3002,7 @@
 	        },
 	        "d2:inOrgUnitGroup": {
 	            parameters: 1,
-	            execute: function execute(parameters) {
+	            execute: function execute(parameters, _, selectedOrgUnit) {
 	                var group = parameters[0];
 	                var isInGroup = "false";
 	                var orgUnitGroups = selectedOrgUnit && selectedOrgUnit.g || [];
@@ -3114,7 +3114,7 @@
 	        return false;
 	    };
 	
-	    function internalExecuteExpression(applicableDhisFunctions, expression, expressionModuloStrings, variablesHash) {
+	    function internalExecuteExpression(applicableDhisFunctions, expression, expressionModuloStrings, variablesHash, selectedOrgUnit) {
 	        // Find all d2-functions appearing in the given expression
 	        var includedDhisFunctions = applicableDhisFunctions.filter(function (_ref3) {
 	            var name = _ref3.name;
@@ -3157,7 +3157,7 @@
 	            var evaluatedArguments = args.map(function (_ref6) {
 	                var argument = _ref6.argument,
 	                    argumentModuloStrings = _ref6.argumentModuloStrings;
-	                return internalExecuteExpression(includedDhisFunctions, argument, argumentModuloStrings, variablesHash);
+	                return internalExecuteExpression(includedDhisFunctions, argument, argumentModuloStrings, variablesHash, selectedOrgUnit);
 	            });
 	            var functionName = functionCall[0];
 	            var dhisFunction = dhisFunctions[functionName];
@@ -3166,7 +3166,7 @@
 	                // Function call is not possible to evaluate, remove the call
 	                accExpression += 'false';
 	            } else {
-	                var dhisFunctionResult = dhisFunction.execute(evaluatedArguments, variablesHash);
+	                var dhisFunctionResult = dhisFunction.execute(evaluatedArguments, variablesHash, selectedOrgUnit);
 	                accExpression += dhisFunctionResult;
 	            }
 	
@@ -3196,7 +3196,7 @@
 	
 	                return _extends({}, value, { name: key });
 	            });
-	            answer = internalExecuteExpression(applicableDhisFunctions, expression, expressionModuloStrings, variablesHash);
+	            answer = internalExecuteExpression(applicableDhisFunctions, expression, expressionModuloStrings, variablesHash, selectedOrgUnit);
 	
 	            if (flag.verbose) {
 	                $log.info("Expression with id " + identifier + " was successfully run. Original condition was: " + beforereplacement + " - Evaluation ended up as:" + expression + " - Result of evaluation was:" + answer);
@@ -40616,4 +40616,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-4b51b228fcac10b3807e.js.map
+//# sourceMappingURL=app-5fea9be3e4395cdecc8d.js.map
