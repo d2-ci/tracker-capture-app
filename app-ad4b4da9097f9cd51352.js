@@ -14153,6 +14153,7 @@
 	                        $scope.currentEvent = {};
 	                        $scope.registrationAndDataEntry = true;
 	                        $scope.prStDes = [];
+	                        $scope.prStDesInStage = {};
 	                        $scope.currentStage = $scope.selectedProgram.programStages[0];
 	                        $scope.currentEvent.event = 'SINGLE_EVENT';
 	                        $scope.currentEvent.providedElsewhere = {};
@@ -14174,8 +14175,13 @@
 	                                $scope.allowProvidedElsewhereExists[$scope.currentStage.id] = true;
 	                            }
 	                        });
+	                        $scope.prStDesInStage[$scope.currentStage.id] = $scope.prStDes;
 	                        $scope.currentEventOriginal = angular.copy($scope.currentEvent);
 	                        $scope.customDataEntryForm = CustomFormService.getForProgramStage($scope.currentStage, $scope.prStDes);
+	
+	                        angular.forEach($scope.currentStage.programStageSections, function (section) {
+	                            section.open = true;
+	                        });
 	                    }
 	                }
 	                $scope.attributeSections = $scope.selectedProgram.programSections.length ? AttributeUtils.userDefinedAttributeSections($scope.attributes, $scope.selectedProgram.programSections) : AttributeUtils.defaultAttributeSections($scope.attributes, $scope.widgetTitle);
@@ -16753,6 +16759,7 @@
 	        $scope.tabularEntryStages = [];
 	        $rootScope.ruleeffects = {};
 	        $scope.prStDes = [];
+	        $scope.prStDesInStage = {};
 	        $scope.allProgramRules = [];
 	        $scope.allowProvidedElsewhereExists = [];
 	        $scope.optionsReady = false;
@@ -16800,11 +16807,13 @@
 	                }
 	
 	                stage.programStageDataElementsCollection = {};
+	                $scope.prStDesInStage[stage.id] = {};
 	
 	                stage.executionDateLabel = stage.executionDateLabel ? stage.executionDateLabel : $translate.instant('report_date');
 	                stage.dueDateLabel = stage.dueDateLabel ? stage.dueDateLabel : $translate.instant('due_date');
 	                angular.forEach(stage.programStageDataElements, function (prStDe) {
 	                    $scope.prStDes[prStDe.dataElement.id] = prStDe;
+	                    $scope.prStDesInStage[stage.id][prStDe.dataElement.id] = prStDe;
 	                    if (prStDe.allowProvidedElsewhere) {
 	                        $scope.allowProvidedElsewhereExists[stage.id] = true;
 	                    }
@@ -40857,4 +40866,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-60cfefd3ae7a0c3acb56.js.map
+//# sourceMappingURL=app-ad4b4da9097f9cd51352.js.map
