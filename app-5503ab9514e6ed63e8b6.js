@@ -10205,7 +10205,7 @@
 	                }
 	            }
 	        },
-	        autoGenerateEvents: function autoGenerateEvents(teiId, program, orgUnit, enrollment, availableEvent) {
+	        autoGenerateEvents: function autoGenerateEvents(teiId, program, orgUnit, enrollment, availableEvent, selectedCategoryOptions) {
 	            var dhis2Events = { events: [] };
 	            if (teiId && program && orgUnit && enrollment) {
 	                angular.forEach(program.programStages, function (stage) {
@@ -10247,6 +10247,12 @@
 	
 	                        dhis2Events.events.push(newEvent);
 	                    }
+	                });
+	            }
+	
+	            if (selectedCategoryOptions) {
+	                angular.forEach(dhis2Events.events, function (event) {
+	                    event.attributeCategoryOptions = selectedCategoryOptions;
 	                });
 	            }
 	
@@ -13282,6 +13288,7 @@
 	    var flag = { debug: true, verbose: $location.search().verbose ? true : false };
 	    $rootScope.ruleeffects = {};
 	    $scope.userAuthority = AuthorityService.getUserAuthorities(SessionStorageService.get('USER_PROFILE'));
+	    $scope.selectedCategoryOptions = {};
 	
 	    $scope.attributesById = CurrentSelection.getAttributesById();
 	    $scope.optionGroupsById = CurrentSelection.getOptionGroupsById();
@@ -13482,6 +13489,7 @@
 	    $scope.$on('registrationWidget', function (event, args) {
 	        $scope.selectedTei = {};
 	        $scope.apiFormattedTei = {};
+	        $scope.selectedCategoryOptions = {};
 	        $scope.registrationMode = args.registrationMode;
 	        $scope.orgUnitNames = CurrentSelection.getOrgUnitNames();
 	
@@ -13725,7 +13733,36 @@
 	        $scope.apiFormattedTei.orgUnit = args.orgUnit;
 	    });
 	
+	    $scope.categoryRequiredDuringTEIRegistration = function () {
+	        if ($scope.selectedProgram && $scope.selectedProgram.categoryCombo && !$scope.selectedProgram.categoryCombo.isDefault && $scope.selectedProgram.categoryCombo.categories) {
+	            if ($scope.registrationAndDataEntry) {
+	                return true;
+	            }
+	            return $scope.selectedProgram.programStages.find(function (stage) {
+	                return stage.autoGenerateEvent;
+	            }) !== undefined;
+	        }
+	        return false;
+	    };
+	
+	    $scope.selectCategoryOption = function (item, category) {
+	        $scope.selectedCategoryOptions[category.id] = item.id;
+	    };
+	
 	    var performRegistration = function performRegistration(destination) {
+	        var selectedCategoryOptions = null;
+	        if ($scope.categoryRequiredDuringTEIRegistration()) {
+	            if ($scope.selectedProgram.categoryCombo.categories.find(function (category) {
+	                return !$scope.selectedCategoryOptions[category.id];
+	            })) {
+	                NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("fill_all_category_options"));
+	                return;
+	            }
+	            selectedCategoryOptions = $scope.selectedProgram.categoryCombo.categories.map(function (category) {
+	                return $scope.selectedCategoryOptions[category.id];
+	            }).join(';');
+	        }
+	
 	        if (destination === "DASHBOARD" || destination === "SELF" || destination === "ENROLLMENT") {
 	            $scope.model.savingRegistration = true;
 	        }
@@ -13791,7 +13828,7 @@
 	                                    }
 	                                    enrollment.enrollment = en.importSummaries[0].reference;
 	                                    var availableEvent = $scope.currentEvent && $scope.currentEvent.event ? $scope.currentEvent : null;
-	                                    var dhis2Events = EventUtils.autoGenerateEvents($scope.apiFormattedTei.trackedEntityInstance, $scope.selectedProgram, $scope.selectedOrgUnit, enrollment, availableEvent);
+	                                    var dhis2Events = EventUtils.autoGenerateEvents($scope.apiFormattedTei.trackedEntityInstance, $scope.selectedProgram, $scope.selectedOrgUnit, enrollment, availableEvent, selectedCategoryOptions);
 	                                    if (dhis2Events.events.length > 0) {
 	                                        DHIS2EventFactory.create(dhis2Events).then(function () {
 	                                            notifyRegistrtaionCompletion(destination, $scope.apiFormattedTei.trackedEntityInstance);
@@ -20875,6 +20912,7 @@
 	    $scope.selectedTeiForDisplay = angular.copy($scope.mainTei);
 	    $scope.ouModes = [{ name: 'SELECTED' }, { name: 'CHILDREN' }, { name: 'DESCENDANTS' }, { name: 'ACCESSIBLE' }];
 	    $scope.selectedOuMode = $scope.ouModes[0];
+	    $scope.selectedCategoryOptions = {};
 	
 	    //Paging
 	    $scope.pager = { pageSize: 50, page: 1, toolBarDisplay: 5 };
@@ -21402,6 +21440,7 @@
 	        $scope.trackedEntityForm = null;
 	        $scope.customRegistrationForm = null;
 	        $scope.customFormExists = false;
+	        $scope.selectedCategoryOptions = {};
 	        AttributesFactory.getByProgram($scope.base.selectedProgramForRelative).then(function (atts) {
 	            $scope.attributes = TEIGridService.generateGridColumns(atts, null, false).columns;
 	            if ($scope.base.selectedProgramForRelative) {
@@ -21444,12 +21483,40 @@
 	        $scope.trackedEntityTypes.selected = $scope.trackedEntityTypes.available[0];
 	    });
 	
+	    $scope.categoryRequiredDuringTEIRegistration = function () {
+	        var selectedProgram = $scope.base.selectedProgramForRelative;
+	        if (selectedProgram && selectedProgram.categoryCombo && !selectedProgram.categoryCombo.isDefault && selectedProgram.categoryCombo.categories) {
+	            return selectedProgram.programStages.find(function (stage) {
+	                return stage.autoGenerateEvent;
+	            }) !== undefined;
+	        }
+	        return false;
+	    };
+	
+	    $scope.selectCategoryOption = function (item, category) {
+	        $scope.selectedCategoryOptions[category.id] = item.id;
+	    };
+	
 	    $scope.registerEntity = function () {
 	
 	        //check for form validity
 	        $scope.outerForm.submitted = true;
 	        if ($scope.outerForm.$invalid) {
 	            return false;
+	        }
+	
+	        //check that categories have been selected
+	        var selectedCategoryOptions = null;
+	        if ($scope.categoryRequiredDuringTEIRegistration()) {
+	            if ($scope.selectedProgram.categoryCombo.categories.find(function (category) {
+	                return !$scope.selectedCategoryOptions[category.id];
+	            })) {
+	                NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("fill_all_category_options"));
+	                return;
+	            }
+	            selectedCategoryOptions = $scope.selectedProgram.categoryCombo.categories.map(function (category) {
+	                return $scope.selectedCategoryOptions[category.id];
+	            }).join(';');
 	        }
 	
 	        //form is valid, continue the registration
@@ -21499,7 +21566,7 @@
 	                            if (en.reference && en.status === 'SUCCESS') {
 	                                enrollment.enrollment = en.reference;
 	                                $scope.selectedEnrollment = enrollment;
-	                                var dhis2Events = EventUtils.autoGenerateEvents($scope.tei.trackedEntityInstance, $scope.base.selectedProgramForRelative, $scope.selectedOrgUnit, enrollment, null);
+	                                var dhis2Events = EventUtils.autoGenerateEvents($scope.tei.trackedEntityInstance, $scope.base.selectedProgramForRelative, $scope.selectedOrgUnit, enrollment, null, selectedCategoryOptions);
 	                                if (dhis2Events.events.length > 0) {
 	                                    DHIS2EventFactory.create(dhis2Events);
 	                                }
@@ -40290,4 +40357,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-65ac0ed93f694d3a26e5.js.map
+//# sourceMappingURL=app-5503ab9514e6ed63e8b6.js.map
