@@ -19596,7 +19596,8 @@
 	            return;
 	        }
 	
-	        $scope.periodOffset = period === 'NEXT' ? $scope.periodOffset + 1 : $scope.periodOffset - 1;
+	        var periodOffset = $scope.periodOffset || 0;
+	        $scope.periodOffset = period === 'NEXT' ? periodOffset + 1 : periodOffset - 1;
 	        $scope.dhis2Event.selectedPeriod = null;
 	
 	        var prds = PeriodService.getPeriods(eventsByStage[stage.id], $scope.model.selectedStage, $scope.selectedEnrollment, $scope.periodOffset);
@@ -40699,4 +40700,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-d653e921c98822ac4fef.js.map
+//# sourceMappingURL=app-f91d947762f74938536f.js.map
