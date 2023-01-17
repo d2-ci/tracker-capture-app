@@ -8474,7 +8474,8 @@
 	        } else {
 	
 	            var startDate = DateUtils.format(moment(referenceDate, calendarSetting.momentFormat).add(offset, 'days'));
-	            var periodOffset = _periodOffset && dhis2.validation.isNumber(_periodOffset) ? _periodOffset : splitDate(startDate).year - splitDate(DateUtils.getToday()).year;
+	            var yearsSinceEnrollment = splitDate(DateUtils.getToday()).year - splitDate(startDate).year;
+	            var periodOffset = dhis2.validation.isNumber(_periodOffset) ? _periodOffset : -yearsSinceEnrollment;
 	            var eventDateOffSet = moment(referenceDate, calendarSetting.momentFormat).add('d', offset)._d;
 	            eventDateOffSet = $filter('date')(eventDateOffSet, calendarSetting.keyDateFormat);
 	
@@ -40696,4 +40697,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-c531b9cb956a8d393f93.js.map
+//# sourceMappingURL=app-1a0d90cbe3339b0dea4e.js.map
