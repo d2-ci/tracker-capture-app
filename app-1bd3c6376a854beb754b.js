@@ -595,7 +595,7 @@
 	            var storedFormat = storage.get('SYSTEM_SETTING');
 	            var userSettings = SessionStorageService.get('USER_SETTING');
 	
-	            dhis2CalendarFormat.locale = userSettings.keyUiLocale;
+	            dhis2CalendarFormat.locale = userSettings.keyUiLocale.replace('_', '-');
 	
 	            if (angular.isObject(storedFormat) && storedFormat.keyDateFormat && storedFormat.keyCalendar) {
 	                if (storedFormat.keyCalendar === 'iso8601') {
@@ -5114,10 +5114,12 @@
 	                dateFormat = 'dd-mm-yyyy';
 	            }
 	
-	            $.calendars.picker.setDefaults($.calendars.picker.regional[calendarSetting.locale]);
+	            var locale = calendarSetting.locale === 'en' ? '' : calendarSetting.locale;
+	            $.calendars.picker.setDefaults($.calendars.picker.regional[locale]);
+	
 	            var minDate = $parse(attrs.minDate)(scope);
 	            var maxDate = $parse(attrs.maxDate)(scope);
-	            var calendar = $.calendars.instance(calendarSetting.keyCalendar, calendarSetting.locale);
+	            var calendar = $.calendars.instance(calendarSetting.keyCalendar, locale);
 	            var pickerClass = attrs.pickerClass;
 	
 	            var initializeDatePicker = function initializeDatePicker(sDate, eDate) {
@@ -8445,9 +8447,7 @@
 	        var index = -1;
 	        var occupied = null;
 	        for (var i = 0; i < periods.length && index === -1; i++) {
-	            var startMoment = moment(periods[i].startDate, calendarSetting.momentFormat);
-	            var endMoment = moment(periods[i].endDate, calendarSetting.momentFormat);
-	            if (startMoment.isSame(event.sortingDate) || endMoment.isSame(event.sortingDate) || endMoment.isAfter(event.sortingDate) && startMoment.isBefore(event.sortingDate)) {
+	            if (moment(periods[i].endDate).isSame(event.sortingDate) || moment(periods[i].startDate).isSame(event.sortingDate) || moment(periods[i].endDate).isAfter(event.sortingDate) && moment(event.sortingDate).isAfter(periods[i].endDate)) {
 	                index = i;
 	                occupied = angular.copy(periods[i]);
 	            }
@@ -10506,13 +10506,13 @@
 	            if (programStage.periodType) {
 	                var prds = getEventDuePeriod(eventsPerStage, programStage, enrollment);
 	                var periods = prds && prds.availablePeriods && prds.availablePeriods.length ? prds.availablePeriods : [];
-	                dummyEvent.periods = periods;
-	                dummyEvent.periodOffset = prds.periodOffset;
-	                dummyEvent.hasFuturePeriod = prds.hasFuturePeriod;
 	                if (periods.length > 0) {
 	                    dummyEvent.dueDate = periods[0].endDate;
 	                    dummyEvent.periodName = periods[0].displayName;
 	                    dummyEvent.eventDate = dummyEvent.dueDate;
+	                    dummyEvent.periods = periods;
+	                    dummyEvent.periodOffset = prds.periodOffset;
+	                    dummyEvent.hasFuturePeriod = prds.hasFuturePeriod;
 	                }
 	            } else {
 	                dummyEvent.dueDate = getEventDueDate(eventsPerStage, programStage, enrollment);
@@ -40706,4 +40706,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-e56f0aca5aae0683af5f.js.map
+//# sourceMappingURL=app-1bd3c6376a854beb754b.js.map
