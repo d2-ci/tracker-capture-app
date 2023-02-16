@@ -16439,7 +16439,7 @@
 	                }
 	            } else if (effect.action === "ASSIGN") {
 	                if (affectedEvent.status !== 'SCHEDULE' && affectedEvent.status !== 'SKIPPED' && !affectedEvent.editingNotAllowed) {
-	                    if (effect.ineffect && effect.dataElement) {
+	                    if (effect.ineffect && effect.dataElement && $scope.prStDesInStage[$scope.currentStage.id][effect.dataElement.id]) {
 	                        //For "ASSIGN" actions where we have a dataelement, we save the calculated value to the dataelement:
 	                        //Blank out the value:
 	                        var processedValue = $filter('trimquotes')(effect.data);
@@ -40939,4 +40939,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-74d468247f79fc0bdb68.js.map
+//# sourceMappingURL=app-55ca8f5ae9bdbcde394b.js.map
