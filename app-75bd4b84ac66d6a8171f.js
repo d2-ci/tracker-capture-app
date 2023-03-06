@@ -586,13 +586,16 @@
 	}])
 	
 	/* service for getting calendar setting */
-	.service('CalendarService', ["storage", "$rootScope", function (storage, $rootScope) {
+	.service('CalendarService', ["storage", "SessionStorageService", "$rootScope", function (storage, SessionStorageService, $rootScope) {
 	
 	    return {
 	        getSetting: function getSetting() {
 	
 	            var dhis2CalendarFormat = { keyDateFormat: 'yyyy-MM-dd', keyCalendar: 'gregorian', momentFormat: 'YYYY-MM-DD' };
 	            var storedFormat = storage.get('SYSTEM_SETTING');
+	            var userSettings = SessionStorageService.get('USER_SETTING');
+	
+	            dhis2CalendarFormat.locale = userSettings.keyUiLocale.replace('_', '-');
 	
 	            if (angular.isObject(storedFormat) && storedFormat.keyDateFormat && storedFormat.keyCalendar) {
 	                if (storedFormat.keyCalendar === 'iso8601') {
@@ -5111,9 +5114,12 @@
 	                dateFormat = 'dd-mm-yyyy';
 	            }
 	
+	            var locale = calendarSetting.locale === 'en' ? '' : calendarSetting.locale;
+	            $.calendars.picker.setDefaults($.calendars.picker.regional[locale]);
+	
 	            var minDate = $parse(attrs.minDate)(scope);
 	            var maxDate = $parse(attrs.maxDate)(scope);
-	            var calendar = $.calendars.instance(calendarSetting.keyCalendar);
+	            var calendar = $.calendars.instance(calendarSetting.keyCalendar, locale);
 	            var pickerClass = attrs.pickerClass;
 	
 	            var initializeDatePicker = function initializeDatePicker(sDate, eDate) {
@@ -40702,4 +40708,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-ae2d7ab5fabfadd2b89a.js.map
+//# sourceMappingURL=app-75bd4b84ac66d6a8171f.js.map
