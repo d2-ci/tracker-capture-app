@@ -587,6 +587,8 @@
 	
 	/* service for getting calendar setting */
 	.service('CalendarService', ["storage", "SessionStorageService", "$rootScope", function (storage, SessionStorageService, $rootScope) {
+	    // The following array should be manually kept in sync with the one in `index.ejs`
+	    var supportedCalendarLocales = ['ar', 'ar-EG', 'zn-CH', 'cs', 'da', 'nl', 'fr', 'km', 'lo', 'nb', 'pt-BR', 'ro', 'ru', 'es', 'sv', 'uk', 'ur', 'vi'];
 	
 	    return {
 	        getSetting: function getSetting() {
@@ -596,6 +598,11 @@
 	            var userSettings = SessionStorageService.get('USER_SETTING');
 	
 	            dhis2CalendarFormat.locale = userSettings.keyUiLocale.replace('_', '-');
+	            if (!supportedCalendarLocales.find(function (locale) {
+	                return locale === dhis2CalendarFormat.locale;
+	            })) {
+	                dhis2CalendarFormat.locale = 'en';
+	            }
 	
 	            if (angular.isObject(storedFormat) && storedFormat.keyDateFormat && storedFormat.keyCalendar) {
 	                if (storedFormat.keyCalendar === 'iso8601') {
@@ -40704,4 +40711,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-fff151ec8e2aa12ea722.js.map
+//# sourceMappingURL=app-2a6b04300b503c775dff.js.map
