@@ -587,7 +587,7 @@
 	/* service for getting calendar setting */
 	.service('CalendarService', ["storage", "SessionStorageService", "$rootScope", function (storage, SessionStorageService, $rootScope) {
 	    // The following array should be manually kept in sync with the one in `index.ejs`
-	    var supportedCalendarLocales = ['ar', 'ar-EG', 'zn-CH', 'cs', 'da', 'nl', 'fr', 'km', 'lo', 'nb', 'pt-BR', 'ro', 'ru', 'es', 'sv', 'uk', 'ur', 'vi'];
+	    var supportedCalendarLocales = ['ar', 'ar-EG', 'zh-CN', 'cs', 'da', 'nl', 'fr', 'km', 'lo', 'nb', 'pt-BR', 'ro', 'ru', 'es', 'sv', 'uk', 'ur', 'vi'];
 	
 	    return {
 	        getSetting: function getSetting() {
@@ -40402,4 +40402,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-f62dc8ee0604b5d2e51a.js.map
+//# sourceMappingURL=app-fbdeb7254683ef1f3365.js.map
