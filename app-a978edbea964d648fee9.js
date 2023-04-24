@@ -3765,13 +3765,9 @@
 	                            hiddenSections[effect.programStageSection] = effect.programStageSection;
 	                        }
 	                    } else if (effect.action === "SHOWERROR" && effect.dataElement && effect.dataElement.id) {
-	                        if (effect.ineffect) {
-	                            errorMessages[effect.dataElement.id] = effect.content + (effect.data ? effect.data : "");
-	                        }
+	                        errorMessages[effect.dataElement.id] = effect.content + (effect.data ? effect.data : "");
 	                    } else if (effect.action === "SHOWWARNING" && effect.dataElement && effect.dataElement.id) {
-	                        if (effect.ineffect) {
-	                            warningMessages[effect.dataElement.id] = effect.content + (effect.data ? effect.data : "");
-	                        }
+	                        warningMessages[effect.dataElement.id] = effect.content + (effect.data ? effect.data : "");
 	                    } else if (effect.action === "ASSIGN" && effect.dataElement) {
 	                        var processedValue = $filter('trimquotes')(effect.data);
 	
@@ -14326,7 +14322,7 @@
 	
 	            var dialogOptions = {
 	                headerText: 'errors',
-	                bodyText: 'please_fix_errors_before_submitting',
+	                bodyText: 'please_fix_errors_before_saving',
 	                sections: sections
 	            };
 	
@@ -40756,4 +40752,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-b48f719201d2e2d27ec8.js.map
+//# sourceMappingURL=app-a978edbea964d648fee9.js.map
