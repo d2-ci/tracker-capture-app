@@ -3642,7 +3642,8 @@
 	            var assignedFields = {};
 	            var hiddenSections = {};
 	            var mandatoryFields = {};
-	            var warningMessages = [];
+	            var errorMessages = {};
+	            var warningMessages = {};
 	            var optionVisibility = { showOnly: null, hidden: {} };
 	
 	            var attributeOptionsChanged = [];
@@ -3667,23 +3668,11 @@
 	                        hiddenFields[effect.trackedEntityAttribute.id] = true;
 	                    } else if (effect.action === "SHOWERROR" && effect.trackedEntityAttribute) {
 	                        if (effect.ineffect) {
-	                            var headerText = $translate.instant('validation_error');
-	                            var bodyText = effect.content + (effect.data ? effect.data : "");
-	
-	                            NotificationService.showNotifcationDialog(headerText, bodyText);
-	                            if (effect.trackedEntityAttribute) {
-	                                currentTei[effect.trackedEntityAttribute.id] = teiOriginalValues[effect.trackedEntityAttribute.id];
-	                            }
+	                            errorMessages[effect.trackedEntityAttribute.id] = effect.content + (effect.data ? effect.data : "");
 	                        }
 	                    } else if (effect.action === "SHOWWARNING" && effect.trackedEntityAttribute) {
 	                        if (effect.ineffect) {
-	                            var message = effect.content + (angular.isDefined(effect.data) ? effect.data : "");
-	
-	                            if (effect.trackedEntityAttribute) {
-	                                warningMessages[effect.trackedEntityAttribute.id] = message;
-	                            } else {
-	                                warningMessages.push(message);
-	                            }
+	                            warningMessages[effect.trackedEntityAttribute.id] = effect.content + (effect.data ? effect.data : "");
 	                        }
 	                    } else if (effect.action === "ASSIGN" && effect.trackedEntityAttribute) {
 	                        var processedValue = $filter('trimquotes')(effect.data);
@@ -3733,14 +3722,15 @@
 	                }
 	            });
 	            clearAttributeValueForShowHideOptionActions(attributeOptionsChanged, currentTei, optionVisibility, attributesById, optionSets);
-	            return { currentTei: currentTei, hiddenFields: hiddenFields, hiddenSections: hiddenSections, warningMessages: warningMessages, assignedFields: assignedFields, mandatoryFields: mandatoryFields, optionVisibility: optionVisibility };
+	            return { currentTei: currentTei, hiddenFields: hiddenFields, hiddenSections: hiddenSections, errorMessages: errorMessages, warningMessages: warningMessages, assignedFields: assignedFields, mandatoryFields: mandatoryFields, optionVisibility: optionVisibility };
 	        },
 	        processRuleEffectsForEvent: function processRuleEffectsForEvent(eventId, currentEvent, currentEventOriginalValues, prStDes, optionSets, optionGroupsById) {
 	            var hiddenFields = {};
 	            var assignedFields = {};
 	            var mandatoryFields = {};
 	            var hiddenSections = {};
-	            var warningMessages = [];
+	            var errorMessages = {};
+	            var warningMessages = {};
 	            var optionVisibility = { showOnly: null, hidden: {} };
 	
 	            var dataElementOptionsChanged = [];
@@ -3763,14 +3753,10 @@
 	                        if (effect.programStageSection) {
 	                            hiddenSections[effect.programStageSection] = effect.programStageSection;
 	                        }
-	                    } else if (effect.action === "SHOWERROR" && effect.dataElement.id) {
-	                        var headerTxt = $translate.instant('validation_error');
-	                        var bodyTxt = effect.content + (effect.data ? effect.data : "");
-	                        NotificationService.showNotifcationDialog(headerTxt, bodyTxt);
-	
-	                        currentEvent[effect.dataElement.id] = currentEventOriginalValues[effect.dataElement.id];
-	                    } else if (effect.action === "SHOWWARNING") {
-	                        warningMessages.push(effect.content + (effect.data ? effect.data : ""));
+	                    } else if (effect.action === "SHOWERROR" && effect.dataElement && effect.dataElement.id) {
+	                        errorMessages[effect.dataElement.id] = effect.content + (effect.data ? effect.data : "");
+	                    } else if (effect.action === "SHOWWARNING" && effect.dataElement && effect.dataElement.id) {
+	                        warningMessages[effect.dataElement.id] = effect.content + (effect.data ? effect.data : "");
 	                    } else if (effect.action === "ASSIGN" && effect.dataElement) {
 	                        var processedValue = $filter('trimquotes')(effect.data);
 	
@@ -3819,7 +3805,7 @@
 	                }
 	            });
 	            clearDataElementValueForShowHideOptionActions(dataElementOptionsChanged, currentEvent, optionVisibility, prStDes, optionSets);
-	            return { currentEvent: currentEvent, hiddenFields: hiddenFields, hiddenSections: hiddenSections, warningMessages: warningMessages, assignedFields: assignedFields, mandatoryFields: mandatoryFields, optionVisibility: optionVisibility };
+	            return { currentEvent: currentEvent, hiddenFields: hiddenFields, hiddenSections: hiddenSections, errorMessages: errorMessages, warningMessages: warningMessages, assignedFields: assignedFields, mandatoryFields: mandatoryFields, optionVisibility: optionVisibility };
 	        },
 	        processRuleEffectAttribute: function processRuleEffectAttribute(context, selectedTei, tei, currentEvent, currentEventOriginialValue, affectedEvent, attributesById, prStDes, optionSets, optionGroupsById) {
 	            //Function used from registration controller to process effects for the tracked entity instance and for the events in the same operation
@@ -3828,7 +3814,8 @@
 	
 	            if (context === "SINGLE_EVENT" && currentEvent && prStDes) {
 	                var eventEffects = this.processRuleEffectsForEvent("SINGLE_EVENT", currentEvent, currentEventOriginialValue, prStDes, optionSets, optionGroupsById);
-	                teiAttributesEffects.warningMessages = angular.extend(teiAttributesEffects.warningMessages, eventEffects.warningMessages);
+	                angular.extend(teiAttributesEffects.errorMessages, eventEffects.errorMessages);
+	                angular.extend(teiAttributesEffects.warningMessages, eventEffects.warningMessages);
 	                teiAttributesEffects.hiddenFields[context] = eventEffects.hiddenFields;
 	                teiAttributesEffects.hiddenSections[context] = eventEffects.hiddenSections;
 	                teiAttributesEffects.assignedFields[context] = eventEffects.assignedFields;
@@ -13314,10 +13301,10 @@
 	    $scope.customRegistrationForm = null;
 	    $scope.selectedTei = {}; // Attribute values in the current form
 	    $scope.apiFormattedTei = {}; // API formatted version of $scope.selectedTei; see $scope.registerEntity(...) for details
-	    $scope.warningMessages = [];
+	    $scope.errorMessages = {};
+	    $scope.warningMessages = {};
 	    $scope.hiddenFields = [];
 	    $scope.assignedFields = [];
-	    $scope.errorMessages = {};
 	    $scope.attributeUniquenessError = {};
 	    $scope.hiddenSections = [];
 	    $scope.mandatoryFields = [];
@@ -13984,6 +13971,26 @@
 	            }
 	        }
 	
+	        var context = $scope.registrationAndDataEntry ? 'SINGLE_EVENT' : 'registration';
+	
+	        if (angular.isDefined($scope.errorMessages[context]) && Object.keys($scope.errorMessages[context]).length > 0) {
+	            //There are unresolved program rule errors - show error message.
+	            $scope.validatingRegistration = false;
+	            var sections = [{
+	                bodyList: Object.values($scope.errorMessages[context]),
+	                itemType: 'danger'
+	            }];
+	
+	            var dialogOptions = {
+	                headerText: 'errors',
+	                bodyText: 'please_fix_errors_before_saving',
+	                sections: sections
+	            };
+	
+	            NotificationService.showNotifcationWithOptions({}, dialogOptions);
+	            return false;
+	        }
+	
 	        //form is valid, continue the registration
 	        //get selected entity
 	        if (!$scope.selectedTei.trackedEntityInstance) {
@@ -14167,11 +14174,10 @@
 	
 	    //listen for rule effect changes
 	    $scope.$on('ruleeffectsupdated', function (event, args) {
-	        if (args.event === "registration" || args.event === 'SINGLE_EVENT') {
-	            $scope.warningMessages = [];
+	        var context = args.event;
+	        if (context === "registration" || context === 'SINGLE_EVENT') {
 	            $scope.hiddenFields = [];
 	            $scope.assignedFields = [];
-	            $scope.errorMessages = {};
 	            $scope.hiddenSections = [];
 	
 	            var effectResult = TrackerRulesExecutionService.processRuleEffectAttribute(args.event, $scope.selectedTei, $scope.apiFormattedTei, $scope.currentEvent, {}, $scope.currentEvent, $scope.attributesById, $scope.prStDes, $scope.optionSets, $scope.optionGroupsById);
@@ -14180,9 +14186,14 @@
 	            $scope.hiddenFields = effectResult.hiddenFields;
 	            $scope.hiddenSections = effectResult.hiddenSections;
 	            $scope.assignedFields = effectResult.assignedFields;
-	            $scope.warningMessages = effectResult.warningMessages;
+	            $scope.errorMessages['registration'] = effectResult.errorMessages;
+	            $scope.warningMessages['registration'] = effectResult.warningMessages;
 	            $scope.mandatoryFields = effectResult.mandatoryFields;
 	            $scope.optionVisibility = effectResult.optionVisibility;
+	            if ($scope.registrationAndDataEntry) {
+	                $scope.errorMessages['SINGLE_EVENT'] = effectResult.errorMessages;
+	                $scope.warningMessages['SINGLE_EVENT'] = effectResult.warningMessages;
+	            }
 	            if ($scope.assignedFields) {
 	                var searchedGroups = {};
 	                angular.forEach($scope.assignedFields, function (field) {
@@ -40402,4 +40413,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-fbdeb7254683ef1f3365.js.map
+//# sourceMappingURL=app-c84d25cf57f4e4b32459.js.map
