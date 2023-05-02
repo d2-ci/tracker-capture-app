@@ -586,13 +586,23 @@
 	}])
 	
 	/* service for getting calendar setting */
-	.service('CalendarService', ["storage", "$rootScope", function (storage, $rootScope) {
+	.service('CalendarService', ["storage", "SessionStorageService", "$rootScope", function (storage, SessionStorageService, $rootScope) {
+	    // The following array should be manually kept in sync with the one in `index.ejs`
+	    var supportedCalendarLocales = ['ar', 'ar-EG', 'zh-CN', 'cs', 'da', 'nl', 'fr', 'km', 'lo', 'nb', 'pt-BR', 'ro', 'ru', 'es', 'sv', 'uk', 'ur', 'vi'];
 	
 	    return {
 	        getSetting: function getSetting() {
 	
 	            var dhis2CalendarFormat = { keyDateFormat: 'yyyy-MM-dd', keyCalendar: 'gregorian', momentFormat: 'YYYY-MM-DD' };
 	            var storedFormat = storage.get('SYSTEM_SETTING');
+	            var userSettings = SessionStorageService.get('USER_SETTING');
+	
+	            dhis2CalendarFormat.locale = userSettings.keyUiLocale.replace('_', '-');
+	            if (!supportedCalendarLocales.find(function (locale) {
+	                return locale === dhis2CalendarFormat.locale;
+	            })) {
+	                dhis2CalendarFormat.locale = 'en';
+	            }
 	
 	            if (angular.isObject(storedFormat) && storedFormat.keyDateFormat && storedFormat.keyCalendar) {
 	                if (storedFormat.keyCalendar === 'iso8601') {
@@ -882,22 +892,48 @@
 	    return {
 	        getCode: function getCode(options, key) {
 	            if (options) {
+	                // for comparison with the option values, which are always represented as strings
+	                var keyString = String(key);
+	
+	                // is key a name?
 	                for (var i = 0; i < options.length; i++) {
-	                    if (key === options[i].displayName) {
+	                    if (keyString === options[i].displayName) {
 	                        return options[i].code;
 	                    }
 	                }
+	                // is key a code?
+	                for (var i = 0; i < options.length; i++) {
+	                    if (keyString === options[i].code) {
+	                        return key;
+	                    }
+	                }
+	                // not a part of the option set
+	                return null;
 	            }
+	
 	            return key;
 	        },
 	        getName: function getName(options, key) {
 	            if (options) {
+	                // for comparison with the option values, which are always represented as strings
+	                var keyString = String(key);
+	
+	                // is key a code?
 	                for (var i = 0; i < options.length; i++) {
-	                    if (key === options[i].code) {
+	                    if (keyString === options[i].code) {
 	                        return options[i].displayName;
 	                    }
 	                }
+	                // is key a name?
+	                for (var i = 0; i < options.length; i++) {
+	                    if (keyString === options[i].displayName) {
+	                        return key;
+	                    }
+	                }
+	                // not a part of the option set
+	                return null;
 	            }
+	
 	            return key;
 	        }
 	    };
@@ -2719,13 +2755,16 @@
 	                return number;
 	            }
 	        },
-	        "d2:oizp": function d2Oizp(parameters) {
-	            var number = parameters[0];
-	            var output = 1;
-	            if (number < 0) {
-	                output = 0;
+	        "d2:oizp": {
+	            parameters: 1,
+	            execute: function execute(parameters) {
+	                var number = parameters[0];
+	                var output = 1;
+	                if (number < 0) {
+	                    output = 0;
+	                }
+	                return output;
 	            }
-	            return output;
 	        },
 	        "d2:count": {
 	            parameters: 1,
@@ -2842,7 +2881,6 @@
 	        "d2:lastEventDate": {
 	            parameters: 1,
 	            execute: function execute(parameters, variablesHash) {
-	                z;
 	                var variableName = parameters[0];
 	                var variableObject = variablesHash[variableName];
 	                var valueFound = "''";
@@ -3524,7 +3562,7 @@
 	                                }
 	                        });
 	                    });
-	                    var result = { event: ruleEffectKey, callerId: flag.callerId, eventsCreated: eventsCreated };
+	                    var result = { event: ruleEffectKey, callerId: flag.callerId, eventsCreated: eventsCreated, ruleeffectsupdated: updatedEffectsExits };
 	                    //Broadcast rules finished if there was any actual changes to the event.
 	                    if (updatedEffectsExits) {
 	                        $rootScope.$broadcast("ruleeffectsupdated", result);
@@ -3615,7 +3653,8 @@
 	            var assignedFields = {};
 	            var hiddenSections = {};
 	            var mandatoryFields = {};
-	            var warningMessages = [];
+	            var errorMessages = {};
+	            var warningMessages = {};
 	            var optionVisibility = { showOnly: null, hidden: {} };
 	
 	            var attributeOptionsChanged = [];
@@ -3640,23 +3679,11 @@
 	                        hiddenFields[effect.trackedEntityAttribute.id] = true;
 	                    } else if (effect.action === "SHOWERROR" && effect.trackedEntityAttribute) {
 	                        if (effect.ineffect) {
-	                            var headerText = $translate.instant('validation_error');
-	                            var bodyText = effect.content + (effect.data ? effect.data : "");
-	
-	                            NotificationService.showNotifcationDialog(headerText, bodyText);
-	                            if (effect.trackedEntityAttribute) {
-	                                currentTei[effect.trackedEntityAttribute.id] = teiOriginalValues[effect.trackedEntityAttribute.id];
-	                            }
+	                            errorMessages[effect.trackedEntityAttribute.id] = effect.content + (effect.data ? effect.data : "");
 	                        }
 	                    } else if (effect.action === "SHOWWARNING" && effect.trackedEntityAttribute) {
 	                        if (effect.ineffect) {
-	                            var message = effect.content + (angular.isDefined(effect.data) ? effect.data : "");
-	
-	                            if (effect.trackedEntityAttribute) {
-	                                warningMessages[effect.trackedEntityAttribute.id] = message;
-	                            } else {
-	                                warningMessages.push(message);
-	                            }
+	                            warningMessages[effect.trackedEntityAttribute.id] = effect.content + (effect.data ? effect.data : "");
 	                        }
 	                    } else if (effect.action === "ASSIGN" && effect.trackedEntityAttribute) {
 	                        var processedValue = $filter('trimquotes')(effect.data);
@@ -3706,14 +3733,15 @@
 	                }
 	            });
 	            clearAttributeValueForShowHideOptionActions(attributeOptionsChanged, currentTei, optionVisibility, attributesById, optionSets);
-	            return { currentTei: currentTei, hiddenFields: hiddenFields, hiddenSections: hiddenSections, warningMessages: warningMessages, assignedFields: assignedFields, mandatoryFields: mandatoryFields, optionVisibility: optionVisibility };
+	            return { currentTei: currentTei, hiddenFields: hiddenFields, hiddenSections: hiddenSections, errorMessages: errorMessages, warningMessages: warningMessages, assignedFields: assignedFields, mandatoryFields: mandatoryFields, optionVisibility: optionVisibility };
 	        },
 	        processRuleEffectsForEvent: function processRuleEffectsForEvent(eventId, currentEvent, currentEventOriginalValues, prStDes, optionSets, optionGroupsById) {
 	            var hiddenFields = {};
 	            var assignedFields = {};
 	            var mandatoryFields = {};
 	            var hiddenSections = {};
-	            var warningMessages = [];
+	            var errorMessages = {};
+	            var warningMessages = {};
 	            var optionVisibility = { showOnly: null, hidden: {} };
 	
 	            var dataElementOptionsChanged = [];
@@ -3736,14 +3764,10 @@
 	                        if (effect.programStageSection) {
 	                            hiddenSections[effect.programStageSection] = effect.programStageSection;
 	                        }
-	                    } else if (effect.action === "SHOWERROR" && effect.dataElement.id) {
-	                        var headerTxt = $translate.instant('validation_error');
-	                        var bodyTxt = effect.content + (effect.data ? effect.data : "");
-	                        NotificationService.showNotifcationDialog(headerTxt, bodyTxt);
-	
-	                        currentEvent[effect.dataElement.id] = currentEventOriginalValues[effect.dataElement.id];
-	                    } else if (effect.action === "SHOWWARNING") {
-	                        warningMessages.push(effect.content + (effect.data ? effect.data : ""));
+	                    } else if (effect.action === "SHOWERROR" && effect.dataElement && effect.dataElement.id) {
+	                        errorMessages[effect.dataElement.id] = effect.content + (effect.data ? effect.data : "");
+	                    } else if (effect.action === "SHOWWARNING" && effect.dataElement && effect.dataElement.id) {
+	                        warningMessages[effect.dataElement.id] = effect.content + (effect.data ? effect.data : "");
 	                    } else if (effect.action === "ASSIGN" && effect.dataElement) {
 	                        var processedValue = $filter('trimquotes')(effect.data);
 	
@@ -3792,7 +3816,7 @@
 	                }
 	            });
 	            clearDataElementValueForShowHideOptionActions(dataElementOptionsChanged, currentEvent, optionVisibility, prStDes, optionSets);
-	            return { currentEvent: currentEvent, hiddenFields: hiddenFields, hiddenSections: hiddenSections, warningMessages: warningMessages, assignedFields: assignedFields, mandatoryFields: mandatoryFields, optionVisibility: optionVisibility };
+	            return { currentEvent: currentEvent, hiddenFields: hiddenFields, hiddenSections: hiddenSections, errorMessages: errorMessages, warningMessages: warningMessages, assignedFields: assignedFields, mandatoryFields: mandatoryFields, optionVisibility: optionVisibility };
 	        },
 	        processRuleEffectAttribute: function processRuleEffectAttribute(context, selectedTei, tei, currentEvent, currentEventOriginialValue, affectedEvent, attributesById, prStDes, optionSets, optionGroupsById) {
 	            //Function used from registration controller to process effects for the tracked entity instance and for the events in the same operation
@@ -3801,7 +3825,8 @@
 	
 	            if (context === "SINGLE_EVENT" && currentEvent && prStDes) {
 	                var eventEffects = this.processRuleEffectsForEvent("SINGLE_EVENT", currentEvent, currentEventOriginialValue, prStDes, optionSets, optionGroupsById);
-	                teiAttributesEffects.warningMessages = angular.extend(teiAttributesEffects.warningMessages, eventEffects.warningMessages);
+	                angular.extend(teiAttributesEffects.errorMessages, eventEffects.errorMessages);
+	                angular.extend(teiAttributesEffects.warningMessages, eventEffects.warningMessages);
 	                teiAttributesEffects.hiddenFields[context] = eventEffects.hiddenFields;
 	                teiAttributesEffects.hiddenSections[context] = eventEffects.hiddenSections;
 	                teiAttributesEffects.assignedFields[context] = eventEffects.assignedFields;
@@ -5109,9 +5134,12 @@
 	                dateFormat = 'dd-mm-yyyy';
 	            }
 	
+	            var locale = calendarSetting.locale === 'en' ? '' : calendarSetting.locale;
+	            $.calendars.picker.setDefaults($.calendars.picker.regional[locale]);
+	
 	            var minDate = $parse(attrs.minDate)(scope);
 	            var maxDate = $parse(attrs.maxDate)(scope);
-	            var calendar = $.calendars.instance(calendarSetting.keyCalendar);
+	            var calendar = $.calendars.instance(calendarSetting.keyCalendar, locale);
 	            var pickerClass = attrs.pickerClass;
 	
 	            var initializeDatePicker = function initializeDatePicker(sDate, eDate) {
@@ -8439,7 +8467,9 @@
 	        var index = -1;
 	        var occupied = null;
 	        for (var i = 0; i < periods.length && index === -1; i++) {
-	            if (moment(periods[i].endDate).isSame(event.sortingDate) || moment(periods[i].startDate).isSame(event.sortingDate) || moment(periods[i].endDate).isAfter(event.sortingDate) && moment(event.sortingDate).isAfter(periods[i].endDate)) {
+	            var startMoment = moment(periods[i].startDate, calendarSetting.momentFormat);
+	            var endMoment = moment(periods[i].endDate, calendarSetting.momentFormat);
+	            if (startMoment.isSame(event.sortingDate) || endMoment.isSame(event.sortingDate) || endMoment.isAfter(event.sortingDate) && startMoment.isBefore(event.sortingDate)) {
 	                index = i;
 	                occupied = angular.copy(periods[i]);
 	            }
@@ -8475,7 +8505,8 @@
 	        } else {
 	
 	            var startDate = DateUtils.format(moment(referenceDate, calendarSetting.momentFormat).add(offset, 'days'));
-	            var periodOffset = _periodOffset && dhis2.validation.isNumber(_periodOffset) ? _periodOffset : splitDate(startDate).year - splitDate(DateUtils.getToday()).year;
+	            var yearsSinceEnrollment = splitDate(DateUtils.getToday()).year - splitDate(startDate).year;
+	            var periodOffset = dhis2.validation.isNumber(_periodOffset) ? _periodOffset : -yearsSinceEnrollment;
 	            var eventDateOffSet = moment(referenceDate, calendarSetting.momentFormat).add('d', offset)._d;
 	            eventDateOffSet = $filter('date')(eventDateOffSet, calendarSetting.keyDateFormat);
 	
@@ -10497,13 +10528,13 @@
 	            if (programStage.periodType) {
 	                var prds = getEventDuePeriod(eventsPerStage, programStage, enrollment);
 	                var periods = prds && prds.availablePeriods && prds.availablePeriods.length ? prds.availablePeriods : [];
+	                dummyEvent.periods = periods;
+	                dummyEvent.periodOffset = prds.periodOffset;
+	                dummyEvent.hasFuturePeriod = prds.hasFuturePeriod;
 	                if (periods.length > 0) {
 	                    dummyEvent.dueDate = periods[0].endDate;
 	                    dummyEvent.periodName = periods[0].displayName;
 	                    dummyEvent.eventDate = dummyEvent.dueDate;
-	                    dummyEvent.periods = periods;
-	                    dummyEvent.periodOffset = prds.periodOffset;
-	                    dummyEvent.hasFuturePeriod = prds.hasFuturePeriod;
 	                }
 	            } else {
 	                dummyEvent.dueDate = getEventDueDate(eventsPerStage, programStage, enrollment);
@@ -10544,7 +10575,7 @@
 	                }
 	            }
 	        },
-	        autoGenerateEvents: function autoGenerateEvents(teiId, program, orgUnit, enrollment, availableEvent) {
+	        autoGenerateEvents: function autoGenerateEvents(teiId, program, orgUnit, enrollment, availableEvent, selectedCategoryOptions) {
 	            var dhis2Events = { events: [] };
 	            if (teiId && program && orgUnit && enrollment) {
 	                angular.forEach(program.programStages, function (stage) {
@@ -10586,6 +10617,12 @@
 	
 	                        dhis2Events.events.push(newEvent);
 	                    }
+	                });
+	            }
+	
+	            if (selectedCategoryOptions) {
+	                angular.forEach(dhis2Events.events, function (event) {
+	                    event.attributeCategoryOptions = selectedCategoryOptions;
 	                });
 	            }
 	
@@ -13603,10 +13640,10 @@
 	    $scope.customRegistrationForm = null;
 	    $scope.selectedTei = {}; // Attribute values in the current form
 	    $scope.apiFormattedTei = {}; // API formatted version of $scope.selectedTei; see $scope.registerEntity(...) for details
-	    $scope.warningMessages = [];
+	    $scope.errorMessages = {};
+	    $scope.warningMessages = {};
 	    $scope.hiddenFields = [];
 	    $scope.assignedFields = [];
-	    $scope.errorMessages = {};
 	    $scope.attributeUniquenessError = {};
 	    $scope.hiddenSections = [];
 	    $scope.mandatoryFields = [];
@@ -13621,6 +13658,7 @@
 	    var flag = { debug: true, verbose: $location.search().verbose ? true : false };
 	    $rootScope.ruleeffects = {};
 	    $scope.userAuthority = AuthorityService.getUserAuthorities(SessionStorageService.get('USER_PROFILE'));
+	    $scope.selectedCategoryOptions = {};
 	
 	    $scope.attributesById = CurrentSelection.getAttributesById();
 	    $scope.optionGroupsById = CurrentSelection.getOptionGroupsById();
@@ -13821,6 +13859,7 @@
 	    $scope.$on('registrationWidget', function (event, args) {
 	        $scope.selectedTei = {};
 	        $scope.apiFormattedTei = {};
+	        $scope.selectedCategoryOptions = {};
 	        $scope.registrationMode = args.registrationMode;
 	        $scope.orgUnitNames = CurrentSelection.getOrgUnitNames();
 	
@@ -13916,6 +13955,7 @@
 	                        $scope.currentEvent = {};
 	                        $scope.registrationAndDataEntry = true;
 	                        $scope.prStDes = [];
+	                        $scope.prStDesInStage = {};
 	                        $scope.currentStage = $scope.selectedProgram.programStages[0];
 	                        $scope.currentEvent.event = 'SINGLE_EVENT';
 	                        $scope.currentEvent.providedElsewhere = {};
@@ -13937,8 +13977,13 @@
 	                                $scope.allowProvidedElsewhereExists[$scope.currentStage.id] = true;
 	                            }
 	                        });
+	                        $scope.prStDesInStage[$scope.currentStage.id] = $scope.prStDes;
 	                        $scope.currentEventOriginal = angular.copy($scope.currentEvent);
 	                        $scope.customDataEntryForm = CustomFormService.getForProgramStage($scope.currentStage, $scope.prStDes);
+	
+	                        angular.forEach($scope.currentStage.programStageSections, function (section) {
+	                            section.open = true;
+	                        });
 	                    }
 	                }
 	                $scope.attributeSections = $scope.selectedProgram.programSections.length ? AttributeUtils.userDefinedAttributeSections($scope.attributes, $scope.selectedProgram.programSections) : AttributeUtils.defaultAttributeSections($scope.attributes, $scope.widgetTitle);
@@ -14058,7 +14103,36 @@
 	        $scope.apiFormattedTei.orgUnit = args.orgUnit;
 	    });
 	
+	    $scope.categoryRequiredDuringTEIRegistration = function () {
+	        if ($scope.selectedProgram && $scope.selectedProgram.categoryCombo && !$scope.selectedProgram.categoryCombo.isDefault && $scope.selectedProgram.categoryCombo.categories) {
+	            if ($scope.registrationAndDataEntry) {
+	                return true;
+	            }
+	            return $scope.selectedProgram.programStages.find(function (stage) {
+	                return stage.autoGenerateEvent;
+	            }) !== undefined;
+	        }
+	        return false;
+	    };
+	
+	    $scope.selectCategoryOption = function (item, category) {
+	        $scope.selectedCategoryOptions[category.id] = item.id;
+	    };
+	
 	    var performRegistration = function performRegistration(destination) {
+	        var selectedCategoryOptions = null;
+	        if ($scope.categoryRequiredDuringTEIRegistration()) {
+	            if ($scope.selectedProgram.categoryCombo.categories.find(function (category) {
+	                return !$scope.selectedCategoryOptions[category.id];
+	            })) {
+	                NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("fill_all_category_options"));
+	                return;
+	            }
+	            selectedCategoryOptions = $scope.selectedProgram.categoryCombo.categories.map(function (category) {
+	                return $scope.selectedCategoryOptions[category.id];
+	            }).join(';');
+	        }
+	
 	        if (destination === "DASHBOARD" || destination === "SELF" || destination === "ENROLLMENT") {
 	            $scope.model.savingRegistration = true;
 	        }
@@ -14124,7 +14198,7 @@
 	                                    }
 	                                    enrollment.enrollment = en.importSummaries[0].reference;
 	                                    var availableEvent = $scope.currentEvent && $scope.currentEvent.event ? $scope.currentEvent : null;
-	                                    var dhis2Events = EventUtils.autoGenerateEvents($scope.apiFormattedTei.trackedEntityInstance, $scope.selectedProgram, $scope.selectedOrgUnit, enrollment, availableEvent);
+	                                    var dhis2Events = EventUtils.autoGenerateEvents($scope.apiFormattedTei.trackedEntityInstance, $scope.selectedProgram, $scope.selectedOrgUnit, enrollment, availableEvent, selectedCategoryOptions);
 	                                    if (dhis2Events.events.length > 0) {
 	                                        DHIS2EventFactory.create(dhis2Events).then(function () {
 	                                            notifyRegistrtaionCompletion(destination, $scope.apiFormattedTei.trackedEntityInstance);
@@ -14234,6 +14308,26 @@
 	                    return false;
 	                }
 	            }
+	        }
+	
+	        var context = $scope.registrationAndDataEntry ? 'SINGLE_EVENT' : 'registration';
+	
+	        if (angular.isDefined($scope.errorMessages[context]) && Object.keys($scope.errorMessages[context]).length > 0) {
+	            //There are unresolved program rule errors - show error message.
+	            $scope.validatingRegistration = false;
+	            var sections = [{
+	                bodyList: Object.values($scope.errorMessages[context]),
+	                itemType: 'danger'
+	            }];
+	
+	            var dialogOptions = {
+	                headerText: 'errors',
+	                bodyText: 'please_fix_errors_before_saving',
+	                sections: sections
+	            };
+	
+	            NotificationService.showNotifcationWithOptions({}, dialogOptions);
+	            return false;
 	        }
 	
 	        //form is valid, continue the registration
@@ -14419,11 +14513,10 @@
 	
 	    //listen for rule effect changes
 	    $scope.$on('ruleeffectsupdated', function (event, args) {
-	        if (args.event === "registration" || args.event === 'SINGLE_EVENT') {
-	            $scope.warningMessages = [];
+	        var context = args.event;
+	        if (context === "registration" || context === 'SINGLE_EVENT') {
 	            $scope.hiddenFields = [];
 	            $scope.assignedFields = [];
-	            $scope.errorMessages = {};
 	            $scope.hiddenSections = [];
 	
 	            var effectResult = TrackerRulesExecutionService.processRuleEffectAttribute(args.event, $scope.selectedTei, $scope.apiFormattedTei, $scope.currentEvent, {}, $scope.currentEvent, $scope.attributesById, $scope.prStDes, $scope.optionSets, $scope.optionGroupsById);
@@ -14432,9 +14525,14 @@
 	            $scope.hiddenFields = effectResult.hiddenFields;
 	            $scope.hiddenSections = effectResult.hiddenSections;
 	            $scope.assignedFields = effectResult.assignedFields;
-	            $scope.warningMessages = effectResult.warningMessages;
+	            $scope.errorMessages['registration'] = effectResult.errorMessages;
+	            $scope.warningMessages['registration'] = effectResult.warningMessages;
 	            $scope.mandatoryFields = effectResult.mandatoryFields;
 	            $scope.optionVisibility = effectResult.optionVisibility;
+	            if ($scope.registrationAndDataEntry) {
+	                $scope.errorMessages['SINGLE_EVENT'] = effectResult.errorMessages;
+	                $scope.warningMessages['SINGLE_EVENT'] = effectResult.warningMessages;
+	            }
 	            if ($scope.assignedFields) {
 	                var searchedGroups = {};
 	                angular.forEach($scope.assignedFields, function (field) {
@@ -16154,7 +16252,7 @@
 	                }
 	            } else if (effect.action === "ASSIGN") {
 	                if (affectedEvent.status !== 'SCHEDULE' && affectedEvent.status !== 'SKIPPED' && !affectedEvent.editingNotAllowed) {
-	                    if (effect.ineffect && effect.dataElement) {
+	                    if (effect.ineffect && effect.dataElement && $scope.prStDesInStage[$scope.currentStage.id][effect.dataElement.id]) {
 	                        //For "ASSIGN" actions where we have a dataelement, we save the calculated value to the dataelement:
 	                        //Blank out the value:
 	                        var processedValue = $filter('trimquotes')(effect.data);
@@ -16492,7 +16590,7 @@
 	                $scope.currentStage.rulesExecuted = true;
 	            });
 	        } else {
-	            TrackerRulesExecutionService.executeRules($scope.allProgramRules, $scope.currentEvent, evs, $scope.prStDes, $scope.attributesById, $scope.selectedTei, $scope.selectedEnrollment, $scope.optionSets, flag);
+	            return TrackerRulesExecutionService.executeRules($scope.allProgramRules, $scope.currentEvent, evs, $scope.prStDes, $scope.attributesById, $scope.selectedTei, $scope.selectedEnrollment, $scope.optionSets, flag);
 	        }
 	    };
 	
@@ -16516,6 +16614,7 @@
 	        $scope.tabularEntryStages = [];
 	        $rootScope.ruleeffects = {};
 	        $scope.prStDes = [];
+	        $scope.prStDesInStage = {};
 	        $scope.allProgramRules = [];
 	        $scope.allowProvidedElsewhereExists = [];
 	        $scope.optionsReady = false;
@@ -16563,11 +16662,13 @@
 	                }
 	
 	                stage.programStageDataElementsCollection = {};
+	                $scope.prStDesInStage[stage.id] = {};
 	
 	                stage.executionDateLabel = stage.executionDateLabel ? stage.executionDateLabel : $translate.instant('report_date');
 	                stage.dueDateLabel = stage.dueDateLabel ? stage.dueDateLabel : $translate.instant('due_date');
 	                angular.forEach(stage.programStageDataElements, function (prStDe) {
 	                    $scope.prStDes[prStDe.dataElement.id] = prStDe;
+	                    $scope.prStDesInStage[stage.id][prStDe.dataElement.id] = prStDe;
 	                    if (prStDe.allowProvidedElsewhere) {
 	                        $scope.allowProvidedElsewhereExists[stage.id] = true;
 	                    }
@@ -17439,10 +17540,12 @@
 	
 	        $scope.currentElement = { id: "eventDate", event: eventToSave.event, saved: false };
 	
+	        var isScheduleEvent = eventToSave.status === 'SCHEDULE';
+	
 	        var e = { event: eventToSave.event,
 	            enrollment: eventToSave.enrollment,
 	            dueDate: DateUtils.formatFromUserToApi(eventToSave.dueDate),
-	            status: eventToSave.status === 'SCHEDULE' ? 'ACTIVE' : eventToSave.status,
+	            status: isScheduleEvent ? 'ACTIVE' : eventToSave.status,
 	            program: eventToSave.program,
 	            programStage: eventToSave.programStage,
 	            orgUnit: eventToSave.dataValues && eventToSave.dataValues.length > 0 ? eventToSave.orgUnit : $scope.selectedOrgUnit.id,
@@ -17475,7 +17578,11 @@
 	            $scope.currentElement = { id: "eventDate", event: eventToSave.event, saved: true };
 	            $scope.currentEventOriginal = angular.copy($scope.currentEvent);
 	            $scope.currentStageEventsOriginal = angular.copy($scope.currentStageEvents);
-	            $scope.executeRules();
+	            $scope.executeRules().then(function (result) {
+	                if (isScheduleEvent && !(result && result.ruleeffectsupdated)) {
+	                    processRuleEffect(result.event, result.callerId);
+	                }
+	            });
 	        });
 	    };
 	
@@ -19012,12 +19119,6 @@
 	        var width = angular.element(document.getElementById('tabelContainer'))[0].clientWidth;
 	        return width;
 	    };
-	
-	    $scope.setDateOnFocus = function (currentValue) {
-	        if (!currentValue) {
-	            $scope.currentEvent.eventDate = DateUtils.getToday();
-	        }
-	    };
 	}]).controller('EventOptionsInTableController', ["$scope", "$translate", function ($scope, $translate) {
 	
 	    var COMPLETE = "Complete";
@@ -19547,7 +19648,8 @@
 	            return;
 	        }
 	
-	        $scope.periodOffset = period === 'NEXT' ? $scope.periodOffset + 1 : $scope.periodOffset - 1;
+	        var periodOffset = $scope.periodOffset || 0;
+	        $scope.periodOffset = period === 'NEXT' ? periodOffset + 1 : periodOffset - 1;
 	        $scope.dhis2Event.selectedPeriod = null;
 	
 	        var prds = PeriodService.getPeriods(eventsByStage[stage.id], $scope.model.selectedStage, $scope.selectedEnrollment, $scope.periodOffset);
@@ -21205,6 +21307,7 @@
 	    $scope.selectedTeiForDisplay = angular.copy($scope.mainTei);
 	    $scope.ouModes = [{ name: 'SELECTED' }, { name: 'CHILDREN' }, { name: 'DESCENDANTS' }, { name: 'ACCESSIBLE' }];
 	    $scope.selectedOuMode = $scope.ouModes[0];
+	    $scope.selectedCategoryOptions = {};
 	
 	    //Paging
 	    $scope.pager = { pageSize: 50, page: 1, toolBarDisplay: 5 };
@@ -21732,6 +21835,7 @@
 	        $scope.trackedEntityForm = null;
 	        $scope.customRegistrationForm = null;
 	        $scope.customFormExists = false;
+	        $scope.selectedCategoryOptions = {};
 	        AttributesFactory.getByProgram($scope.base.selectedProgramForRelative).then(function (atts) {
 	            $scope.attributes = TEIGridService.generateGridColumns(atts, null, false).columns;
 	            if ($scope.base.selectedProgramForRelative) {
@@ -21774,12 +21878,40 @@
 	        $scope.trackedEntityTypes.selected = $scope.trackedEntityTypes.available[0];
 	    });
 	
+	    $scope.categoryRequiredDuringTEIRegistration = function () {
+	        var selectedProgram = $scope.base.selectedProgramForRelative;
+	        if (selectedProgram && selectedProgram.categoryCombo && !selectedProgram.categoryCombo.isDefault && selectedProgram.categoryCombo.categories) {
+	            return selectedProgram.programStages.find(function (stage) {
+	                return stage.autoGenerateEvent;
+	            }) !== undefined;
+	        }
+	        return false;
+	    };
+	
+	    $scope.selectCategoryOption = function (item, category) {
+	        $scope.selectedCategoryOptions[category.id] = item.id;
+	    };
+	
 	    $scope.registerEntity = function () {
 	
 	        //check for form validity
 	        $scope.outerForm.submitted = true;
 	        if ($scope.outerForm.$invalid) {
 	            return false;
+	        }
+	
+	        //check that categories have been selected
+	        var selectedCategoryOptions = null;
+	        if ($scope.categoryRequiredDuringTEIRegistration()) {
+	            if ($scope.selectedProgram.categoryCombo.categories.find(function (category) {
+	                return !$scope.selectedCategoryOptions[category.id];
+	            })) {
+	                NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("fill_all_category_options"));
+	                return;
+	            }
+	            selectedCategoryOptions = $scope.selectedProgram.categoryCombo.categories.map(function (category) {
+	                return $scope.selectedCategoryOptions[category.id];
+	            }).join(';');
 	        }
 	
 	        //form is valid, continue the registration
@@ -21829,7 +21961,7 @@
 	                            if (en.reference && en.status === 'SUCCESS') {
 	                                enrollment.enrollment = en.reference;
 	                                $scope.selectedEnrollment = enrollment;
-	                                var dhis2Events = EventUtils.autoGenerateEvents($scope.tei.trackedEntityInstance, $scope.base.selectedProgramForRelative, $scope.selectedOrgUnit, enrollment, null);
+	                                var dhis2Events = EventUtils.autoGenerateEvents($scope.tei.trackedEntityInstance, $scope.base.selectedProgramForRelative, $scope.selectedOrgUnit, enrollment, null, selectedCategoryOptions);
 	                                if (dhis2Events.events.length > 0) {
 	                                    DHIS2EventFactory.create(dhis2Events);
 	                                }
@@ -40620,4 +40752,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-4a1fa1f2f0b465f5b981.js.map
+//# sourceMappingURL=app-a978edbea964d648fee9.js.map
