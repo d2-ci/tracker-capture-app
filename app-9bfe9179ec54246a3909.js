@@ -892,48 +892,22 @@
 	    return {
 	        getCode: function getCode(options, key) {
 	            if (options) {
-	                // for comparison with the option values, which are always represented as strings
-	                var keyString = String(key);
-	
-	                // is key a name?
 	                for (var i = 0; i < options.length; i++) {
-	                    if (keyString === options[i].displayName) {
+	                    if (key === options[i].displayName) {
 	                        return options[i].code;
 	                    }
 	                }
-	                // is key a code?
-	                for (var i = 0; i < options.length; i++) {
-	                    if (keyString === options[i].code) {
-	                        return key;
-	                    }
-	                }
-	                // not a part of the option set
-	                return null;
 	            }
-	
 	            return key;
 	        },
 	        getName: function getName(options, key) {
 	            if (options) {
-	                // for comparison with the option values, which are always represented as strings
-	                var keyString = String(key);
-	
-	                // is key a code?
 	                for (var i = 0; i < options.length; i++) {
-	                    if (keyString === options[i].code) {
+	                    if (key === options[i].code) {
 	                        return options[i].displayName;
 	                    }
 	                }
-	                // is key a name?
-	                for (var i = 0; i < options.length; i++) {
-	                    if (keyString === options[i].displayName) {
-	                        return key;
-	                    }
-	                }
-	                // not a part of the option set
-	                return null;
 	            }
-	
 	            return key;
 	        }
 	    };
@@ -40741,4 +40715,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-2935edc675771231935f.js.map
+//# sourceMappingURL=app-9bfe9179ec54246a3909.js.map
