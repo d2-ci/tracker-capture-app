@@ -3006,8 +3006,7 @@
 	        "d2:length": {
 	            parameters: 1,
 	            execute: function execute(parameters) {
-	                var text = typeof parameters[0] === 'string' ? parameters[0] : String(parameters[0]);
-	                return text.replace(/\n/g, '').length;
+	                return String(parameters[0]).length;
 	            }
 	        },
 	        "d2:condition": {
@@ -3060,8 +3059,7 @@
 	     * @returns {*}
 	     */
 	    function evaluate(code) {
-	        var codeWithNewline = code.replace(/\n/g, '\\n');
-	        var func = new Function('"use strict";return ' + codeWithNewline);
+	        var func = new Function('"use strict";return ' + code.replace(/\n/g, '\\n'));
 	        return func();
 	    }
 	
@@ -3201,20 +3199,46 @@
 	        return evaluate(expressionToEvaluate);
 	    };
 	
+	    function removeNewLinesFromNonStrings(expression, expressionModuloStrings) {
+	        var fragments = expressionModuloStrings.split(/\n+/g);
+	        var result = fragments.reduce(function (_ref7, fragment) {
+	            var reducedExpression = _ref7.reducedExpression,
+	                remainder = _ref7.remainder;
+	
+	            remainder = remainder.replace(/^\n*/, '');
+	            reducedExpression += remainder.substring(0, fragment.length);
+	
+	            return {
+	                reducedExpression: reducedExpression,
+	                remainder: remainder.substring(fragment.length)
+	            };
+	        }, { reducedExpression: '', remainder: expression });
+	
+	        return {
+	            reducedExpression: result.reducedExpression,
+	            reducedExpressionModuloStrings: fragments.join('')
+	        };
+	    };
+	
 	    var runExpression = function runExpression(expression, beforereplacement, identifier, flag, variablesHash, selectedOrgUnit) {
 	        var answer = false;
 	        try {
 	            var expressionModuloStrings = expression.replace(/'[^']*'|"[^"]*"/g, function (match) {
 	                return ' '.repeat(match.length);
 	            });
-	            var applicableDhisFunctions = Object.entries(dhisFunctions).map(function (_ref7) {
-	                var _ref8 = _slicedToArray(_ref7, 2),
-	                    key = _ref8[0],
-	                    value = _ref8[1];
+	            var applicableDhisFunctions = Object.entries(dhisFunctions).map(function (_ref8) {
+	                var _ref9 = _slicedToArray(_ref8, 2),
+	                    key = _ref9[0],
+	                    value = _ref9[1];
 	
 	                return _extends({}, value, { name: key });
 	            });
-	            answer = internalExecuteExpression(applicableDhisFunctions, expression, expressionModuloStrings, variablesHash, selectedOrgUnit);
+	
+	            var _removeNewLinesFromNo = removeNewLinesFromNonStrings(expression, expressionModuloStrings),
+	                reducedExpression = _removeNewLinesFromNo.reducedExpression,
+	                reducedExpressionModuloStrings = _removeNewLinesFromNo.reducedExpressionModuloStrings;
+	
+	            answer = internalExecuteExpression(applicableDhisFunctions, reducedExpression, reducedExpressionModuloStrings, variablesHash, selectedOrgUnit);
 	
 	            if (flag.verbose) {
 	                $log.info("Expression with id " + identifier + " was successfully run. Original condition was: " + beforereplacement + " - Evaluation ended up as:" + expression + " - Result of evaluation was:" + answer);
@@ -4349,10 +4373,10 @@
 	            });
 	        },
 	        defaultAttributeSections: function defaultAttributeSections(attributes, widgetTitle) {
-	            var _ref9;
+	            var _ref10;
 	
 	            var attributeSections = [{ displayName: widgetTitle === 'profile' ? '' : $translate.instant('profile'), attributes: attributes }];
-	            return _ref9 = {}, _defineProperty(_ref9, true, attributeSections), _defineProperty(_ref9, false, attributeSections), _ref9;
+	            return _ref10 = {}, _defineProperty(_ref10, true, attributeSections), _defineProperty(_ref10, false, attributeSections), _ref10;
 	        },
 	        userDefinedAttributeSections: function userDefinedAttributeSections(attributes, programSections) {
 	            var _programSections$redu;
@@ -4370,8 +4394,8 @@
 	                var attributeList = acc[false][0].attributes;
 	                acc[true].push({
 	                    displayName: programSection.displayName,
-	                    attributes: programSection.trackedEntityAttributes.map(function (_ref10) {
-	                        var id = _ref10.id;
+	                    attributes: programSection.trackedEntityAttributes.map(function (_ref11) {
+	                        var id = _ref11.id;
 	
 	                        attributeList.push(programTrackedEntityAttributes[id]);
 	                        return programTrackedEntityAttributes[id];
@@ -40728,4 +40752,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-8f51db6ea9aaaf3d7224.js.map
+//# sourceMappingURL=app-87c1b819b7e9d3b9d83e.js.map
