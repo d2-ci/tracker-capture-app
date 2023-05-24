@@ -3963,6 +3963,7 @@
 	    this.frontPageData = null;
 	    this.trackedEntityTypes = null;
 	    this.optionGroupsById = null;
+	    this.ruleEngineEvents = null;
 	
 	    this.set = function (currentSelection) {
 	        this.currentSelection = currentSelection;
@@ -4071,6 +4072,14 @@
 	
 	    this.setOptionGroupsById = function (optionGroupsById) {
 	        this.optionGroupsById = optionGroupsById;
+	    };
+	
+	    this.getRuleEngineEvents = function () {
+	        return this.ruleEngineEvents;
+	    };
+	
+	    this.setRuleEngineEvents = function (evs) {
+	        this.ruleEngineEvents = evs;
 	    };
 	}).service('AuditHistoryDataService', ["$http", "$translate", "NotificationService", "DHIS2URL", function ($http, $translate, NotificationService, DHIS2URL) {
 	    this.getAuditHistoryData = function (dataId, dataType) {
@@ -11417,17 +11426,17 @@
 	            ruleBoundData.textInEffect = false;
 	            ruleBoundData.keyDataInEffect = false;
 	
-	            if (!event || event === 'registration') return;
+	            var ruleEffectKey = event || 'registration';
 	
 	            //In case the 
-	            if (ruleBoundData.lastEventUpdated !== event) {
+	            if (ruleBoundData.lastEventUpdated !== ruleEffectKey) {
 	                ruleBoundData.displayTextEffects = {};
 	                ruleBoundData.displayKeyDataEffects = {};
-	                ruleBoundData.lastEventUpdated = event;
+	                ruleBoundData.lastEventUpdated = ruleEffectKey;
 	            }
 	
-	            if (ruleeffects && ruleeffects[event]) {
-	                angular.forEach(ruleeffects[event], function (effect) {
+	            if (ruleeffects && ruleeffects[ruleEffectKey]) {
+	                angular.forEach(ruleeffects[ruleEffectKey], function (effect) {
 	                    var g = 1;
 	                    var u = g + 1;
 	                    if (effect.location === location) {
@@ -14420,13 +14429,30 @@
 	            var eventExists = $scope.currentEvent && $scope.currentEvent.event;
 	            var enrollment = $scope.selectedEnrollment && $scope.selectedEnrollment.orgUnit ? $scope.selectedEnrollment : null;
 	            var evs = null;
+	
+	            var _CurrentSelection$rul = CurrentSelection.ruleEngineEvents,
+	                programStages = _CurrentSelection$rul.programStages,
+	                eventsByStage = _CurrentSelection$rul.eventsByStage,
+	                prStDes = _CurrentSelection$rul.prStDes;
+	
+	
 	            if (eventExists) {
 	                evs = { all: [], byStage: {} };
 	                evs.all = [$scope.currentEvent];
 	                evs.byStage[$scope.currentStage.id] = [$scope.currentEvent];
+	            } else if (enrollment) {
+	                var allSorted = [];
+	                for (var ps = 0; ps < programStages.length; ps++) {
+	                    for (var e = 0; e < eventsByStage[programStages[ps].id].length; e++) {
+	                        allSorted.push(eventsByStage[programStages[ps].id][e]);
+	                    }
+	                }
+	                allSorted = orderByFilter(allSorted, '-sortingDate').reverse();
+	
+	                evs = { all: allSorted, byStage: eventsByStage };
 	            }
 	            if (eventExists || enrollment) {
-	                TrackerRulesExecutionService.executeRules($scope.allProgramRules, eventExists ? $scope.currentEvent : 'registration', evs, $scope.prStDes, $scope.attributesById, $scope.selectedTei, enrollment, $scope.optionSets, flag);
+	                TrackerRulesExecutionService.executeRules($scope.allProgramRules, eventExists ? $scope.currentEvent : 'registration', evs, enrollment ? prStDes : $scope.prStDes, $scope.attributesById, $scope.selectedTei, enrollment, $scope.optionSets, flag);
 	            }
 	        }
 	    };
@@ -18380,6 +18406,12 @@
 	            }, 200);
 	        }
 	        $scope.allEventsSorted = orderByFilter($scope.allEventsSorted, '-sortingDate').reverse();
+	
+	        CurrentSelection.setRuleEngineEvents({
+	            programStages: $scope.programStages,
+	            eventsByStage: $scope.eventsByStage,
+	            prStDes: $scope.prStDes
+	        });
 	    };
 	
 	    $scope.showLastEventInStage = function (stageId) {
@@ -22359,14 +22391,14 @@
 	
 	    //listen for updated rule effects
 	    $scope.$on('ruleeffectsupdated', function (event, args) {
-	        if (currentEventId && currentEventId === args.event) {
+	        if (currentEventId ? args.event === currentEventId : args.event === 'registration') {
 	            setOrderedData(RuleBoundFactory.getDisplayEffects($scope.data, args.event, $rootScope.ruleeffects, $scope.widgetTitle));
 	        }
 	    });
 	
 	    $scope.$on('dataEntryEventChanged', function (event, args) {
 	        if (currentEventId !== args.event) {
-	            currentEventId = args.event;
+	            currentEventId = args.event || 'registration';
 	            setOrderedData(RuleBoundFactory.getDisplayEffects($scope.data, currentEventId, $rootScope.ruleeffects, $scope.widgetTitle));
 	        }
 	    });
@@ -40792,4 +40824,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-523f0a5f6b012c2b4e6d.js.map
+//# sourceMappingURL=app-a251d7c78db80d930284.js.map
