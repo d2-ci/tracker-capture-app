@@ -3952,7 +3952,6 @@
 	    this.attributesById = null;
 	    this.ouLevels = null;
 	    this.sortedTeiIds = [];
-	    this.selectedTeiEvents = null;
 	    this.relationshipOwner = {};
 	    this.selectedTeiEvents = [];
 	    this.fileNames = {};
@@ -14427,20 +14426,19 @@
 	
 	        if ($scope.selectedProgram && $scope.selectedProgram.id) {
 	            var eventExists = $scope.currentEvent && $scope.currentEvent.event;
-	            var enrollment = $scope.selectedEnrollment && $scope.selectedEnrollment.orgUnit ? $scope.selectedEnrollment : null;
 	            var evs = null;
-	
-	            var _CurrentSelection$rul = CurrentSelection.ruleEngineEvents,
-	                programStages = _CurrentSelection$rul.programStages,
-	                eventsByStage = _CurrentSelection$rul.eventsByStage,
-	                prStDes = _CurrentSelection$rul.prStDes;
-	
+	            var prStDes = null;
 	
 	            if (eventExists) {
 	                evs = { all: [], byStage: {} };
 	                evs.all = [$scope.currentEvent];
 	                evs.byStage[$scope.currentStage.id] = [$scope.currentEvent];
-	            } else if (enrollment) {
+	            } else if ($scope.registrationMode === 'PROFILE' && CurrentSelection.ruleEngineEvents) {
+	                var _CurrentSelection$rul = CurrentSelection.ruleEngineEvents,
+	                    programStages = _CurrentSelection$rul.programStages,
+	                    eventsByStage = _CurrentSelection$rul.eventsByStage;
+	
+	                prStDes = CurrentSelection.ruleEngineEvents.prStDes;
 	                var allSorted = [];
 	                for (var ps = 0; ps < programStages.length; ps++) {
 	                    for (var e = 0; e < eventsByStage[programStages[ps].id].length; e++) {
@@ -14451,8 +14449,8 @@
 	
 	                evs = { all: allSorted, byStage: eventsByStage };
 	            }
-	            if (eventExists || enrollment) {
-	                TrackerRulesExecutionService.executeRules($scope.allProgramRules, eventExists ? $scope.currentEvent : 'registration', evs, enrollment ? prStDes : $scope.prStDes, $scope.attributesById, $scope.selectedTei, enrollment, $scope.optionSets, flag);
+	            if (evs) {
+	                TrackerRulesExecutionService.executeRules($scope.allProgramRules, eventExists ? $scope.currentEvent : 'registration', evs, prStDes || $scope.prStDes, $scope.attributesById, $scope.selectedTei, $scope.selectedEnrollment, $scope.optionSets, flag);
 	            }
 	        }
 	    };
@@ -40824,4 +40822,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-a251d7c78db80d930284.js.map
+//# sourceMappingURL=app-0f225a68ab1c56faa5a2.js.map
