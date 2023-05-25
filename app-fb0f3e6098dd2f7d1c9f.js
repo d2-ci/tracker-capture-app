@@ -3564,7 +3564,7 @@
 	     * @param {*} flag execution flags
 	     */
 	    var internalFetchContextData = function internalFetchContextData(selectedEnrollment, executingEvent) {
-	        return OrgUnitFactory.getFromStoreOrServer(selectedEnrollment ? selectedEnrollment.orgUnit : executingEvent.orgUnit).then(function (orgUnit) {
+	        return OrgUnitFactory.getFromStoreOrServer(executingEvent && executingEvent.orgUnit ? executingEvent.orgUnit : selectedEnrollment.orgUnit).then(function (orgUnit) {
 	            var data = { selectedOrgUnit: orgUnit, selectedProgramStage: null };
 	            if (executingEvent && executingEvent.program && executingEvent.programStage) {
 	                return MetaDataFactory.get("programs", executingEvent.program).then(function (program) {
@@ -41063,4 +41063,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-8ad6267c30cdc57e22ce.js.map
+//# sourceMappingURL=app-fb0f3e6098dd2f7d1c9f.js.map
