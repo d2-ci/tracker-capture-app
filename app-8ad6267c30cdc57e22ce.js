@@ -13326,7 +13326,7 @@
 	            if ($scope.selectedTeiId) {
 	
 	                TEIService.getPotentialDuplicatesForTei($scope.selectedTeiId).then(function (duplicates) {
-	                    $scope.potentialDuplicates = duplicates.potentialDuplicates;
+	                    $scope.potentialDuplicates = duplicates.identifiableObjects;
 	                    $scope.duplicateExists = $scope.potentialDuplicates.length > 0;
 	                });
 	
@@ -41063,4 +41063,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-777950da3b5aeed25058.js.map
+//# sourceMappingURL=app-8ad6267c30cdc57e22ce.js.map
