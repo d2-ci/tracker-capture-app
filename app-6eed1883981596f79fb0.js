@@ -451,6 +451,8 @@
 	
 	var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
 	
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+	
 	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 	
 	function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
@@ -1692,10 +1694,8 @@
 	
 	        //Append single quotation marks in case the variable is of text or date type:
 	        if (valueType === 'LONG_TEXT' || valueType === 'TEXT' || valueType === 'DATE' || valueType === 'AGE' || valueType === 'OPTION_SET' || valueType === 'URL' || valueType === 'DATETIME' || valueType === 'TIME' || valueType === 'PHONE_NUMBER' || valueType === 'ORGANISATION_UNIT' || valueType === 'USERNAME') {
-	            if (processedValue) {
-	                processedValue = "'" + processedValue + "'";
-	            } else {
-	                processedValue = "''";
+	            if (!processedValue) {
+	                processedValue = "";
 	            }
 	        } else if (valueType === 'BOOLEAN' || valueType === 'TRUE_ONLY') {
 	            if (processedValue === "Yes") {
@@ -1705,7 +1705,7 @@
 	            } else if (processedValue && eval(processedValue)) {
 	                processedValue = true;
 	            } else {
-	                processedValue = "''";
+	                processedValue = "";
 	            }
 	        } else if (valueType === "INTEGER" || valueType === "NUMBER" || valueType === "INTEGER_POSITIVE" || valueType === "INTEGER_NEGATIVE" || valueType === "INTEGER_ZERO_OR_POSITIVE" || valueType === "PERCENTAGE") {
 	            if (processedValue) {
@@ -1930,6 +1930,24 @@
 	    var lastEventDate = null;
 	    var lastProgramId = null;
 	    var eventScopeExceptCurrent = false;
+	    var passOnTypes = ['number', 'boolean'];
+	
+	    var getInjectionValue = function getInjectionValue(rawValue) {
+	        var nonEmptyValue = rawValue != null ? rawValue : '';
+	
+	        var typeOfValue = typeof nonEmptyValue === 'undefined' ? 'undefined' : _typeof(nonEmptyValue);
+	
+	        if (typeOfValue === 'string') {
+	            // we will sanitize and encapsulate string values
+	            return '"' + nonEmptyValue.replace(/"/g, '\'') + '"';
+	        }
+	
+	        if (passOnTypes.includes(typeOfValue)) {
+	            return nonEmptyValue.toString();
+	        }
+	
+	        return false.toString();
+	    };
 	
 	    var replaceVariables = function replaceVariables(expression, variablesHash) {
 	        //replaces the variables in an expression with actual variable values.
@@ -1952,7 +1970,7 @@
 	
 	                if (angular.isDefined(variablesHash[variablepresent])) {
 	                    //Replace all occurrences of the variable name(hence using regex replacement):
-	                    expression = expression.replace(new RegExp(variablesHash[variablepresent].variablePrefix + "\\{" + variablepresent + "\\}", 'g'), variablesHash[variablepresent].variableValue);
+	                    expression = expression.replace(new RegExp(variablesHash[variablepresent].variablePrefix + "\\{" + variablepresent + "\\}", 'g'), getInjectionValue(variablesHash[variablepresent].variableValue));
 	                } else {
 	                    $log.warn("Expression " + expression + " contains variable " + variablepresent + " - but this variable is not defined.");
 	                }
@@ -1970,7 +1988,7 @@
 	
 	                if (angular.isDefined(variablesHash[variablepresent]) && variablesHash[variablepresent].variablePrefix === 'V') {
 	                    //Replace all occurrences of the variable name(hence using regex replacement):
-	                    expression = expression.replace(new RegExp("V{" + variablepresent + "}", 'g'), variablesHash[variablepresent].variableValue);
+	                    expression = expression.replace(new RegExp("V{" + variablepresent + "}", 'g'), getInjectionValue(variablesHash[variablepresent].variableValue));
 	                } else {
 	                    $log.warn("Expression " + expression + " conains context variable " + variablepresent + " - but this variable is not defined.");
 	                }
@@ -1988,7 +2006,7 @@
 	
 	                if (angular.isDefined(variablesHash[variablepresent]) && variablesHash[variablepresent].variablePrefix === 'A') {
 	                    //Replace all occurrences of the variable name(hence using regex replacement):
-	                    expression = expression.replace(new RegExp("A{" + variablepresent + "}", 'g'), variablesHash[variablepresent].variableValue);
+	                    expression = expression.replace(new RegExp("A{" + variablepresent + "}", 'g'), getInjectionValue(variablesHash[variablepresent].variableValue));
 	                } else {
 	                    $log.warn("Expression " + expression + " conains attribute " + variablepresent + " - but this attribute is not defined.");
 	                }
@@ -2006,7 +2024,7 @@
 	
 	                if (angular.isDefined(variablesHash[variablepresent]) && variablesHash[variablepresent].variablePrefix === 'C') {
 	                    //Replace all occurrences of the variable name(hence using regex replacement):
-	                    expression = expression.replace(new RegExp("C{" + variablepresent + "}", 'g'), variablesHash[variablepresent].variableValue);
+	                    expression = expression.replace(new RegExp("C{" + variablepresent + "}", 'g'), getInjectionValue(variablesHash[variablepresent].variableValue));
 	                } else {
 	                    $log.warn("Expression " + expression + " conains constant " + variablepresent + " - but this constant is not defined.");
 	                }
@@ -3074,7 +3092,7 @@
 	     * @returns {*}
 	     */
 	    function evaluate(code) {
-	        var func = new Function('"use strict";return ' + code);
+	        var func = new Function('"use strict";return ' + code.replace(/\n/g, '\\n'));
 	        return func();
 	    }
 	
@@ -3214,20 +3232,46 @@
 	        return evaluate(expressionToEvaluate);
 	    };
 	
+	    function removeNewLinesFromNonStrings(expression, expressionModuloStrings) {
+	        var fragments = expressionModuloStrings.split(/\n+/g);
+	        var result = fragments.reduce(function (_ref7, fragment) {
+	            var reducedExpression = _ref7.reducedExpression,
+	                remainder = _ref7.remainder;
+	
+	            remainder = remainder.replace(/^\n*/, '');
+	            reducedExpression += remainder.substring(0, fragment.length);
+	
+	            return {
+	                reducedExpression: reducedExpression,
+	                remainder: remainder.substring(fragment.length)
+	            };
+	        }, { reducedExpression: '', remainder: expression });
+	
+	        return {
+	            reducedExpression: result.reducedExpression,
+	            reducedExpressionModuloStrings: fragments.join('')
+	        };
+	    };
+	
 	    var runExpression = function runExpression(expression, beforereplacement, identifier, flag, variablesHash, selectedOrgUnit) {
 	        var answer = false;
 	        try {
 	            var expressionModuloStrings = expression.replace(/'[^']*'|"[^"]*"/g, function (match) {
 	                return ' '.repeat(match.length);
 	            });
-	            var applicableDhisFunctions = Object.entries(dhisFunctions).map(function (_ref7) {
-	                var _ref8 = _slicedToArray(_ref7, 2),
-	                    key = _ref8[0],
-	                    value = _ref8[1];
+	            var applicableDhisFunctions = Object.entries(dhisFunctions).map(function (_ref8) {
+	                var _ref9 = _slicedToArray(_ref8, 2),
+	                    key = _ref9[0],
+	                    value = _ref9[1];
 	
 	                return _extends({}, value, { name: key });
 	            });
-	            answer = internalExecuteExpression(applicableDhisFunctions, expression, expressionModuloStrings, variablesHash, selectedOrgUnit);
+	
+	            var _removeNewLinesFromNo = removeNewLinesFromNonStrings(expression, expressionModuloStrings),
+	                reducedExpression = _removeNewLinesFromNo.reducedExpression,
+	                reducedExpressionModuloStrings = _removeNewLinesFromNo.reducedExpressionModuloStrings;
+	
+	            answer = internalExecuteExpression(applicableDhisFunctions, reducedExpression, reducedExpressionModuloStrings, variablesHash, selectedOrgUnit);
 	
 	            if (flag.verbose) {
 	                $log.info("Expression with id " + identifier + " was successfully run. Original condition was: " + beforereplacement + " - Evaluation ended up as:" + expression + " - Result of evaluation was:" + answer);
@@ -4362,10 +4406,10 @@
 	            });
 	        },
 	        defaultAttributeSections: function defaultAttributeSections(attributes, widgetTitle) {
-	            var _ref9;
+	            var _ref10;
 	
 	            var attributeSections = [{ displayName: widgetTitle === 'profile' ? '' : $translate.instant('profile'), attributes: attributes }];
-	            return _ref9 = {}, _defineProperty(_ref9, true, attributeSections), _defineProperty(_ref9, false, attributeSections), _ref9;
+	            return _ref10 = {}, _defineProperty(_ref10, true, attributeSections), _defineProperty(_ref10, false, attributeSections), _ref10;
 	        },
 	        userDefinedAttributeSections: function userDefinedAttributeSections(attributes, programSections) {
 	            var _programSections$redu;
@@ -4383,8 +4427,8 @@
 	                var attributeList = acc[false][0].attributes;
 	                acc[true].push({
 	                    displayName: programSection.displayName,
-	                    attributes: programSection.trackedEntityAttributes.map(function (_ref10) {
-	                        var id = _ref10.id;
+	                    attributes: programSection.trackedEntityAttributes.map(function (_ref11) {
+	                        var id = _ref11.id;
 	
 	                        attributeList.push(programTrackedEntityAttributes[id]);
 	                        return programTrackedEntityAttributes[id];
@@ -12698,7 +12742,7 @@
 	            if ($scope.selectedTeiId) {
 	
 	                TEIService.getPotentialDuplicatesForTei($scope.selectedTeiId).then(function (duplicates) {
-	                    $scope.potentialDuplicates = duplicates.potentialDuplicates;
+	                    $scope.potentialDuplicates = duplicates.identifiableObjects;
 	                    $scope.duplicateExists = $scope.potentialDuplicates.length > 0;
 	                });
 	
@@ -40413,4 +40457,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-cbab6c3c2a9530ab6bde.js.map
+//# sourceMappingURL=app-6eed1883981596f79fb0.js.map
