@@ -3563,8 +3563,11 @@
 	     * @param {*} optionSets all optionsets(matedata)
 	     * @param {*} flag execution flags
 	     */
-	    var internalFetchContextData = function internalFetchContextData(selectedEnrollment, executingEvent) {
-	        return OrgUnitFactory.getFromStoreOrServer(executingEvent && executingEvent.orgUnit ? executingEvent.orgUnit : selectedEnrollment.orgUnit).then(function (orgUnit) {
+	    var internalFetchContextData = function internalFetchContextData(selectedEnrollment, executingEvent, selectedOrgUnitId) {
+	        var orgUnitId = null;
+	        if (executingEvent && executingEvent.orgUnit) orgUnitId = executingEvent.orgUnit;else if (selectedEnrollment.orgUnit) orgUnitId = selectedEnrollment.orgUnit;else orgUnitId = selectedOrgUnitId;
+	
+	        return OrgUnitFactory.getFromStoreOrServer(orgUnitId).then(function (orgUnit) {
 	            var data = { selectedOrgUnit: orgUnit, selectedProgramStage: null };
 	            if (executingEvent && executingEvent.program && executingEvent.programStage) {
 	                return MetaDataFactory.get("programs", executingEvent.program).then(function (program) {
@@ -3580,7 +3583,7 @@
 	        });
 	    };
 	
-	    var internalExecuteRules = function internalExecuteRules(allProgramRules, executingEvent, evs, allDataElements, allTrackedEntityAttributes, selectedEntity, selectedEnrollment, optionSets, flag) {
+	    var internalExecuteRules = function internalExecuteRules(allProgramRules, executingEvent, evs, allDataElements, allTrackedEntityAttributes, selectedEntity, selectedEnrollment, selectedOrgUnitId, optionSets, flag) {
 	        if (allProgramRules) {
 	            var variablesHash = {};
 	
@@ -3603,7 +3606,7 @@
 	            //Run rules in priority - lowest number first(priority null is last)
 	            rules = orderByFilter(rules, 'priority');
 	
-	            return internalFetchContextData(selectedEnrollment, executingEvent).then(function (data) {
+	            return internalFetchContextData(selectedEnrollment, executingEvent, selectedOrgUnitId).then(function (data) {
 	                var selectedOrgUnit = data.selectedOrgUnit;
 	                var selectedProgramStage = data.selectedProgramStage;
 	                var variablesHash = VariableService.getVariables(allProgramRules, executingEvent, evs, allDataElements, allTrackedEntityAttributes, selectedEntity, selectedEnrollment, optionSets, selectedOrgUnit, selectedProgramStage);
@@ -3919,8 +3922,8 @@
 	    };
 	
 	    return {
-	        executeRules: function executeRules(allProgramRules, executingEvent, evs, allDataElements, allTrackedEntityAttributes, selectedEntity, selectedEnrollment, optionSets, flags) {
-	            return internalExecuteRules(allProgramRules, executingEvent, evs, allDataElements, allTrackedEntityAttributes, selectedEntity, selectedEnrollment, optionSets, flags);
+	        executeRules: function executeRules(allProgramRules, executingEvent, evs, allDataElements, allTrackedEntityAttributes, selectedEntity, selectedEnrollment, selectedOrgUnitId, optionSets, flags) {
+	            return internalExecuteRules(allProgramRules, executingEvent, evs, allDataElements, allTrackedEntityAttributes, selectedEntity, selectedEnrollment, selectedOrgUnitId, optionSets, flags);
 	        },
 	        loadAndExecuteRulesScope: function loadAndExecuteRulesScope(currentEvent, programId, programStageId, programStageDataElements, allTrackedEntityAttributes, optionSets, orgUnitId, flags) {
 	            return internalGetOrLoadRules(programId).then(function (rules) {
@@ -14690,9 +14693,7 @@
 	
 	                evs = { all: allSorted, byStage: eventsByStage };
 	            }
-	            if (evs) {
-	                TrackerRulesExecutionService.executeRules($scope.allProgramRules, eventExists ? $scope.currentEvent : 'registration', evs, prStDes || $scope.prStDes, $scope.attributesById, $scope.selectedTei, $scope.selectedEnrollment, $scope.optionSets, flag);
-	            }
+	            TrackerRulesExecutionService.executeRules($scope.allProgramRules, eventExists ? $scope.currentEvent : 'registration', evs, prStDes || $scope.prStDes, $scope.attributesById, $scope.selectedTei, $scope.selectedEnrollment, $scope.selectedOrgUnit.id, $scope.optionSets, flag);
 	        }
 	    };
 	
@@ -16891,11 +16892,11 @@
 	        //If the events is displayed in a table, it is necessary to run the rules for all visible events.        
 	        if ($scope.currentStage && $scope.currentStage.displayEventsInTable && angular.isUndefined($scope.currentStage.rulesExecuted)) {
 	            angular.forEach($scope.currentStageEvents, function (event) {
-	                TrackerRulesExecutionService.executeRules($scope.allProgramRules, event, evs, $scope.prStDes, $scope.attributesById, $scope.selectedTei, $scope.selectedEnrollment, $scope.optionSets, flag);
+	                TrackerRulesExecutionService.executeRules($scope.allProgramRules, event, evs, $scope.prStDes, $scope.attributesById, $scope.selectedTei, $scope.selectedEnrollment, null, $scope.optionSets, flag);
 	                $scope.currentStage.rulesExecuted = true;
 	            });
 	        } else {
-	            return TrackerRulesExecutionService.executeRules($scope.allProgramRules, $scope.currentEvent, evs, $scope.prStDes, $scope.attributesById, $scope.selectedTei, $scope.selectedEnrollment, $scope.optionSets, flag);
+	            return TrackerRulesExecutionService.executeRules($scope.allProgramRules, $scope.currentEvent, evs, $scope.prStDes, $scope.attributesById, $scope.selectedTei, $scope.selectedEnrollment, null, $scope.optionSets, flag);
 	        }
 	    };
 	
@@ -22337,7 +22338,7 @@
 	        });
 	
 	        if ($scope.base.selectedProgramForRelative && $scope.base.selectedProgramForRelative.id) {
-	            TrackerRulesExecutionService.executeRules($scope.allProgramRules, 'registrationRelationship', null, null, null, $scope.selectedTei, $scope.selectedEnrollment, null, flag);
+	            TrackerRulesExecutionService.executeRules($scope.allProgramRules, 'registrationRelationship', null, null, null, $scope.selectedTei, $scope.selectedEnrollment, null, null, flag);
 	        }
 	    };
 	
@@ -41063,4 +41064,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-fb0f3e6098dd2f7d1c9f.js.map
+//# sourceMappingURL=app-02dc18402e6f9545bda6.js.map
