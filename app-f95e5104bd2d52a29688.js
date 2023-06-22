@@ -1890,21 +1890,21 @@
 	            variables = pushVariable(variables, 'environment', 'WebClient', null, 'TEXT', true, 'V', '', false);
 	            variables = pushVariable(variables, 'current_date', DateUtils.getToday(), null, 'DATE', true, 'V', '', false);
 	
-	            variables = pushVariable(variables, 'event_date', executingEvent.eventDate, null, 'DATE', true, 'V', '', false);
-	            variables = pushVariable(variables, 'due_date', executingEvent.dueDate, null, 'DATE', true, 'V', '');
+	            variables = pushVariable(variables, 'event_date', executingEvent.eventDate, null, 'DATE', !!executingEvent.eventDate, 'V', '', false);
+	            variables = pushVariable(variables, 'due_date', executingEvent.dueDate, null, 'DATE', !!executingEvent.dueDate, 'V', '');
 	            variables = pushVariable(variables, 'event_count', evs ? evs.all.length : 0, null, 'INTEGER', true, 'V', '', false);
 	
-	            variables = pushVariable(variables, 'enrollment_date', selectedEnrollment ? selectedEnrollment.enrollmentDate : '', null, 'DATE', selectedEnrollment ? selectedEnrollment.enrollmentDate ? true : false : false, 'V', '', false);
-	            variables = pushVariable(variables, 'enrollment_id', selectedEnrollment ? selectedEnrollment.enrollment : '', null, 'TEXT', selectedEnrollment ? true : false, 'V', '', false);
-	            variables = pushVariable(variables, 'event_id', executingEvent ? executingEvent.event : '', null, 'TEXT', executingEvent ? true : false, 'V', executingEvent ? executingEvent.eventDate : false, false);
-	            variables = pushVariable(variables, 'event_status', executingEvent ? executingEvent.status : '', null, 'TEXT', executingEvent ? true : false, 'V', executingEvent ? executingEvent.eventDate : false, false);
+	            variables = pushVariable(variables, 'enrollment_date', selectedEnrollment ? selectedEnrollment.enrollmentDate : '', null, 'DATE', !!(selectedEnrollment && selectedEnrollment.enrollmentDate), 'V', '', false);
+	            variables = pushVariable(variables, 'enrollment_id', selectedEnrollment ? selectedEnrollment.enrollment : '', null, 'TEXT', !!selectedEnrollment, 'V', '', false);
+	            variables = pushVariable(variables, 'event_id', executingEvent ? executingEvent.event : '', null, 'TEXT', !!executingEvent, 'V', executingEvent ? executingEvent.eventDate : false, false);
+	            variables = pushVariable(variables, 'event_status', executingEvent ? executingEvent.status : '', null, 'TEXT', !!executingEvent, 'V', executingEvent ? executingEvent.eventDate : false, false);
 	
-	            variables = pushVariable(variables, 'incident_date', selectedEnrollment ? selectedEnrollment.incidentDate : '', null, 'DATE', selectedEnrollment ? true : false, 'V', '', false);
+	            variables = pushVariable(variables, 'incident_date', selectedEnrollment ? selectedEnrollment.incidentDate : '', null, 'DATE', !!selectedEnrollment, 'V', '', false);
 	            variables = pushVariable(variables, 'enrollment_count', selectedEnrollment ? 1 : 0, null, 'INTEGER', true, 'V', '', false);
 	            variables = pushVariable(variables, 'tei_count', selectedEnrollment ? 1 : 0, null, 'INTEGER', true, 'V', '', false);
 	
-	            variables = pushVariable(variables, 'program_stage_id', selectedProgramStage && selectedProgramStage.id || '', null, 'TEXT', selectedProgramStage && selectedProgramStage.id ? true : false, 'V', '', false);
-	            variables = pushVariable(variables, 'program_stage_name', selectedProgramStage && selectedProgramStage.name || '', null, 'TEXT', selectedProgramStage && selectedProgramStage.name ? true : false, 'V', '', false);
+	            variables = pushVariable(variables, 'program_stage_id', selectedProgramStage && selectedProgramStage.id || '', null, 'TEXT', !!(selectedProgramStage && selectedProgramStage.id), 'V', '', false);
+	            variables = pushVariable(variables, 'program_stage_name', selectedProgramStage && selectedProgramStage.name || '', null, 'TEXT', !!(selectedProgramStage && selectedProgramStage.name), 'V', '', false);
 	
 	            //Push all constant values:
 	            angular.forEach(allProgramRules.constants, function (constant) {
@@ -1912,7 +1912,7 @@
 	            });
 	
 	            if (selectedOrgUnit) {
-	                variables = pushVariable(variables, 'orgunit_code', selectedOrgUnit.code, null, 'TEXT', selectedOrgUnit.code ? true : false, 'V', '', false);
+	                variables = pushVariable(variables, 'orgunit_code', selectedOrgUnit.code, null, 'TEXT', !!selectedOrgUnit.code, 'V', '', false);
 	            }
 	
 	            return variables;
@@ -2745,12 +2745,7 @@
 	        },
 	        "d2:concatenate": {
 	            execute: function execute(parameters) {
-	                var returnString = "'";
-	                for (var i = 0; i < parameters.length; i++) {
-	                    returnString += parameters[i];
-	                }
-	                returnString += "'";
-	                return returnString;
+	                return parameters.join('');
 	            }
 	        },
 	        "d2:addDays": {
@@ -2758,9 +2753,7 @@
 	            execute: function execute(parameters) {
 	                var date = $filter('trimquotes')(parameters[0]);
 	                var daystoadd = $filter('trimquotes')(parameters[1]);
-	                var newdate = DateUtils.format(moment(date, CalendarService.getSetting().momentFormat).add(daystoadd, 'days'));
-	                var newdatestring = "'" + newdate + "'";
-	                return newdatestring;
+	                return DateUtils.format(moment(date, CalendarService.getSetting().momentFormat).add(daystoadd, 'days'));
 	            }
 	        },
 	        "d2:zing": {
@@ -2901,7 +2894,7 @@
 	            execute: function execute(parameters, variablesHash) {
 	                var variableName = parameters[0];
 	                var variableObject = variablesHash[variableName];
-	                var valueFound = "''";
+	                var valueFound = "";
 	                if (variableObject) {
 	                    if (variableObject.variableEventDate) {
 	                        valueFound = VariableService.processValue(variableObject.variableEventDate, 'DATE');
@@ -3010,7 +3003,7 @@
 	                var startChar = string.length < parameters[1] - 1 ? -1 : parameters[1];
 	                var endChar = string.length < parameters[2] ? -1 : parameters[2];
 	                if (startChar < 0 || endChar < 0) {
-	                    return "''";
+	                    return "";
 	                }
 	                var returnString = string.substring(startChar, endChar);
 	                returnString = VariableService.processValue(returnString, 'TEXT');
@@ -3227,7 +3220,7 @@
 	                accExpression += 'false';
 	            } else {
 	                var dhisFunctionResult = dhisFunction.execute(evaluatedArguments, variablesHash, selectedOrgUnit);
-	                accExpression += dhisFunctionResult;
+	                accExpression += getInjectionValue(dhisFunctionResult);
 	            }
 	
 	            return {
@@ -40827,4 +40820,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-fa69d97f3e0948bf858c.js.map
+//# sourceMappingURL=app-f95e5104bd2d52a29688.js.map
