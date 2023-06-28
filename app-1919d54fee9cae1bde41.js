@@ -10040,7 +10040,7 @@
 	            angular.forEach(attributes, function (attr) {
 	                if (attr.displayInListNoProgram) {
 	                    gridColumnIndex++;
-	                    var gridColumn = { id: attr.id, displayName: attr.displayName, formName: attr.formName, show: false, valueType: attr.valueType };
+	                    var gridColumn = { id: attr.id, displayName: attr.displayName, displayFormName: attr.displayFormName, show: false, valueType: attr.valueType };
 	                    setShowGridColumn(gridColumn, gridColumnIndex, config, savedGridColumnsKeyMap);
 	                    gridColumns.push(gridColumn);
 	                }
@@ -40457,4 +40457,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-6eed1883981596f79fb0.js.map
+//# sourceMappingURL=app-1919d54fee9cae1bde41.js.map
