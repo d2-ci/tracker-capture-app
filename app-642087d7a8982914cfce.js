@@ -3053,15 +3053,10 @@
 	            parameters: 1,
 	            execute: function execute(parameters, _, selectedOrgUnit) {
 	                var group = parameters[0];
-	                var isInGroup = "false";
 	                var orgUnitGroups = selectedOrgUnit && selectedOrgUnit.g || [];
-	                var foundGroup = orgUnitGroups.find(function (o) {
+	                return !!orgUnitGroups.find(function (o) {
 	                    return o.id === group || o.code === group;
 	                });
-	                if (foundGroup) {
-	                    isInGroup = "true";
-	                }
-	                return isInGroup;
 	            }
 	        },
 	        "d2:hasUserRole": {
@@ -40816,4 +40811,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-796215c335e9f3c6b1a9.js.map
+//# sourceMappingURL=app-642087d7a8982914cfce.js.map
