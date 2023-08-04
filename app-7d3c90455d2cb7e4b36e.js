@@ -898,16 +898,17 @@
 	                var keyString = String(key);
 	
 	                // is key a name?
-	                for (var i = 0; i < options.length; i++) {
-	                    if (keyString === options[i].displayName) {
-	                        return options[i].code;
-	                    }
+	                var option = options.find(function (option) {
+	                    return keyString === option.displayName;
+	                });
+	                if (option) {
+	                    return option.code;
 	                }
 	                // is key a code?
-	                for (var i = 0; i < options.length; i++) {
-	                    if (keyString === options[i].code) {
-	                        return key;
-	                    }
+	                if (options.find(function (option) {
+	                    return keyString === option.code;
+	                })) {
+	                    return key;
 	                }
 	                // not a part of the option set
 	                return null;
@@ -921,16 +922,17 @@
 	                var keyString = String(key);
 	
 	                // is key a code?
-	                for (var i = 0; i < options.length; i++) {
-	                    if (keyString === options[i].code) {
-	                        return options[i].displayName;
-	                    }
+	                var option = options.find(function (option) {
+	                    return keyString === option.code;
+	                });
+	                if (option) {
+	                    return option.displayName;
 	                }
 	                // is key a name?
-	                for (var i = 0; i < options.length; i++) {
-	                    if (keyString === options[i].displayName) {
-	                        return key;
-	                    }
+	                if (options.find(function (option) {
+	                    return keyString === option.displayName;
+	                })) {
+	                    return key;
 	                }
 	                // not a part of the option set
 	                return null;
@@ -40811,4 +40813,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-642087d7a8982914cfce.js.map
+//# sourceMappingURL=app-7d3c90455d2cb7e4b36e.js.map
