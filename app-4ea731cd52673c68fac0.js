@@ -8956,6 +8956,7 @@
 	        return enrollment;
 	    };
 	    var errorHeader = $translate.instant("error");
+	    var exclusiveOuModes = ['ACCESSIBLE', 'CAPTURE', 'ALL'];
 	    return {
 	        get: function get(enrollmentUid, teiUid, programUid) {
 	            var url = DHIS2URL + '/enrollments/' + enrollmentUid;
@@ -8973,8 +8974,15 @@
 	            });
 	        },
 	        getByStartAndEndDate: function getByStartAndEndDate(program, orgUnit, ouMode, startDate, endDate, pageSize) {
+	            var url = DHIS2URL + '/enrollments.json?program=' + program;
 	            var paging = pageSize ? '&pageSize=' + pageSize : '&paging=false';
-	            var promise = $http.get(DHIS2URL + '/enrollments.json?program=' + program + '&ou=' + orgUnit + '&ouMode=' + ouMode + '&programStartDate=' + startDate + '&programEndDate=' + endDate + '&fields=:all' + paging).then(function (response) {
+	            if (orgUnit && !exclusiveOuModes.includes(ouMode)) {
+	                url = url + '&ou=' + orgUnit;
+	            }
+	            if (ouMode) {
+	                url = url + '&ouMode=' + ouMode;
+	            }
+	            var promise = $http.get(url + '&programStartDate=' + startDate + '&programEndDate=' + endDate + '&fields=:all' + paging).then(function (response) {
 	                return convertFromApiToUser(response.data);
 	            }, function (response) {
 	                var errorBody = $translate.instant('failed_to_fetch_enrollment');
@@ -9190,43 +9198,47 @@
 	.factory('TEIService', ["$http", "$translate", "DHIS2URL", "$q", "AttributesFactory", "CommonUtils", "CurrentSelection", "DateUtils", "NotificationService", "TeiAccessApiService", function ($http, $translate, DHIS2URL, $q, AttributesFactory, CommonUtils, CurrentSelection, DateUtils, NotificationService, TeiAccessApiService) {
 	    var cachedTeiWithProgramData = null;
 	    var errorHeader = $translate.instant("error");
+	    var exclusiveOuModes = ['ACCESSIBLE', 'CAPTURE', 'ALL'];
 	    var getSearchUrl = function getSearchUrl(type, ouId, ouMode, queryUrl, programOrTETUrl, attributeUrl, pager, paging, format) {
 	        var baseUrl = DHIS2URL + '/trackedEntityInstances/' + type;
 	        var url = baseUrl;
+	        var params = [];
 	        var deferred = $q.defer();
 	
 	        if (format === "csv") {
-	            url = url + '.csv?ou=' + ouId + '&ouMode=' + ouMode;
+	            url = url + '.csv?';
 	        } else if (format === "xml") {
-	            url = url + '.json?ou=' + ouId + '&ouMode=' + ouMode;
+	            url = url + '.json?';
 	        } else {
-	            url = url + '.json?ou=' + ouId + '&ouMode=' + ouMode;
+	            url = url + '.json?';
 	        }
 	
+	        if (ouId && !exclusiveOuModes.includes(ouMode)) {
+	            params.push('ou=' + ouId);
+	        }
+	        if (ouMode) {
+	            params.push('ouMode=' + ouMode);
+	        }
 	        if (queryUrl) {
-	            url = url + '&' + queryUrl;
+	            params.push(queryUrl);
 	        }
 	        if (programOrTETUrl) {
-	            url = url + '&' + programOrTETUrl;
+	            params.push(programOrTETUrl);
 	        }
 	        if (attributeUrl) {
-	            url = url + '&' + attributeUrl;
+	            params.push(attributeUrl);
 	        }
 	        if (paging) {
 	            var pgSize = pager && pager.pageSize || 50;
 	            var pg = pager && pager.page || 1;
 	            pgSize = pgSize > 1 ? pgSize : 1;
 	            pg = pg > 1 ? pg : 1;
-	            url = url + '&pageSize=' + pgSize + '&page=' + pg;
-	            if (pager && pager.skipTotalPages) {
-	                url += '&totalPages=false';
-	            } else {
-	                url += '&totalPages=true';
-	            }
+	            params.push('pageSize=' + pgSize + '&page=' + pg);
+	            params.push('totalPages=' + !(pager && pager.skipTotalPages));
 	        } else {
-	            url = url + '&paging=false';
+	            params.push('paging=false');
 	        }
-	        return url;
+	        return url + params.join('&');
 	    };
 	    var setTeiAttributeValues = function setTeiAttributeValues(teiAttributes, optionSets, attributesById) {
 	        teiAttributes.forEach(function (att) {
@@ -9694,6 +9706,7 @@
 	
 	    var skipPaging = "&skipPaging=true";
 	    var errorHeader = $translate.instant("error");
+	    var exclusiveOuModes = ['ACCESSIBLE', 'CAPTURE', 'ALL'];
 	
 	    var getContextEvent = function getContextEvent(dhis2Event) {
 	        if (Array.isArray(dhis2Event)) {
@@ -9705,7 +9718,7 @@
 	    return {
 	
 	        getEventsByStatus: function getEventsByStatus(entity, orgUnit, program, programStatus) {
-	            var promise = TeiAccessApiService.get(entity, program, DHIS2URL + '/events.json?ouMode=ACCESSIBLE&' + 'trackedEntityInstance=' + entity + '&orgUnit=' + orgUnit + '&program=' + program + '&programStatus=' + programStatus + skipPaging).then(function (response) {
+	            var promise = TeiAccessApiService.get(entity, program, DHIS2URL + '/events.json?ouMode=ACCESSIBLE&' + 'trackedEntityInstance=' + entity + '&program=' + program + '&programStatus=' + programStatus + skipPaging).then(function (response) {
 	                return response.data.events;
 	            }, function (response) {
 	
@@ -9748,14 +9761,18 @@
 	            return promise;
 	        },
 	        getByOrgUnitAndProgram: function getByOrgUnitAndProgram(orgUnit, ouMode, program, startDate, endDate, pageSize) {
-	            var url;
-	            var paging = pageSize ? '&pageSize=' + pageSize : skipPaging;
-	            if (startDate && endDate) {
-	                url = DHIS2URL + '/events.json?' + 'orgUnit=' + orgUnit + '&ouMode=' + ouMode + '&program=' + program + '&startDate=' + startDate + '&endDate=' + endDate + paging;
-	            } else {
-	                url = DHIS2URL + '/events.json?' + 'orgUnit=' + orgUnit + '&ouMode=' + ouMode + '&program=' + program + paging;
+	            var url = DHIS2URL + '/events.json?program=' + program;
+	            if (orgUnit && !exclusiveOuModes.includes(ouMode)) {
+	                url = url + '&orgUnit=' + orgUnit;
 	            }
-	            var promise = $http.get(url).then(function (response) {
+	            if (ouMode) {
+	                url = url + '&ouMode=' + ouMode;
+	            }
+	            if (startDate && endDate) {
+	                url = url + '&startDate=' + startDate + '&endDate=' + endDate;
+	            }
+	            var paging = pageSize ? '&pageSize=' + pageSize : skipPaging;
+	            var promise = $http.get(url + paging).then(function (response) {
 	                return response.data.events;
 	            }, function (response) {
 	                if (response && response.data && response.data.status === 'ERROR') {
@@ -9861,11 +9878,20 @@
 	/* factory for handling event reports */
 	.factory('EventReportService', ["$http", "DHIS2URL", "$translate", "NotificationService", function ($http, DHIS2URL, $translate, NotificationService) {
 	    var errorHeader = $translate.instant("error");
+	    var exclusiveOuModes = ['ACCESSIBLE', 'CAPTURE', 'ALL'];
 	    return {
 	
 	        getEventReport: function getEventReport(orgUnit, ouMode, program, startDate, endDate, programStatus, eventStatus, pager) {
 	
-	            var url = DHIS2URL + '/events/eventRows.json?' + 'orgUnit=' + orgUnit + '&ouMode=' + ouMode + '&program=' + program;
+	            var url = DHIS2URL + '/events/eventRows.json?program=' + program;
+	
+	            if (orgUnit && !exclusiveOuModes.includes(ouMode)) {
+	                url = url + '&orgUnit=' + orgUnit;
+	            }
+	
+	            if (ouMode) {
+	                url = url + '&ouMode=' + ouMode;
+	            }
 	
 	            if (programStatus) {
 	                url = url + '&programStatus=' + programStatus;
@@ -40817,4 +40843,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-b70c8a67a90972d1cbd3.js.map
+//# sourceMappingURL=app-4ea731cd52673c68fac0.js.map
