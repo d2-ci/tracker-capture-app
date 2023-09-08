@@ -11580,7 +11580,14 @@
 	        });
 	        return promise;
 	    };
-	}]);
+	}]).service('AssignmentQueue', function () {
+	    var assignmentQueue = Promise.resolve();
+	
+	    this.insertAssignment = function (assignment) {
+	        assignmentQueue = assignmentQueue.then(assignment, assignment);
+	        return assignmentQueue;
+	    };
+	});
 
 /***/ }),
 /* 15 */
@@ -15940,7 +15947,7 @@
 	/* global angular, trackerCapture */
 	
 	var trackerCapture = angular.module('trackerCapture');
-	trackerCapture.controller('DataEntryController', ["$rootScope", "$scope", "$modal", "$filter", "$log", "$timeout", "$translate", "$window", "$q", "$parse", "$location", "CommonUtils", "DateUtils", "DashboardLayoutService", "EventUtils", "orderByFilter", "SessionStorageService", "EnrollmentService", "DHIS2EventFactory", "ModalService", "NotificationService", "CurrentSelection", "TrackerRulesExecutionService", "CustomFormService", "PeriodService", "OptionSetService", "AttributesFactory", "TrackerRulesFactory", "EventCreationService", "AuthorityService", "AccessUtils", "TCOrgUnitService", "UsersService", function ($rootScope, $scope, $modal, $filter, $log, $timeout, $translate, $window, $q, $parse, $location, CommonUtils, DateUtils, DashboardLayoutService, EventUtils, orderByFilter, SessionStorageService, EnrollmentService, DHIS2EventFactory, ModalService, NotificationService, CurrentSelection, TrackerRulesExecutionService, CustomFormService, PeriodService, OptionSetService, AttributesFactory, TrackerRulesFactory, EventCreationService, AuthorityService, AccessUtils, TCOrgUnitService, UsersService) {
+	trackerCapture.controller('DataEntryController', ["$rootScope", "$scope", "$modal", "$filter", "$log", "$timeout", "$translate", "$window", "$q", "$parse", "$location", "CommonUtils", "DateUtils", "DashboardLayoutService", "EventUtils", "orderByFilter", "SessionStorageService", "EnrollmentService", "DHIS2EventFactory", "ModalService", "NotificationService", "CurrentSelection", "TrackerRulesExecutionService", "CustomFormService", "PeriodService", "OptionSetService", "AttributesFactory", "TrackerRulesFactory", "EventCreationService", "AuthorityService", "AccessUtils", "TCOrgUnitService", "UsersService", "AssignmentQueue", function ($rootScope, $scope, $modal, $filter, $log, $timeout, $translate, $window, $q, $parse, $location, CommonUtils, DateUtils, DashboardLayoutService, EventUtils, orderByFilter, SessionStorageService, EnrollmentService, DHIS2EventFactory, ModalService, NotificationService, CurrentSelection, TrackerRulesExecutionService, CustomFormService, PeriodService, OptionSetService, AttributesFactory, TrackerRulesFactory, EventCreationService, AuthorityService, AccessUtils, TCOrgUnitService, UsersService, AssignmentQueue) {
 	
 	    //Unique instance id for the controller:
 	    $scope.APIURL = DHIS2URL;
@@ -17549,7 +17556,9 @@
 	                    providedElsewhere: eventToSave.providedElsewhere[prStDe.dataElement.id] ? true : false
 	                }]
 	            };
-	            return DHIS2EventFactory.updateForSingleValue(ev).then(function (response) {
+	            return AssignmentQueue.insertAssignment(function () {
+	                return DHIS2EventFactory.updateForSingleValue(ev);
+	            }).then(function (response) {
 	                if (!response) {
 	                    if (!backgroundUpdate) {
 	                        $scope.currentElement.saved = false;
@@ -40843,4 +40852,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-4ea731cd52673c68fac0.js.map
+//# sourceMappingURL=app-b32e5a346ceaac2558a1.js.map
