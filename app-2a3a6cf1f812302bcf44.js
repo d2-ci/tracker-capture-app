@@ -11558,13 +11558,7 @@
 	    var assignmentQueue = Promise.resolve();
 	
 	    this.insertAssignment = function (assignment) {
-	        assignmentQueue = new Promise(function (resolve, reject) {
-	            var runAssignment = function runAssignment() {
-	                return assignment().then(resolve, reject);
-	            };
-	            assignmentQueue.then(runAssignment, runAssignment);
-	        });
-	
+	        assignmentQueue = assignmentQueue.then(assignment, assignment);
 	        return assignmentQueue;
 	    };
 	});
@@ -40832,4 +40826,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-f11a88b2ff6826b6c6a4.js.map
+//# sourceMappingURL=app-2a3a6cf1f812302bcf44.js.map
