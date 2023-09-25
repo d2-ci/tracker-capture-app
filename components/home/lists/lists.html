@@ -1,0 +1,151 @@
+<div ng-controller="ListsController" ng-if="selectedProgram && selectedProgram.displayFrontPageList">
+    <div class="hideInPrint" ng-if="selectedProgram" ng-cloak>
+        <div class="btn-group hideInPrint">
+            <button type="button" ng-repeat="workingList in selectedProgram.workingLists | orderBy: 'order'" class="btn btn-default small-vertical-spacing" ng-class="getWorkingListButtonClass(workingList)" ng-click="setWorkingList(workingList)" ng-attr-title="{{workingList.description | translate}}">
+                <span ng-if="workingList.style && workingList.style.icon" ng-class="workingList.style.icon"></span>
+                <span ng-if="!workingList.style || !workingList.style.icon">{{workingList.displayName}}</span>
+            </button>
+        </div>
+        <div class="btn-group">
+            <div class="dropdown small-vertical-spacing">
+                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" ng-class="getWorkingListButtonClass({ name: 'custom'})" >{{'custom_working_list' | translate}}<span style="margin-left:12px" class="fa fa-caret-down"></span></button>
+                <div class="dropdown-menu custom-workinglist-dropdown">
+                    <form name="searchForm">
+                        <div class="custom-workinglist-dropdown-main">                                
+                            <div class="custom-workinglist-dropdown-list">
+                                <div ng-include="'components/home/lists/custom-workinglist.html'"></div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    
+    
+        <div class="pull-right dropdown small-vertical-spacing" ng-if="currentTrackedEntityList.data">
+            <button ng-if="numberOfSelectedRows" type="button" class="btn btn-primary" ng-click="completeSelectedEnrollments()">
+                {{('complete'| translate)}} {{numberOfSelectedRows}}
+            </button>
+            <span class="dropdown">
+                <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown"><span class="fa fa-download"></span></button>
+                <ul class="dropdown-menu">
+                    <li><h6 class="dropdown-header">Download as</h6></li>
+                    <li class="divider"></li>
+                    <li ng-repeat="format in listExportFormats"><a href ng-click="getExportList(format)">{{format}}</a></li>
+                </ul>
+            </span>
+            <button type="button" class="btn btn-default" onclick="javascript:window.print()" ng-attr-title="{{'print' | translate}}"><span class="fa fa-print"></span></button>
+            <button class="btn btn-default"ng-click="showHideListColumns()" ng-attr-title="{{'show_hide_columns'| translate}}"><span class="fa fa-table"></span></button>
+        </div>
+
+
+        <span ng-if="pager.total > -1">
+            {{'total'| translate}}:&nbsp;{{pager.total}}
+        </span>
+        <span ng-if="pager.total == -1">
+            {{'total'| translate}}:&nbsp;ukjent&nbsp;/&nbsp;mer&nbsp;enn&nbsp;1000
+        </span>
+        
+        
+        <i ng-if="currentTrackedEntityList.loading" class="fa fa-spinner fa-spin fa-2x"></i>
+    </div>
+
+    <div class="row" ng-if="currentTrackedEntityList && currentTrackedEntityList.config && currentTrackedEntityList.config.description">
+        <div class="vertical-spacing" >
+            <div class="alert alert-info" style="margin-left:12px;margin-right:12px">
+                {{currentTrackedEntityList.config.description}}
+                <span ng-if="isInnreiseProgram(selectedProgram) && provesvarStatusLastet">
+                    <span ng-if="innreiseStatusQueryFailed">
+                        <hr>
+                        Kunne ikke hente status for prøvesvar og innreise.
+                    </span>
+                    <hr>
+                    <div ng-if="!innreiseStatusQueryFailed">
+                        <div ng-if="innreiseStatus === 'AVSLUTTET'">Innreisedata sist oppdatert {{innreiseSistOppdatert}}.</div>
+                        <div ng-if="innreiseStatus === 'KJORER'">Nye innreisedata lastes inn. Dette kan ta flere minutter. Oppdater siden for å hente inn nye data.</div>
+                        <div ng-if="innreiseStatus === 'FEIL'" class="error">Det skjedde en feil ved siste innlesing av innreisedata.</div>
+                        <div ng-if="innreiseStatus === 'ALDRI_KJORT'">Innreisedata har aldri blitt hentet.</div>
+                        <div ng-if="!innreiseStatus" class="error">Kunne ikke laste inn status på innreisedata</div>
+                    </div>
+                    <hr>
+                    <div style="display: flex" ng-if="!innreiseStatusQueryFailed">
+                        <div style="align-self: center">
+                            <div ng-if="provesvarStatus === 'AVSLUTTET'">Prøvesvardata sist hentet {{innreiseProvesvarSistOppdatert}}.</div>
+                            <div ng-if="provesvarStatus === 'KJORER'">Nye prøvesvardata lastes inn. <br />Dette kan ta flere minutter. Oppdater siden for å hente inn nye data.</div>
+                            <div ng-if="provesvarStatus === 'FEIL'" class="error">Det skjedde en feil ved sist innlesing av prøvesvardata. <br />Vennligst prøv igjen. <br />Ta kontakt med support dersom problemet vedvarer.</div>
+                            <div ng-if="provesvarStatus === 'ALDRI_KJORT'">Prøvesvardata har aldri blitt hentet</div>
+                            <div ng-if="!provesvarStatus" class="error">Kunne ikke laste inn status på prøvesvardata</div>
+                        </div>
+                        <div style="padding-left: 1em;">
+                            <span ng-if="!harTilgangTilProvesvar && provesvarAktivert">Du har ikke tilgang til å synkronisere prøvesvar. </span>
+                            <span ng-if="!provesvarAktivert">Kommunen har ikke aktivert prøvesvar. </span>
+                            <span ng-if="provesvarStartFailed" class="error">
+                                Noe feilet ved henting av prøvesvar. Last siden på nytt og prøv igjen.
+                            </span>
+                            <button ng-if="kanStarteNyProvesvarSynk && !proveSvarSyncIsLoading" ng-click="syncLabTests()" class="btn btn-primary" style="margin-left: 1em">
+                                Hent prøvesvar nå
+                            </button>
+                            <button ng-if="kanStarteNyProvesvarSynk && proveSvarSyncIsLoading" ng-click="syncLabTests()" class="btn btn-primary" disabled style="margin-left: 1em">
+                                Henter prøvesvar <img id="ouwt_loader" src="../images/ajax-loader-bar.gif" alt="{{'in_progress'| translate}}"/>
+                            </button>
+                        </div>
+                    </div>
+
+                </span>
+                <div ng-if="isInnreiseProgram(selectedProgram) && !provesvarStatusLastet">
+                    <img id="ouwt_loader" src="../images/ajax-loader-bar.gif" alt="{{'in_progress'| translate}}"/>
+                </div>
+                <span ng-if="isStatusArbeidsliste()">
+                    <span ng-if="msisStatusQueryFailed">
+                        <hr>
+                        Kunne ikke hente status på import av prøvesvar fra MSIS.
+                    </span>
+                    <hr>
+                    <div style="display: flex" ng-if="!msisStatusQueryFailed">
+                        <div style="align-self: center">
+                            <div ng-if="msisStatus === 'AVSLUTTET'">Siste import av prøvesvar fra MSIS: {{msisSistOppdatert}}.</div>
+                            <div ng-if="msisStatus === 'KJORER'">Prøvesvar importeres fra MSIS. <br />Dette kan ta flere minutter. Oppdater siden for å hente inn nye data.</div>
+                            <div ng-if="msisStatus === 'FEIL'" class="error">Det skjedde en feil ved sist import av prøvesvar fra MSIS. <br />Vennligst prøv igjen. <br />Ta kontakt med support dersom problemet vedvarer.</div>
+                            <div ng-if="msisStatus === 'ALDRI_KJORT'">Import av prøvesvar fra MSIS har aldri blitt kjørt</div>
+                            <div ng-if="!msisStatus" class="error">Kunne ikke laste inn status på import av prøvesvar fra MSIS</div>
+                        </div>
+                        <div style="padding-left: 1em;">
+                            <span ng-if="!harTilgangTilProvesvar && msisAktivert">Du har ikke tilgang til å starte import av prøvesvar fra MSIS. </span>
+                            <span ng-if="!msisAktivert">Kommunen har ikke aktivert import av prøvesvar fra MSIS. </span>
+                            <span ng-if="provesvarStartFailed" class="error">
+                                Noe feilet ved henting import av prøvesvar fra MSIS. Last siden på nytt og prøv igjen.
+                            </span>
+                            <button ng-if="kanStarteNyMsisSynk && !msisImportIsLoading" ng-click="importLabTests()" class="btn btn-primary" style="margin-left: 1em">
+                                Start import av prøvesvar fra MSIS nå
+                            </button>
+                            <button ng-if="kanStarteNyMsisSynk && msisImportIsLoading" ng-click="importLabTests()" class="btn btn-primary" disabled style="margin-left: 1em">
+                                Importerer prøvesvar fra MSIS <img id="ouwt_loader" src="../images/ajax-loader-bar.gif" alt="{{'in_progress'| translate}}"/>
+                            </button>
+                        </div>
+                    </div>
+                </span>
+
+            </div>
+        </div>
+    </div>
+
+    <!--- Error display for search begins -->
+    <div class="row" ng-if="currentTrackedEntityList && currentTrackedEntityList.type == trackedEntityListTypes.CUSTOM">
+        <div class="vertical-spacing" ng-if="emptyCustomWorkingListValues">
+            <div class="alert alert-warning">{{'search_input_required'| translate}}</div>
+        </div>
+    </div>
+    
+    <!--- Error display for search ends -->    
+    <tracker-tei-list-performant 
+        tei-data="currentTrackedEntityList.data"
+        tei-pager="pager" 
+        tei-sort-column="currentTrackedEntityList.sortColumn"
+        tei-grid-columns="gridColumns"
+        tei-refetch-data="fetchTeis(pager, sortColumn)"
+        on-tei-clicked="openTei(tei)"
+        selected-rows-count="numberOfSelectedRows"
+        active-enrollments="currentTrackedEntityList.config.enrollmentStatus === 'ACTIVE'"
+        >
+    </tracker-tei-list-performant>
+</div>
