@@ -6321,7 +6321,7 @@
 	                        }
 	
 	                        var coordinates = $scope.d2Object[$scope.id].slice(1, -1).split(",");
-	                        if (!dhis2.validation.isNumber(coordinates[0]) || !dhis2.validation.isNumber(coordinates[1])) {
+	                        if (!dhis2.validation.isNumber(coordinates[0]) || !dhis2.validation.isNumber(coordinates[0])) {
 	                            NotificationService.showNotifcationDialog($translate.instant('error'), $translate.instant('invalid_coordinate_format') + ":  " + $scope.d2Object[$scope.id]);
 	                        }
 	                        $scope.coordinateObject.coordinate = { latitude: parseFloat(coordinates[1]), longitude: parseFloat(coordinates[0]) };
@@ -41089,4 +41089,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-dfdccb08f4835f671c0e.js.map
+//# sourceMappingURL=app-b6718615565449bcafa2.js.map
