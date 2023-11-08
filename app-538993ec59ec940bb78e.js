@@ -899,14 +899,14 @@
 	
 	                // is key a name?
 	                var option = options.find(function (option) {
-	                    return keyString === option.displayName;
+	                    return option && keyString === option.displayName;
 	                });
 	                if (option) {
 	                    return option.code;
 	                }
 	                // is key a code?
 	                if (options.find(function (option) {
-	                    return keyString === option.code;
+	                    return option && keyString === option.code;
 	                })) {
 	                    return key;
 	                }
@@ -923,14 +923,14 @@
 	
 	                // is key a code?
 	                var option = options.find(function (option) {
-	                    return keyString === option.code;
+	                    return option && keyString === option.code;
 	                });
 	                if (option) {
 	                    return option.displayName;
 	                }
 	                // is key a name?
 	                if (options.find(function (option) {
-	                    return keyString === option.displayName;
+	                    return option && keyString === option.displayName;
 	                })) {
 	                    return key;
 	                }
@@ -40848,4 +40848,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-478f270180852932d85f.js.map
+//# sourceMappingURL=app-538993ec59ec940bb78e.js.map
