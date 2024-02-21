@@ -8365,13 +8365,27 @@
 	
 	    var programStageLayout = {};
 	
+	    var removeDuplicateWidgets = function removeDuplicateWidgets(dashboardLayout) {
+	        angular.forEach(dashboardLayout.customLayout, function (layout) {
+	            var widgetTitles = new Set();
+	            layout.widgets = layout.widgets.filter(function (widget) {
+	                if (widgetTitles.has(widget.title)) {
+	                    return false;
+	                }
+	                widgetTitles.add(widget.title);
+	                return true;
+	            });
+	        });
+	        return dashboardLayout;
+	    };
+	
 	    var getDefaultLayout = function getDefaultLayout(customLayout) {
 	        var dashboardLayout = { customLayout: customLayout, defaultLayout: defaultLayout };
 	        var promise = $http.get(DHIS2URL + '/dataStore/tracker-capture/keyTrackerDashboardDefaultLayout').then(function (response) {
 	            angular.extend(dashboardLayout.defaultLayout, response.data);
-	            return dashboardLayout;
+	            return removeDuplicateWidgets(dashboardLayout);
 	        }, function () {
-	            return dashboardLayout;
+	            return removeDuplicateWidgets(dashboardLayout);
 	        });
 	        return promise;
 	    };
@@ -8434,7 +8448,7 @@
 	        },
 	        get: function get() {
 	            var promise = $http.get(DHIS2URL + '/userSettings/keyTrackerDashboardLayout').then(function (response) {
-	                return getDefaultLayout(response.data);
+	                return getDefaultLayout(response.data === 'null' ? null : response.data);
 	            }, function () {
 	                return getDefaultLayout(null);
 	            });
@@ -40852,4 +40866,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-be7621751cf11f76bfc9.js.map
+//# sourceMappingURL=app-8d4bdd81d618542b5579.js.map
