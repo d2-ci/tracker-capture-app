@@ -10495,7 +10495,7 @@
 	                if (query.url) {
 	                    query.url = query.url + q;
 	                } else {
-	                    query.url = q;
+	                    query.url = q.substring(1);
 	                }
 	            }
 	        }
@@ -11290,7 +11290,7 @@
 	            searchParams.programUrl += "&followUp=true";
 	        }
 	        if (sortColumn) {
-	            searchParams.sortUrl = "&order=" + sortColumn.id + ':' + sortColumn.direction;
+	            searchParams.sortUrl = "order=" + sortColumn.id + ':' + sortColumn.direction;
 	        }
 	        if (workingList.enrollmentCreatedPeriod) {
 	            var enrollmentStartDate = moment().add(workingList.enrollmentCreatedPeriod.periodFrom, 'days').format("YYYY-MM-DD");
@@ -23285,7 +23285,7 @@
 	        if ($scope.customWorkingListValues.assignedUserMode) {
 	            customConfig.assignUrl += "&assignedUserMode=" + $scope.customWorkingListValues.assignedUserMode;
 	        }
-	        if (!$scope.customWorkingListValues.assignedUserMode || $scope.customWorkingListValues.assignedUserMode == "PROVIDED" && $scope.customWorkingListValues.assignedUsers) {
+	        if ((!$scope.customWorkingListValues.assignedUserMode || $scope.customWorkingListValues.assignedUserMode == "PROVIDED") && $scope.customWorkingListValues.assignedUsers) {
 	            if (customConfig.assignUrl) customConfig.assignUrl += "&";
 	            customConfig.assignUrl += "assignedUser=" + $scope.customWorkingListValues.assignedUsers;
 	        }
@@ -23293,31 +23293,22 @@
 	        customConfig.attributeUrl = EntityQueryFactory.getAttributesQuery($scope.customWorkingListValues.attributes, $scope.customWorkingListValues.enrollment);
 	
 	        setCurrentTrackedEntityList($scope.trackedEntityListTypes.CUSTOM, customConfig, null);
-	        $scope.fetchCustomWorkingList(customConfig);
-	    };
-	
-	    var getOrderUrl = function getOrderUrl(urlToExtend) {
-	        if ($scope.currentTrackedEntityList.sortColumn) {
-	            var sortColumn = $scope.currentTrackedEntityList.sortColumn;
-	            if (urlToExtend) {
-	                return urlToExtend += "&order=" + sortColumn.id + ':' + sortColumn.direction;
-	            }
-	            return "order=" + sortColumn.id + ":" + sortColumn.direction;
-	        }
+	        $scope.fetchCustomWorkingList();
 	    };
 	
 	    $scope.fetchCustomWorkingList = function () {
-	        if (!$scope.currentTrackedEntityList.type == $scope.trackedEntityListTypes.CUSTOM) return;
+	        if ($scope.currentTrackedEntityList.type !== $scope.trackedEntityListTypes.CUSTOM) return;
 	        var customConfig = $scope.currentTrackedEntityList.config;
 	        var sortColumn = $scope.currentTrackedEntityList.sortColumn;
 	        $scope.currentTrackedEntityList.loading = true;
 	        customConfig.queryAndSortUrl = customConfig.queryUrl;
 	        if (sortColumn) {
-	            var order = '&order=' + sortColumn.id + ':' + sortColumn.direction;
-	            customConfig.queryAndSortUrl = customConfig.queryAndSortUrl.concat(order);
+	            if (customConfig.queryAndSortUrl) customConfig.queryAndSortUrl += "&";
+	            customConfig.queryAndSortUrl += 'order=' + sortColumn.id + ':' + sortColumn.direction;
 	        }
 	        if (customConfig.assignUrl) {
-	            customConfig.queryAndSortUrl = customConfig.queryAndSortUrl.concat(customConfig.assignUrl);
+	            if (customConfig.queryAndSortUrl) customConfig.queryAndSortUrl += "&";
+	            customConfig.queryAndSortUrl += customConfig.assignUrl;
 	        }
 	
 	        TEIService.search(customConfig.orgUnit.id, customConfig.ouMode.name, customConfig.queryAndSortUrl, customConfig.programUrl, customConfig.attributeUrl.url, $scope.pager, true).then(setCurrentTrackedEntityListData);
@@ -41103,4 +41094,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-08465875e39ec626b28d.js.map
+//# sourceMappingURL=app-2768b33b473aef4cf8a6.js.map
