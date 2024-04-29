@@ -451,12 +451,12 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                 const keyString = String(key);
 
                 // is key a name?
-                const option = options.find(option => keyString === option.displayName);
+                const option = options.find(option => option && keyString === option.displayName);
                 if (option) {
                     return option.code;
                 }
                 // is key a code?
-                if (options.find(option => keyString === option.code)) {
+                if (options.find(option => option && keyString === option.code)) {
                     return key;
                 }
                 // not a part of the option set
@@ -471,12 +471,12 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                 const keyString = String(key);
 
                 // is key a code?
-                const option = options.find(option => keyString === option.code);
+                const option = options.find(option => option && keyString === option.code);
                 if (option) {
                     return option.displayName;
                 }
                 // is key a name?
-                if (options.find(option => keyString === option.displayName)) {
+                if (options.find(option => option && keyString === option.displayName)) {
                     return key;
                 }
                 // not a part of the option set
@@ -1841,7 +1841,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
         //d2:hasValue('variableName') to avoid the further replacement, and make sure the correct input is fed into d2:hasValue.
         var avoidReplacementFunctions = ['d2:hasValue','d2:lastEventDate', 'd2:count', 'd2:countIfZeroPos', 'd2:countIfValue'];
         avoidReplacementFunctions.forEach(avoidReplaceFunction => {
-            expression = expression.replace( new RegExp("(" + avoidReplaceFunction + "\\() *[A#CV]\\{([\\w \\-\\_\\.]+)\\}(.*)\\)" ), "$1'$2'$3\)");
+            expression = expression.replaceAll( new RegExp("(" + avoidReplaceFunction + "\\() *[A#CV]\\{([\\w \\-\\_\\.]+)\\}", 'g'), "$1'$2'");
         });
 
         //Check if the expression contains program rule variables at all(any curly braces):

@@ -899,14 +899,14 @@
 	
 	                // is key a name?
 	                var option = options.find(function (option) {
-	                    return keyString === option.displayName;
+	                    return option && keyString === option.displayName;
 	                });
 	                if (option) {
 	                    return option.code;
 	                }
 	                // is key a code?
 	                if (options.find(function (option) {
-	                    return keyString === option.code;
+	                    return option && keyString === option.code;
 	                })) {
 	                    return key;
 	                }
@@ -923,14 +923,14 @@
 	
 	                // is key a code?
 	                var option = options.find(function (option) {
-	                    return keyString === option.code;
+	                    return option && keyString === option.code;
 	                });
 	                if (option) {
 	                    return option.displayName;
 	                }
 	                // is key a name?
 	                if (options.find(function (option) {
-	                    return keyString === option.displayName;
+	                    return option && keyString === option.displayName;
 	                })) {
 	                    return key;
 	                }
@@ -1959,7 +1959,7 @@
 	        //d2:hasValue('variableName') to avoid the further replacement, and make sure the correct input is fed into d2:hasValue.
 	        var avoidReplacementFunctions = ['d2:hasValue', 'd2:lastEventDate', 'd2:count', 'd2:countIfZeroPos', 'd2:countIfValue'];
 	        avoidReplacementFunctions.forEach(function (avoidReplaceFunction) {
-	            expression = expression.replace(new RegExp("(" + avoidReplaceFunction + "\\() *[A#CV]\\{([\\w \\-\\_\\.]+)\\}(.*)\\)"), "$1'$2'$3\)");
+	            expression = expression.replaceAll(new RegExp("(" + avoidReplaceFunction + "\\() *[A#CV]\\{([\\w \\-\\_\\.]+)\\}", 'g'), "$1'$2'");
 	        });
 	
 	        //Check if the expression contains program rule variables at all(any curly braces):
@@ -6084,7 +6084,7 @@
 	                        }
 	
 	                        var coordinates = $scope.d2Object[$scope.id].slice(1, -1).split(",");
-	                        if (!dhis2.validation.isNumber(coordinates[0]) || !dhis2.validation.isNumber(coordinates[0])) {
+	                        if (!dhis2.validation.isNumber(coordinates[0]) || !dhis2.validation.isNumber(coordinates[1])) {
 	                            NotificationService.showNotifcationDialog($translate.instant('error'), $translate.instant('invalid_coordinate_format') + ":  " + $scope.d2Object[$scope.id]);
 	                        }
 	                        $scope.coordinateObject.coordinate = { latitude: parseFloat(coordinates[1]), longitude: parseFloat(coordinates[0]) };
@@ -8365,13 +8365,27 @@
 	
 	    var programStageLayout = {};
 	
+	    var removeDuplicateWidgets = function removeDuplicateWidgets(dashboardLayout) {
+	        angular.forEach(dashboardLayout.customLayout, function (layout) {
+	            var widgetTitles = new Set();
+	            layout.widgets = layout.widgets.filter(function (widget) {
+	                if (widgetTitles.has(widget.title)) {
+	                    return false;
+	                }
+	                widgetTitles.add(widget.title);
+	                return true;
+	            });
+	        });
+	        return dashboardLayout;
+	    };
+	
 	    var getDefaultLayout = function getDefaultLayout(customLayout) {
 	        var dashboardLayout = { customLayout: customLayout, defaultLayout: defaultLayout };
 	        var promise = $http.get(DHIS2URL + '/dataStore/tracker-capture/keyTrackerDashboardDefaultLayout').then(function (response) {
 	            angular.extend(dashboardLayout.defaultLayout, response.data);
-	            return dashboardLayout;
+	            return removeDuplicateWidgets(dashboardLayout);
 	        }, function () {
-	            return dashboardLayout;
+	            return removeDuplicateWidgets(dashboardLayout);
 	        });
 	        return promise;
 	    };
@@ -8434,7 +8448,7 @@
 	        },
 	        get: function get() {
 	            var promise = $http.get(DHIS2URL + '/userSettings/keyTrackerDashboardLayout').then(function (response) {
-	                return getDefaultLayout(response.data);
+	                return getDefaultLayout(response.data === 'null' ? null : response.data);
 	            }, function () {
 	                return getDefaultLayout(null);
 	            });
@@ -11580,7 +11594,14 @@
 	        });
 	        return promise;
 	    };
-	}]);
+	}]).service('AssignmentQueue', function () {
+	    var assignmentQueue = Promise.resolve();
+	
+	    this.insertAssignment = function (assignment) {
+	        assignmentQueue = assignmentQueue.then(assignment, assignment);
+	        return assignmentQueue;
+	    };
+	});
 
 /***/ }),
 /* 15 */
@@ -15940,7 +15961,7 @@
 	/* global angular, trackerCapture */
 	
 	var trackerCapture = angular.module('trackerCapture');
-	trackerCapture.controller('DataEntryController', ["$rootScope", "$scope", "$modal", "$filter", "$log", "$timeout", "$translate", "$window", "$q", "$parse", "$location", "CommonUtils", "DateUtils", "DashboardLayoutService", "EventUtils", "orderByFilter", "SessionStorageService", "EnrollmentService", "DHIS2EventFactory", "ModalService", "NotificationService", "CurrentSelection", "TrackerRulesExecutionService", "CustomFormService", "PeriodService", "OptionSetService", "AttributesFactory", "TrackerRulesFactory", "EventCreationService", "AuthorityService", "AccessUtils", "TCOrgUnitService", "UsersService", function ($rootScope, $scope, $modal, $filter, $log, $timeout, $translate, $window, $q, $parse, $location, CommonUtils, DateUtils, DashboardLayoutService, EventUtils, orderByFilter, SessionStorageService, EnrollmentService, DHIS2EventFactory, ModalService, NotificationService, CurrentSelection, TrackerRulesExecutionService, CustomFormService, PeriodService, OptionSetService, AttributesFactory, TrackerRulesFactory, EventCreationService, AuthorityService, AccessUtils, TCOrgUnitService, UsersService) {
+	trackerCapture.controller('DataEntryController', ["$rootScope", "$scope", "$modal", "$filter", "$log", "$timeout", "$translate", "$window", "$q", "$parse", "$location", "CommonUtils", "DateUtils", "DashboardLayoutService", "EventUtils", "orderByFilter", "SessionStorageService", "EnrollmentService", "DHIS2EventFactory", "ModalService", "NotificationService", "CurrentSelection", "TrackerRulesExecutionService", "CustomFormService", "PeriodService", "OptionSetService", "AttributesFactory", "TrackerRulesFactory", "EventCreationService", "AuthorityService", "AccessUtils", "TCOrgUnitService", "UsersService", "AssignmentQueue", function ($rootScope, $scope, $modal, $filter, $log, $timeout, $translate, $window, $q, $parse, $location, CommonUtils, DateUtils, DashboardLayoutService, EventUtils, orderByFilter, SessionStorageService, EnrollmentService, DHIS2EventFactory, ModalService, NotificationService, CurrentSelection, TrackerRulesExecutionService, CustomFormService, PeriodService, OptionSetService, AttributesFactory, TrackerRulesFactory, EventCreationService, AuthorityService, AccessUtils, TCOrgUnitService, UsersService, AssignmentQueue) {
 	
 	    //Unique instance id for the controller:
 	    $scope.APIURL = DHIS2URL;
@@ -17549,7 +17570,9 @@
 	                    providedElsewhere: eventToSave.providedElsewhere[prStDe.dataElement.id] ? true : false
 	                }]
 	            };
-	            return DHIS2EventFactory.updateForSingleValue(ev).then(function (response) {
+	            return AssignmentQueue.insertAssignment(function () {
+	                return DHIS2EventFactory.updateForSingleValue(ev);
+	            }).then(function (response) {
 	                if (!response) {
 	                    if (!backgroundUpdate) {
 	                        $scope.currentElement.saved = false;
@@ -40834,4 +40857,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-bd3e82b9b8931fbcf629.js.map
+//# sourceMappingURL=app-d0443398c32da94a8687.js.map
