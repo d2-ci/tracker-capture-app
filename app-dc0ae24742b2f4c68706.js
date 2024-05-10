@@ -16234,18 +16234,20 @@
 	
 	    //Adds support for HIDEPROGRAMSTAGE even if no event exists in enrollment
 	    var processRegistrationRuleEffect = function processRegistrationRuleEffect(event, callerId) {
+	        $scope.stagesNotShowingInStageTasks = {};
+	
 	        angular.forEach($rootScope.ruleeffects[event], function (effect) {
 	            if (effect.action === "HIDEPROGRAMSTAGE") {
 	                if (effect.programStage) {
-	                    if ($scope.stagesNotShowingInStageTasks[effect.programStage.id] !== effect.ineffect) {
-	                        $scope.stagesNotShowingInStageTasks[effect.programStage.id] = effect.ineffect;
+	                    if (effect.ineffect) {
+	                        $scope.stagesNotShowingInStageTasks[effect.programStage.id] = true;
 	                    }
-	                    updateTabularEntryStages();
 	                } else {
 	                    $log.warn("ProgramRuleAction " + effect.id + " is of type HIDEPROGRAMSTAGE, bot does not have a stage defined");
 	                }
 	            }
 	        });
+	        updateTabularEntryStages();
 	    };
 	
 	    var processRuleEffect = function processRuleEffect(event, callerId) {
@@ -16278,7 +16280,8 @@
 	        $scope.errorMessages[event] = [];
 	        $scope.hiddenFields[event] = [];
 	        $scope.mandatoryFields[event] = [];
-	        $scope.optionVisibility[event] = { showOnly: null, hidden: {} };;
+	        $scope.optionVisibility[event] = { showOnly: null, hidden: {} };
+	        $scope.stagesNotShowingInStageTasks = {};
 	
 	        var dataElementOptionsChanged = [];
 	
@@ -16379,8 +16382,8 @@
 	                }
 	            } else if (effect.action === "HIDEPROGRAMSTAGE") {
 	                if (effect.programStage) {
-	                    if ($scope.stagesNotShowingInStageTasks[effect.programStage.id] !== effect.ineffect) {
-	                        $scope.stagesNotShowingInStageTasks[effect.programStage.id] = effect.ineffect;
+	                    if (effect.ineffect) {
+	                        $scope.stagesNotShowingInStageTasks[effect.programStage.id] = true;
 	                    }
 	                } else {
 	                    $log.warn("ProgramRuleAction " + effect.id + " is of type HIDEPROGRAMSTAGE, bot does not have a stage defined");
@@ -40853,4 +40856,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-b745e7b1533227e15c9a.js.map
+//# sourceMappingURL=app-dc0ae24742b2f4c68706.js.map
