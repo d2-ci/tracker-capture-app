@@ -1000,7 +1000,7 @@
 	                if (destination === 'USER') {
 	                    val = val === 'true' ? true : '';
 	                } else {
-	                    val = val === true ? 'true' : '';
+	                    val = val === true ? 'true' : 'false';
 	                }
 	            }
 	            if (val && obj.valueType === 'ORGANISATION_UNIT') {
@@ -40856,4 +40856,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-dc0ae24742b2f4c68706.js.map
+//# sourceMappingURL=app-be98cc1a013a3153ade1.js.map
