@@ -14151,7 +14151,7 @@
 	            $scope.apiFormattedTei = {};
 	            $scope.currentEvent = {};
 	            $timeout(function () {
-	                $rootScope.$broadcast('registrationWidget', { registrationMode: 'REGISTRATION' });
+	                $rootScope.$broadcast('registrationWidget', { registrationMode: 'REGISTRATION', generateAttributes: true });
 	            });
 	        }
 	    };
@@ -40856,4 +40856,4 @@
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=app-dc0ae24742b2f4c68706.js.map
+//# sourceMappingURL=app-2a0b602cb7cc3d5c3db8.js.map
